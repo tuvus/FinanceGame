@@ -10,10 +10,15 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@remixicon/react": "^4.9.0",
     "@tailwindcss/vite": "^4.3.0",
+    "clsx": "^2.1.1",
     "random": "^5.4.1",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
+    "recharts": "^3.8.1",
+    "tailwind-merge": "^3.6.0",
+    "tailwind-variants": "^3.2.2",
     "tailwindcss": "^4.3.0"
   },
   "devDependencies": {

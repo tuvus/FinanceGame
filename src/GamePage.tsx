@@ -1,6 +1,7 @@
 import './App.css'
 import random from "random";
 import {useState} from "react";
+import {LineChart} from "./components/LineChart.tsx";
 
 type GameProps = {
     fname: string; lname: string;
@@ -10,6 +11,7 @@ function GamePage({fname, lname}: GameProps) {
 
     const [balance, setBalance] = useState(random.float(10000, 30000));
     const formatter = new Intl.NumberFormat("en", {style: "currency", currency: "USD", maximumFractionDigits: 2});
+    const compactFormatter = new Intl.NumberFormat("en", {style: "currency", currency: "USD", notation: "compact", compactDisplay: "short"});
     const [page, setPage] = useState(0);
     const [salary] = useState(59999);
     const [pinvestments, setpinvestments] = useState(0);
@@ -19,6 +21,7 @@ function GamePage({fname, lname}: GameProps) {
     const [investmentsBalance, setInvestmentsBalance] = useState(0);
     const [indexShares, setIndexShares] = useState(0);
     const [indexShareValue, setIndexShareValue] = useState(random.int(7000, 50000) / 100);
+    const [indexHistory, setIndexHistory] = useState([{date: year, value: indexShareValue}])
 
     const taxes = salary * .32;
     const livingExpenses = 32000;
@@ -82,7 +85,7 @@ function GamePage({fname, lname}: GameProps) {
             <p className="mt-2 text-yellow-600">
                 Uninvested: {formatter.format(investmentsBalance)}
             </p>
-            <div className="flex flex-col items-center bg-amber-100 rounded-xl p-4 gap-1">
+            <div className="flex flex-col items-center bg-amber-100 rounded-xl p-4 m-4 gap-1">
                 <h3 className="text-gray-700 font-bold">Index fund</h3>
                 <p className="text-gray-700">{formatter.format(indexShareValue)} per share</p>
                 <p className="text-gray-700">
@@ -102,11 +105,20 @@ function GamePage({fname, lname}: GameProps) {
                     setIndexShares(indexShares - toSell);
                     setInvestmentsBalance(investmentsBalance + toSell * indexShareValue);
                 }}><h3>Sell</h3></button> : <></>}
+                <LineChart className="h-60 w-120" data={indexHistory}
+                           index="date"
+                           showLegend={false}
+                           minValue={Math.min(...indexHistory.map(h => h.value))}
+                           maxValue={Math.max(...indexHistory.map(h => h.value))}
+                           aria-hidden="true"
+                           categories={["value"]}
+                           valueFormatter={(number: number) => compactFormatter.format(number)}/>
             </div>
             <button className="w-80 text-xl h-10 font-bold" onClick={() => {
                 setPage(0);
                 setYear(year + 1);
-                setIndexShareValue(indexShareValue * random.float(.97, 1.1))
+                setIndexShareValue(indexShareValue * random.float(.93, 1.12))
+                setIndexHistory([...indexHistory, ({date: year, value: indexShareValue})]);
             }}><h3>Next year</h3></button>
         </div>
     ];
