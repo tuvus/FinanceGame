@@ -78,25 +78,25 @@ function GamePage({fname, lname}: GameProps) {
             }}><h3>Next: Investments</h3></button>
         </div>,
         <div className="flex flex-col gap-2 items-center">
-            <h1>Investments!</h1>
-            <p className="mt-2">
+            <h1>Investment Portfolio</h1>
+            <p className="mt-2 text-yellow-600">
                 Uninvested: {formatter.format(investmentsBalance)}
             </p>
             <div className="flex flex-col items-center bg-amber-100 rounded-xl p-4 gap-1">
                 <h3 className="text-gray-700 font-bold">Index fund</h3>
                 <p className="text-gray-700">{formatter.format(indexShareValue)} per share</p>
                 <p className="text-gray-700">
-                    Shares: {indexShares} ({formatter.format(indexShares * indexShareValue)})
+                    Shares: {Math.round(indexShares * 100) / 100} ({formatter.format(indexShares * indexShareValue)})
                 </p>
                 <button className="w-40 text-xl h-10 font-bold" onClick={() => {
-                    let toBuy = parseInt(prompt("How many shares do you want to buy?", "0"));
+                    let toBuy = parseInt(prompt("How many shares do you want to buy?", (Math.floor(investmentsBalance * 100 / indexShareValue) / 100).toString()));
                     toBuy = Math.floor(Math.min(toBuy, investmentsBalance / indexShareValue) * 100) / 100;
                     if (toBuy.valueOf() <= 0 || isNaN(toBuy)) return;
                     setIndexShares(indexShares + toBuy);
                     setInvestmentsBalance(investmentsBalance - toBuy * indexShareValue);
                 }}><h3>Buy</h3></button>
                 {indexShares > 0 ? <button className="w-40 text-xl h-10 font-bold" onClick={() => {
-                    let toSell = parseInt(prompt("How many shares do you want to sell?", "0"));
+                    let toSell = parseInt(prompt("How many shares do you want to sell?", (Math.floor(indexShares * 100) / 100).toString()));
                     toSell = Math.floor(Math.min(toSell, indexShares) * 100) / 100;
                     if (toSell.valueOf() <= 0 || isNaN(toSell)) return;
                     setIndexShares(indexShares - toSell);
