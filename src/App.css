@@ -1,0 +1,25 @@
+@import "tailwindcss";
+button {
+    border-radius: 8px;
+    border: 2px solid transparent;
+    font-family: inherit;
+    color: white;
+    background-color: #585858;
+    cursor: pointer;
+    text-align: center;
+    transition: border-color 0.25s;
+}
+button:hover {
+    border-color: #e89e60;
+}
+button:focus,
+button:focus-visible {
+    outline: 4px auto -webkit-focus-ring-color;
+}
+
+input {
+    font-size: 22px;
+}
+label {
+    font-size: 22px;
+}
