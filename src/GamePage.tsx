@@ -10,17 +10,27 @@ type GameProps = {
 class Account {
     name: string;
     balance: number;
-    history: {date: year, balance: number}[];
-    constructor(name:string, balance: number, date: year) {
+    history: { date: year, balance: number }[];
+
+    constructor(name: string, balance: number, date: year) {
         this.name = name;
         this.balance = balance;
         this.history = [{date: date, balance: balance}];
+    }
+
+    endYear(date: year): void {
+        this.history = [...this.history, {date: date, balance: this.balance}];
     }
 }
 
 function GamePage({fname, lname}: GameProps) {
     const formatter = new Intl.NumberFormat("en", {style: "currency", currency: "USD", maximumFractionDigits: 2});
-    const compactFormatter = new Intl.NumberFormat("en", {style: "currency", currency: "USD", notation: "compact", compactDisplay: "short"});
+    const compactFormatter = new Intl.NumberFormat("en", {
+        style: "currency",
+        currency: "USD",
+        notation: "compact",
+        compactDisplay: "short"
+    });
     const [year, setYear] = useState(random.int(1940, 2010));
     const [savingsAccount] = useState({a: new Account("Savings Account", random.float(10000, 30000), year)});
     const [page, setPage] = useState(0);
@@ -29,9 +39,11 @@ function GamePage({fname, lname}: GameProps) {
     const [pretirement, setpretirement] = useState(0);
     const [pleisure, setpleisure] = useState(40);
     const [investmentAccount] = useState({a: new Account("Investment Account", 0, year)});
+    const [investmentPortfolio] = useState({a: new Account("Investments", 0, year)});
     const [indexShares, setIndexShares] = useState(0);
     const [indexShareValue, setIndexShareValue] = useState(random.int(7000, 50000) / 100);
     const [indexHistory, setIndexHistory] = useState([{date: year, value: indexShareValue}])
+    const [allAccounts, setAllAccounts] = useState([savingsAccount.a, investmentAccount.a, investmentPortfolio.a]);
 
     const taxes = salary * .32;
     const livingExpenses = 32000;
@@ -40,6 +52,32 @@ function GamePage({fname, lname}: GameProps) {
     const newSavings = takehomemoney * ((100 - pinvestments - pretirement - pleisure) / 100);
 
     const pages = [
+        <div className="flex flex-col gap-2 items-center">
+            <h1>Year in review {year - 1}</h1>
+            {allAccounts.filter(a => a.name == "Savings Account" || a.name == "Investments").map((account) => {
+                let diff: number | undefined = undefined;
+                if (account.history.length > 1 && account.history[account.history.length - 2].balance != 0)
+                    diff = Math.floor((account.history[account.history.length - 1].balance - account.history[account.history.length - 2].balance) / Math.abs(account.history[account.history.length - 2].balance) * 100);
+                return {account, diff};
+            }).map(({account, diff}, i) => (
+                <div key={i} className="flex flex-col items-center bg-amber-100 rounded-xl p-4 m-4 gap-1">
+                    <div className="flex items-baseline gap-2">
+                        <h3 className="text-gray-700 font-bold">{account.name}</h3>
+                        {diff ? diff >= 0 ? (<p className="text-green-700">+{diff}%</p>)
+                            : <p className="text-red-800">{diff}%</p> : <></>}
+                    </div>
+                    <LineChart className="h-40 w-120" data={account.history}
+                               index="date"
+                               showLegend={false}
+                               minValue={Math.min(...account.history.map(h => h.balance))}
+                               maxValue={Math.max(...account.history.map(h => h.balance))}
+                               aria-hidden="true"
+                               categories={["balance"]}
+                               valueFormatter={(number: number) => compactFormatter.format(number)}/>
+                </div>))}
+            <button className="w-80 text-xl h-10 font-bold" onClick={() => setPage(page + 1)}><h3>Next: Paycheck</h3>
+            </button>
+        </div>,
         <div className="flex flex-col gap-2 items-center">
             <h1>Payday!</h1>
             <p className="text-yellow-600">{formatter.format(salary)} paycheck</p>
@@ -102,20 +140,20 @@ function GamePage({fname, lname}: GameProps) {
                     Shares: {Math.round(indexShares * 100) / 100} ({formatter.format(indexShares * indexShareValue)})
                 </p>
                 <div className="flex gap-2">
-                <button className="w-40 text-xl h-10 font-bold" onClick={() => {
-                    let toBuy = parseInt(prompt("How many shares do you want to buy?", (Math.floor(investmentAccount.a.balance * 100 / indexShareValue) / 100).toString()));
-                    toBuy = Math.floor(Math.min(toBuy, investmentAccount.a.balance / indexShareValue) * 100) / 100;
-                    if (toBuy.valueOf() <= 0 || isNaN(toBuy)) return;
-                    setIndexShares(indexShares + toBuy);
-                    investmentAccount.a.balance -= toBuy * indexShareValue;
-                }}><h3>Buy</h3></button>
-                {indexShares > 0 ? <button className="w-40 text-xl h-10 font-bold" onClick={() => {
-                    let toSell = parseInt(prompt("How many shares do you want to sell?", (Math.floor(indexShares * 100) / 100).toString()));
-                    toSell = Math.floor(Math.min(toSell, indexShares) * 100) / 100;
-                    if (toSell.valueOf() <= 0 || isNaN(toSell)) return;
-                    setIndexShares(indexShares - toSell);
-                    investmentAccount.a.balance += toSell * indexShareValue;
-                }}><h3>Sell</h3></button> : <></>}
+                    <button className="w-40 text-xl h-10 font-bold" onClick={() => {
+                        let toBuy = parseInt(prompt("How many shares do you want to buy?", (Math.floor(investmentAccount.a.balance * 100 / indexShareValue) / 100).toString()));
+                        toBuy = Math.floor(Math.min(toBuy, investmentAccount.a.balance / indexShareValue) * 100) / 100;
+                        if (toBuy.valueOf() <= 0 || isNaN(toBuy)) return;
+                        setIndexShares(indexShares + toBuy);
+                        investmentAccount.a.balance -= toBuy * indexShareValue;
+                    }}><h3>Buy</h3></button>
+                    {indexShares > 0 ? <button className="w-40 text-xl h-10 font-bold" onClick={() => {
+                        let toSell = parseInt(prompt("How many shares do you want to sell?", (Math.floor(indexShares * 100) / 100).toString()));
+                        toSell = Math.floor(Math.min(toSell, indexShares) * 100) / 100;
+                        if (toSell.valueOf() <= 0 || isNaN(toSell)) return;
+                        setIndexShares(indexShares - toSell);
+                        investmentAccount.a.balance += toSell * indexShareValue;
+                    }}><h3>Sell</h3></button> : <></>}
                 </div>
                 <LineChart className="h-60 w-120" data={indexHistory}
                            index="date"
@@ -129,8 +167,10 @@ function GamePage({fname, lname}: GameProps) {
             <button className="w-80 text-xl h-10 font-bold" onClick={() => {
                 setPage(0);
                 setYear(year + 1);
-                setIndexShareValue(indexShareValue * random.float(.93, 1.12))
+                setIndexShareValue(indexShareValue * random.float(.93, 1.12));
                 setIndexHistory([...indexHistory, ({date: year, value: indexShareValue})]);
+                investmentPortfolio.a.balance = investmentAccount.a.balance + indexShares * indexShareValue;
+                allAccounts.forEach((account) => account.endYear(year));
             }}><h3>Next year</h3></button>
         </div>
     ];
