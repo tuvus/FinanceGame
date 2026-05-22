@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/immutability */
 import './App.css'
 import random from "random";
 import {useState} from "react";
@@ -11,16 +12,16 @@ class Account {
     name: string;
     balance: number;
     diff: number | undefined;
-    history: { date: year, balance: number }[];
+    history: { date: number, balance: number }[];
 
-    constructor(name: string, balance: number, date: year) {
+    constructor(name: string, balance: number, date: number) {
         this.name = name;
         this.balance = balance;
         this.diff = undefined;
         this.history = [{date: date, balance: balance}];
     }
 
-    endYear(date: year): void {
+    endYear(date: number): void {
         this.history = [...this.history, {date: date, balance: this.balance}];
         this.diff = Math.floor((this.history[this.history.length - 1].balance - this.history[this.history.length - 2].balance) / Math.abs(this.history[this.history.length - 2].balance) * 100);
     }
@@ -29,7 +30,7 @@ class Account {
 class Stock extends Account {
     shares: number;
 
-    constructor(name: string, balance: number, date: year) {
+    constructor(name: string, balance: number, date: number) {
         super(name, balance, date);
         this.shares = 0;
     }
@@ -56,8 +57,8 @@ function GamePage({fname, lname}: GameProps) {
     const [pleisure, setpleisure] = useState(40);
     const [investmentAccount] = useState({a: new Account("Investment Account", 0, year)});
     const [investmentPortfolio] = useState({a: new Account("Investments", 0, year)});
-    const [indexFund, setIndexFund] = useState({a: new Stock("Index Fund", random.int(7000, 50000) / 100, year)})
-    const [allAccounts, setAllAccounts] = useState([savingsAccount.a, investmentAccount.a, investmentPortfolio.a]);
+    const [indexFund] = useState({a: new Stock("Index Fund", random.int(7000, 50000) / 100, year)})
+    const [allAccounts] = useState([savingsAccount.a, investmentAccount.a, investmentPortfolio.a]);
     const [rerender, setRerender] = useState(false);
     const render = () => {
         setRerender(!rerender)
@@ -164,16 +165,16 @@ function GamePage({fname, lname}: GameProps) {
                 </p>
                 <div className="flex gap-2">
                     <button className="w-40 text-xl h-10 font-bold" onClick={() => {
-                        let toBuy = parseInt(prompt("How many shares do you want to buy?", (Math.floor(investmentAccount.a.balance * 100 / indexFund.a.balance) / 100).toString()));
-                        toBuy = Math.floor(Math.min(toBuy, investmentAccount.a.balance / indexFund.a.balance) * 100) / 100;
+                        let toBuy = parseFloat(prompt("How many shares do you want to buy?", (Math.floor(investmentAccount.a.balance * 100 / indexFund.a.balance) / 100).toString()) ?? "");
+                        toBuy = Math.min(toBuy, investmentAccount.a.balance / indexFund.a.balance);
                         if (toBuy.valueOf() <= 0 || isNaN(toBuy)) return;
                         indexFund.a.shares += toBuy;
                         investmentAccount.a.balance -= toBuy * indexFund.a.balance;
                         render();
                     }}><h3>Buy</h3></button>
                     {indexFund.a.shares > 0 ? <button className="w-40 text-xl h-10 font-bold" onClick={() => {
-                        let toSell = parseInt(prompt("How many shares do you want to sell?", (Math.floor(indexFund.a.shares * 100) / 100).toString()));
-                        toSell = Math.floor(Math.min(toSell, indexFund.a.shares) * 100) / 100;
+                        let toSell = parseFloat(prompt("How many shares do you want to sell?", (Math.floor(indexFund.a.shares * 100) / 100).toString()) ?? "");
+                        toSell = Math.min(toSell, indexFund.a.shares);
                         if (toSell.valueOf() <= 0 || isNaN(toSell)) return;
                         indexFund.a.shares -= toSell;
                         investmentAccount.a.balance += toSell * indexFund.a.balance;
@@ -183,8 +184,8 @@ function GamePage({fname, lname}: GameProps) {
                 <LineChart className="h-60 w-120" data={indexFund.a.history}
                            index="date"
                            showLegend={false}
-                           minValue={Math.min(...indexFund.a.history.map(h => h.value))}
-                           maxValue={Math.max(...indexFund.a.history.map(h => h.value))}
+                           minValue={Math.min(...indexFund.a.history.map(h => h.balance))}
+                           maxValue={Math.max(...indexFund.a.history.map(h => h.balance))}
                            aria-hidden="true"
                            categories={["balance"]}
                            valueFormatter={(number: number) => compactFormatter.format(number)}/>
