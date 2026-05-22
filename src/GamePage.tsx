@@ -203,11 +203,27 @@ function GamePage({fname, lname}: GameProps) {
     return (
         <>
             {pages[page]}
-            <div className="flex flex-col absolute bottom-0 w-full g-4 mb-2">
-                <h2>{fname} {lname}</h2>
-                <h3 className="text-yellow-600">Bank Account: {formatter.format(savingsAccount.a.balance)}</h3>
-                <p>{year}</p>
+            <div id="transfer-modal" className="flex modal justify-center">
+                <div className="ml-auto mr-auto mt-[20%] w-100 bg-amber-100 rounded-xl justify-center p-4">
+                    <h3 className="text-gray-700">Transfer Funds</h3>
+
+                    <button onClick={() => document.getElementById("transfer-modal")!.style.display = "none"}
+                            className="p-2">Cancel
+                    </button>
+                    <button onClick={() => document.getElementById("transfer-modal")!.style.display = "none"}
+                            className="p-2 bg-green-700!">Transfer
+                    </button>
+                </div>
             </div>
+            <div className="absolute flex bottom-0 g-4 justify-center w-full mb-3">
+                <h3 className="text-yellow-600">Bank Account: {formatter.format(savingsAccount.a.balance)}</h3>
+                <button className="w-40 ml-4 text-lg h-8"
+                        onClick={() => document.getElementById("transfer-modal")!.style.display = "block"}>Transfer
+                    Money
+                </button>
+            </div>
+            <h2 className="absolute bottom-2 left-10">{fname} {lname}</h2>
+            <p className="absolute bottom-4 right-10">{year}</p>
 
         </>
     );
