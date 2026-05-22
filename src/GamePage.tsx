@@ -73,22 +73,25 @@ function GamePage({fname, lname}: GameProps) {
     const pages = [
         <div className="flex flex-col gap-2 items-center">
             <h1>Year in review {year - 1}</h1>
-            {allAccounts.filter(a => a.name == "Savings Account" || a.name == "Investments").map((account, i) => (
-                <div key={i} className="flex flex-col items-center bg-amber-100 rounded-xl p-4 m-4 gap-1">
-                    <div className="flex items-baseline gap-2">
+            <div className="grid grid-cols-2">
+                {allAccounts.filter(a => a.name == "Savings Account" || a.name == "Investments").map((account, i) => (
+                    <div key={i} className="flex flex-col items-center bg-amber-100 rounded-xl p-4 m-4 gap-1">
                         <h3 className="text-gray-700 font-bold">{account.name}</h3>
-                        {account.diff ? account.diff >= 0 ? (<p className="text-green-700">+{account.diff}%</p>)
-                            : <p className="text-red-800">{account.diff}%</p> : <></>}
-                    </div>
-                    <LineChart className="h-40 w-120" data={account.history}
-                               index="date"
-                               showLegend={false}
-                               minValue={Math.min(...account.history.map(h => h.balance))}
-                               maxValue={Math.max(...account.history.map(h => h.balance))}
-                               aria-hidden="true"
-                               categories={["balance"]}
-                               valueFormatter={(number: number) => compactFormatter.format(number)}/>
-                </div>))}
+                        <div className="flex items-baseline gap-2">
+                            <p className="text-gray-700">{formatter.format(account.balance)}</p>
+                            {account.diff ? account.diff >= 0 ? (<p className="text-green-700">+{account.diff}%</p>)
+                                : <p className="text-red-800">{account.diff}%</p> : <></>}
+                        </div>
+                        <LineChart className="h-40 w-120" data={account.history}
+                                   index="date"
+                                   showLegend={false}
+                                   minValue={Math.min(...account.history.map(h => h.balance))}
+                                   maxValue={Math.max(...account.history.map(h => h.balance))}
+                                   aria-hidden="true"
+                                   categories={["balance"]}
+                                   valueFormatter={(number: number) => compactFormatter.format(number)}/>
+                    </div>))}
+            </div>
             <button className="w-80 text-xl h-10 font-bold" onClick={() => setPage(page + 1)}><h3>Next: Paycheck</h3>
             </button>
         </div>,
