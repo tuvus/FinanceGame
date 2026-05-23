@@ -3,6 +3,7 @@ import './App.css'
 import random from "random";
 import {useState} from "react";
 import {LineChart} from "./components/LineChart.tsx";
+import Select from 'react-select';
 
 type GameProps = {
     fname: string; lname: string;
@@ -13,12 +14,14 @@ class Account {
     balance: number;
     diff: number | undefined;
     history: { date: number, balance: number }[];
+    isOwnedAccount: boolean;
 
-    constructor(name: string, balance: number, date: number) {
+    constructor(name: string, balance: number, date: number, isOwnedAccount: boolean) {
         this.name = name;
         this.balance = balance;
         this.diff = undefined;
         this.history = [{date: date, balance: balance}];
+        this.isOwnedAccount = isOwnedAccount;
     }
 
     endYear(date: number): void {
@@ -31,13 +34,17 @@ class Stock extends Account {
     shares: number;
 
     constructor(name: string, balance: number, date: number) {
-        super(name, balance, date);
+        super(name, balance, date, false);
         this.shares = 0;
     }
 
     getValue(): number {
         return this.shares * this.balance;
     }
+}
+
+interface TransferFundsSelectState {
+    selectedAccount: Account | null;
 }
 
 function GamePage({fname, lname}: GameProps) {
@@ -49,20 +56,23 @@ function GamePage({fname, lname}: GameProps) {
         compactDisplay: "short"
     });
     const [year, setYear] = useState(random.int(1940, 2010));
-    const [savingsAccount] = useState({a: new Account("Savings Account", random.float(10000, 30000), year)});
+    const [savingsAccount] = useState({a: new Account("Savings Account", random.float(10000, 30000), year, true)});
     const [page, setPage] = useState(0);
     const [salary] = useState(59999);
     const [pinvestments, setpinvestments] = useState(10);
     const [pretirement, setpretirement] = useState(5);
     const [pleisure, setpleisure] = useState(40);
-    const [investmentAccount] = useState({a: new Account("Investment Account", 0, year)});
-    const [investmentPortfolio] = useState({a: new Account("Investments", 0, year)});
+    const [investmentAccount] = useState({a: new Account("Investment Account", 0, year, true)});
+    const [investmentPortfolio] = useState({a: new Account("Investments", 0, year, false)});
     const [indexFund] = useState({a: new Stock("Index Fund", random.int(7000, 50000) / 100, year)})
     const [allAccounts] = useState([savingsAccount.a, investmentAccount.a, investmentPortfolio.a]);
     const [rerender, setRerender] = useState(false);
     const render = () => {
         setRerender(!rerender)
     };
+    const [transferFrom, setTransferFrom] = useState<TransferFundsSelectState>({selectedAccount: null});
+    const [transferTo, setTransferTo] = useState<TransferFundsSelectState>({selectedAccount: null});
+    const [fundsToTransfer, setFundsToTransfer] = useState(0)
 
 
     const taxes = salary * .32;
@@ -75,7 +85,7 @@ function GamePage({fname, lname}: GameProps) {
         <div className="flex flex-col gap-2 items-center">
             <h1>Year in review {year - 1}</h1>
             <div className="grid grid-cols-2">
-                {allAccounts.filter(a => a.name == "Savings Account" || a.name == "Investments").map((account, i) => (
+                {allAccounts.filter(a => a.isOwnedAccount).map((account, i) => (
                     <div key={i} className="flex flex-col items-center bg-amber-100 rounded-xl p-4 m-4 gap-1">
                         <h3 className="text-gray-700 font-bold">{account.name}</h3>
                         <div className="flex items-baseline gap-2">
@@ -204,21 +214,68 @@ function GamePage({fname, lname}: GameProps) {
         <>
             {pages[page]}
             <div id="transfer-modal" className="flex modal justify-center">
-                <div className="ml-auto mr-auto mt-[20%] w-100 bg-amber-100 rounded-xl justify-center p-4">
+                <div
+                    className="flex flex-col gap-2 ml-auto mr-auto mt-[20%] w-100 bg-amber-100 rounded-xl justify-center p-4">
                     <h3 className="text-gray-700">Transfer Funds</h3>
+                    <Select options={allAccounts.filter(a => a.isOwnedAccount)}
+                            getOptionLabel={a => a.name}
+                            value={transferFrom.selectedAccount}
+                            isSearchable={false}
+                            onChange={(a: Account | null) => {
+                                let to = transferTo.selectedAccount;
+                                if (a == to) to = transferFrom.selectedAccount;
+                                setTransferFrom({selectedAccount: a});
+                                setTransferTo({selectedAccount: to});
+                            }}></Select>
+                    {transferFrom.selectedAccount ?
+                        <p className="text-gray-700 text-lg!">Balance: {formatter.format(transferFrom.selectedAccount!.balance)}</p> : <></>}
+                    <Select options={allAccounts.filter(a => a != transferFrom.selectedAccount && a.isOwnedAccount)}
+                            getOptionLabel={a => a.name}
+                            value={transferTo.selectedAccount}
+                            isSearchable={false}
+                            onChange={(a: Account | null) => setTransferTo({selectedAccount: a})}></Select>
 
-                    <button onClick={() => document.getElementById("transfer-modal")!.style.display = "none"}
-                            className="p-2">Cancel
-                    </button>
-                    <button onClick={() => document.getElementById("transfer-modal")!.style.display = "none"}
-                            className="p-2 bg-green-700!">Transfer
-                    </button>
+                    <div className="flex">
+                        <p className="text-xl text-gray-700! p-2">$</p>
+                        <input name="transfer-funds" className="w-80 bg-white rounded-xl p-1 text-gray-700"
+                               min={0}
+                               max={transferFrom.selectedAccount?.balance ?? 0}
+                               disabled={transferFrom.selectedAccount == null}
+                               value={fundsToTransfer}
+                               onChange={e => setFundsToTransfer(e.target.valueAsNumber)}
+                               type="number">
+                        </input>
+                    </div>
+
+                    <div className="flex gap-2 justify-center">
+                        <button
+                            onClick={() => document.getElementById("transfer-modal")!.style.display = "none"}
+                            className="p-2 w-25">Cancel
+                        </button>
+                        <button
+                            onClick={() => {
+                                if (transferFrom.selectedAccount != null && transferTo.selectedAccount != null && transferFrom.selectedAccount != transferTo.selectedAccount) {
+                                    const toTransfer = Math.min(fundsToTransfer, transferFrom.selectedAccount.balance);
+                                    transferFrom.selectedAccount.balance -= toTransfer;
+                                    transferTo.selectedAccount.balance += toTransfer;
+                                }
+                                document.getElementById("transfer-modal")!.style.display = "none";
+                            }}
+                            className="p-2 w-25 bg-green-700!">Transfer
+                        </button>
+                    </div>
                 </div>
             </div>
             <div className="absolute flex bottom-0 g-4 justify-center w-full mb-3">
-                <h3 className="text-yellow-600">Bank Account: {formatter.format(savingsAccount.a.balance)}</h3>
+                <h3 className="text-yellow-600">Bank Account: {formatter.format(savingsAccount.a.balance)}
+                </h3>
                 <button className="w-40 ml-4 text-lg h-8"
-                        onClick={() => document.getElementById("transfer-modal")!.style.display = "block"}>Transfer
+                        onClick={() => {
+                            setFundsToTransfer(0);
+                            setTransferFrom({selectedAccount: null});
+                            setTransferTo({selectedAccount: null});
+                            document.getElementById("transfer-modal")!.style.display = "block";
+                        }}>Transfer
                     Money
                 </button>
             </div>
