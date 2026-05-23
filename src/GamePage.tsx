@@ -73,6 +73,13 @@ function GamePage({fname, lname}: GameProps) {
     const [transferFrom, setTransferFrom] = useState<TransferFundsSelectState>({selectedAccount: null});
     const [transferTo, setTransferTo] = useState<TransferFundsSelectState>({selectedAccount: null});
     const [fundsToTransfer, setFundsToTransfer] = useState(0)
+    const [stocksToBuySell, setStocksToBuySellSell] = useState(0)
+    const [buySellConfirm, setBuySellConfirm] = useState({
+        func: (amount: number) => {
+            console.log(amount.toString())
+        }
+    })
+    const [stockBuySellText, setStockBuySellText] = useState("Buy")
 
 
     const taxes = salary * .32;
@@ -175,20 +182,28 @@ function GamePage({fname, lname}: GameProps) {
                 </p>
                 <div className="flex gap-2">
                     <button className="w-40 text-xl h-10 font-bold" onClick={() => {
-                        let toBuy = parseFloat(prompt("How many shares do you want to buy?", (Math.floor(investmentAccount.a.balance * 100 / indexFund.a.balance) / 100).toString()) ?? "");
-                        toBuy = Math.min(toBuy, investmentAccount.a.balance / indexFund.a.balance);
-                        if (toBuy.valueOf() <= 0 || isNaN(toBuy)) return;
-                        indexFund.a.shares += toBuy;
-                        investmentAccount.a.balance -= toBuy * indexFund.a.balance;
-                        render();
+                        setStocksToBuySellSell(Math.floor(investmentAccount.a.balance * 100 / indexFund.a.balance) / 100);
+                        setBuySellConfirm({func: (amount: number) => {
+                            amount = Math.min(amount, investmentAccount.a.balance / indexFund.a.balance);
+                            if (amount.valueOf() <= 0 || isNaN(amount)) return;
+                            indexFund.a.shares += amount;
+                            investmentAccount.a.balance -= amount * indexFund.a.balance;
+                            render();
+                        }});
+                        setStockBuySellText("Buy");
+                        document.getElementById("buy-stock-modal")!.style.display = "block";
                     }}><h3>Buy</h3></button>
                     {indexFund.a.shares > 0 ? <button className="w-40 text-xl h-10 font-bold" onClick={() => {
-                        let toSell = parseFloat(prompt("How many shares do you want to sell?", (Math.floor(indexFund.a.shares * 100) / 100).toString()) ?? "");
-                        toSell = Math.min(toSell, indexFund.a.shares);
-                        if (toSell.valueOf() <= 0 || isNaN(toSell)) return;
-                        indexFund.a.shares -= toSell;
-                        investmentAccount.a.balance += toSell * indexFund.a.balance;
-                        render();
+                        setStocksToBuySellSell(Math.floor(indexFund.a.shares * 100) / 100);
+                        setBuySellConfirm({func: (amount: number) => {
+                                amount = Math.min(amount, indexFund.a.shares);
+                                if (amount.valueOf() <= 0 || isNaN(amount)) return;
+                                indexFund.a.shares -= amount;
+                                investmentAccount.a.balance += amount * indexFund.a.balance;
+                                render();
+                            }});
+                        setStockBuySellText("Sell");
+                        document.getElementById("buy-stock-modal")!.style.display = "block";
                     }}><h3>Sell</h3></button> : <></>}
                 </div>
                 <LineChart className="h-60 w-120" data={indexFund.a.history}
@@ -213,6 +228,35 @@ function GamePage({fname, lname}: GameProps) {
     return (
         <>
             {pages[page]}
+            <div id="buy-stock-modal" className="flex modal justify-center">
+                <div
+                    className="flex flex-col gap-2 ml-auto mr-auto mt-[20%] w-100 bg-amber-100 rounded-xl justify-center p-4">
+                    <h3 className="text-gray-700">How many Shares would you like to {stockBuySellText.toLowerCase()}?</h3>
+                    <div className="flex">
+                        <p className="text-xl text-gray-700! p-2">$</p>
+                        <input name="buy-shares" className="w-80 bg-white rounded-xl p-1 text-gray-700"
+                               min={0}
+                               max={investmentAccount.a.balance / indexFund.a.balance}
+                               value={stocksToBuySell}
+                               type="number">
+                        </input>
+                    </div>
+
+                    <div className="flex gap-2 justify-center">
+                        <button
+                            onClick={() => document.getElementById("buy-stock-modal")!.style.display = "none"}
+                            className="p-2 w-25">Cancel
+                        </button>
+                        <button
+                            onClick={() => {
+                                buySellConfirm.func(stocksToBuySell);
+                                document.getElementById("buy-stock-modal")!.style.display = "none";
+                            }}
+                            className="p-2 w-25 bg-green-700!">{stockBuySellText}
+                        </button>
+                    </div>
+                </div>
+            </div>
             <div id="transfer-modal" className="flex modal justify-center">
                 <div
                     className="flex flex-col gap-2 ml-auto mr-auto mt-[20%] w-100 bg-amber-100 rounded-xl justify-center p-4">
