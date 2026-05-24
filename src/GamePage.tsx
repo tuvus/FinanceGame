@@ -58,7 +58,7 @@ function GamePage({fname, lname}: GameProps) {
     const [year, setYear] = useState(random.int(1940, 2010));
     const [savingsAccount] = useState({a: new Account("Savings Account", random.float(10000, 30000), year, true)});
     const [page, setPage] = useState(0);
-    const [salary] = useState(60000);
+    const [salary, setSalary] = useState(60000);
     const [pinvestments, setpinvestments] = useState(2);
     const [pretirement, setpretirement] = useState(5);
     const [pleisure, setpleisure] = useState(5);
@@ -80,10 +80,11 @@ function GamePage({fname, lname}: GameProps) {
         }
     })
     const [stockBuySellText, setStockBuySellText] = useState("Buy")
+    const [inflation, setInflation] = useState(1)
 
 
     const taxes = (salary - (salary * pretirement / 100)) * .32;
-    const livingExpenses = 32000;
+    const livingExpenses = 32000 * inflation;
 
     const newSavings = salary * (100 - pinvestments - pretirement - pleisure) / 100 - taxes - livingExpenses;
 
@@ -243,6 +244,10 @@ function GamePage({fname, lname}: GameProps) {
             <button className="w-80 text-xl h-10 font-bold" onClick={() => {
                 setPage(0);
                 setYear(year + 1);
+                const newInflation = random.float(1.01, 1.03);
+                setInflation(inflation * newInflation);
+                setSalary(salary * newInflation);
+                indexFund.a.balance *= newInflation;
                 indexFund.a.balance *= random.float(.85, 1.2);
                 indexFund.a.endYear(year);
                 investmentPortfolio.a.balance = investmentAccount.a.balance + indexFund.a.getValue();
