@@ -19,16 +19,30 @@ export class Account {
     }
 }
 
-
-export class Stock extends Account {
-    shares: number;
+export class StockAccount extends Account {
+    positions: Map<Account, number>;
 
     constructor(name: string, balance: number, date: number) {
-        super(name, balance, date, false);
-        this.shares = 0;
+        super(name, balance, date, true);
+        this.positions = new Map<Account, number>();
     }
 
-    getValue(): number {
-        return this.shares * this.balance;
+    addStock(stock: Account, amount: number) {
+        this.positions.set(stock, amount + (this.positions.get(stock) ?? 0));
+    }
+
+    removeStock(stock: Account, amount: number) {
+        this.positions.set(stock, amount - (this.positions.get(stock) ?? 0));
+        if (this.positions.get(stock)! < 0.00001)
+            this.positions.delete(stock);
+    }
+
+    getStock(stock: Account) {
+        return this.positions.get(stock) ?? 0;
+    }
+
+    getTotalValue() {
+        return this.balance + [...this.positions.entries()].map(e => e[0].balance * e[1])
+            .reduce((sum, current) => sum + current, 0);
     }
 }

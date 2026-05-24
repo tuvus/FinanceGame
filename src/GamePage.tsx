@@ -4,7 +4,7 @@ import random from "random";
 import {useState} from "react";
 import {LineChart} from "./components/LineChart.tsx";
 import Select from 'react-select';
-import {Account, Stock} from "./Data.tsx";
+import {Account, StockAccount} from "./Data.tsx";
 import StockCard from "./components/StockCard.tsx";
 
 type GameProps = {
@@ -28,12 +28,13 @@ function GamePage({fname, lname}: GameProps) {
     const [page, setPage] = useState(0);
     const [salary, setSalary] = useState(60000);
     const [pinvestments, setpinvestments] = useState(2);
-    const [pretirement, setpretirement] = useState(5);
+    const [pretirement, setpretirement] = useState(3);
     const [pleisure, setpleisure] = useState(5);
-    const [investmentAccount] = useState({a: new Account("Investment Account", 0, year, true)});
+    const [investmentAccount] = useState({a: new StockAccount("Investment Account", 0, year)});
+    const [retirementAccount] = useState({a: new StockAccount("Retirement Account", 0, year)});
     const [investmentPortfolio] = useState({a: new Account("Investments", 0, year, false)});
-    const [indexFund] = useState({a: new Stock("Index Fund", random.int(7000, 50000) / 100, year)})
-    const [allAccounts] = useState([savingsAccount.a, investmentAccount.a, investmentPortfolio.a]);
+    const [indexFund] = useState({a: new Account("Index Fund", random.int(7000, 50000) / 100, year, false)});
+    const [allAccounts] = useState([savingsAccount.a, investmentAccount.a, retirementAccount.a, investmentPortfolio.a]);
     const [rerender, setRerender] = useState(false);
     const render = () => {
         setRerender(!rerender)
@@ -48,6 +49,28 @@ function GamePage({fname, lname}: GameProps) {
     const livingExpenses = 32000 * inflation;
 
     const newSavings = salary * (100 - pinvestments - pretirement - pleisure) / 100 - taxes - livingExpenses;
+
+    const endYear = () => {
+        // Income and interest
+        savingsAccount.a.balance += newSavings;
+        investmentAccount.a.balance += salary * pinvestments / 100
+        retirementAccount.a.balance += salary * pretirement / 100
+        indexFund.a.balance *= random.float(.85, 1.2);
+
+        // Inflation
+        const newInflation = random.float(1.01, 1.03);
+        setInflation(inflation * newInflation);
+        setSalary(salary * newInflation);
+        indexFund.a.balance *= newInflation;
+
+        setPage(0);
+        setYear(year + 1);
+
+        // History log
+        indexFund.a.endYear(year);
+        investmentPortfolio.a.balance = investmentAccount.a.getTotalValue();
+        allAccounts.forEach((account) => account.endYear(year));
+    };
 
     const pages = [
         <div className="flex flex-col gap-2 items-center">
@@ -85,7 +108,7 @@ function GamePage({fname, lname}: GameProps) {
         //         money</h3></button>
         // </div>,
         <div className="flex flex-col gap-2 items-center">
-            <h1>Allocations</h1>
+            <h1>Allocation</h1>
             <div className="grid grid-cols-3 w-1/3">
                 <p className="text-green-700">Paycheck</p>
                 <p></p>
@@ -142,8 +165,6 @@ function GamePage({fname, lname}: GameProps) {
             </div>
             <button className="w-80 text-xl h-10 font-bold" onClick={() => {
                 setPage(page + 1);
-                savingsAccount.a.balance += newSavings;
-                investmentAccount.a.balance += salary * pinvestments / 100
             }}><h3>Next: Investments</h3></button>
         </div>,
         <div className="flex flex-col gap-2 items-center">
@@ -151,18 +172,21 @@ function GamePage({fname, lname}: GameProps) {
             <p className="mt-2 text-yellow-600">
                 Uninvested: {formatter.format(investmentAccount.a.balance)}
             </p>
-            <StockCard stock={indexFund} investmentAccount={investmentAccount} formatter={formatter} compactFormatter={compactFormatter} render={render}/>
+            <StockCard stock={indexFund} investmentAccount={investmentAccount} formatter={formatter}
+                       compactFormatter={compactFormatter} render={render}/>
             <button className="w-80 text-xl h-10 font-bold" onClick={() => {
-                setPage(0);
-                setYear(year + 1);
-                const newInflation = random.float(1.01, 1.03);
-                setInflation(inflation * newInflation);
-                setSalary(salary * newInflation);
-                indexFund.a.balance *= newInflation;
-                indexFund.a.balance *= random.float(.85, 1.2);
-                indexFund.a.endYear(year);
-                investmentPortfolio.a.balance = investmentAccount.a.balance + indexFund.a.getValue();
-                allAccounts.forEach((account) => account.endYear(year));
+                setPage(page + 1);
+            }}><h3>Next: Retirement</h3></button>
+        </div>,
+        <div className="flex flex-col gap-2 items-center">
+            <h1>Retirement Portfolio</h1>
+            <p className="mt-2 text-yellow-600">
+                Uninvested: {formatter.format(retirementAccount.a.balance)}
+            </p>
+            <StockCard stock={indexFund} investmentAccount={retirementAccount} formatter={formatter}
+                       compactFormatter={compactFormatter} render={render}/>
+            <button className="w-80 text-xl h-10 font-bold" onClick={() => {
+                endYear();
             }}><h3>Next year</h3></button>
         </div>
     ];
@@ -194,7 +218,7 @@ function GamePage({fname, lname}: GameProps) {
                     <div className="flex">
                         <p className="text-xl text-gray-700! p-2">$</p>
                         <input name="transfer-funds" className="w-80 bg-white rounded-xl p-1 text-gray-700"
-                               min={0}
+                               min=""
                                max={transferFrom.selectedAccount?.balance ?? 0}
                                disabled={transferFrom.selectedAccount == null}
                                value={fundsToTransfer}
@@ -209,15 +233,17 @@ function GamePage({fname, lname}: GameProps) {
                             className="p-2 w-25">Cancel
                         </button>
                         <button
+                            disabled={transferFrom.selectedAccount == null || transferTo.selectedAccount == null}
                             onClick={() => {
                                 if (transferFrom.selectedAccount != null && transferTo.selectedAccount != null && transferFrom.selectedAccount != transferTo.selectedAccount) {
                                     const toTransfer = Math.min(fundsToTransfer, transferFrom.selectedAccount.balance);
                                     transferFrom.selectedAccount.balance -= toTransfer;
                                     transferTo.selectedAccount.balance += toTransfer;
+                                    render();
                                 }
                                 document.getElementById("transfer-modal")!.style.display = "none";
                             }}
-                            className="p-2 w-25 bg-green-700!">Transfer
+                            className="p-2 w-25 enabled:bg-green-700! disabled:bg-gray-400!">Transfer
                         </button>
                     </div>
                 </div>
