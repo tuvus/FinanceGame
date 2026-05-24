@@ -58,10 +58,10 @@ function GamePage({fname, lname}: GameProps) {
     const [year, setYear] = useState(random.int(1940, 2010));
     const [savingsAccount] = useState({a: new Account("Savings Account", random.float(10000, 30000), year, true)});
     const [page, setPage] = useState(0);
-    const [salary] = useState(59999);
-    const [pinvestments, setpinvestments] = useState(10);
+    const [salary] = useState(60000);
+    const [pinvestments, setpinvestments] = useState(2);
     const [pretirement, setpretirement] = useState(5);
-    const [pleisure, setpleisure] = useState(40);
+    const [pleisure, setpleisure] = useState(5);
     const [investmentAccount] = useState({a: new Account("Investment Account", 0, year, true)});
     const [investmentPortfolio] = useState({a: new Account("Investments", 0, year, false)});
     const [indexFund] = useState({a: new Stock("Index Fund", random.int(7000, 50000) / 100, year)})
@@ -73,7 +73,7 @@ function GamePage({fname, lname}: GameProps) {
     const [transferFrom, setTransferFrom] = useState<TransferFundsSelectState>({selectedAccount: null});
     const [transferTo, setTransferTo] = useState<TransferFundsSelectState>({selectedAccount: null});
     const [fundsToTransfer, setFundsToTransfer] = useState(0)
-    const [stocksToBuySell, setStocksToBuySellSell] = useState(0)
+    const [stocksToBuySell, setStocksToBuySell] = useState(0)
     const [buySellConfirm, setBuySellConfirm] = useState({
         func: (amount: number) => {
             console.log(amount.toString())
@@ -82,17 +82,16 @@ function GamePage({fname, lname}: GameProps) {
     const [stockBuySellText, setStockBuySellText] = useState("Buy")
 
 
-    const taxes = salary * .32;
+    const taxes = (salary - (salary * pretirement / 100)) * .32;
     const livingExpenses = 32000;
 
-    const takehomemoney = salary - taxes - livingExpenses;
-    const newSavings = takehomemoney * ((100 - pinvestments - pretirement - pleisure) / 100);
+    const newSavings = salary * (100 - pinvestments - pretirement - pleisure) / 100 - taxes - livingExpenses;
 
     const pages = [
         <div className="flex flex-col gap-2 items-center">
             <h1>Year in review {year - 1}</h1>
             <div className="grid grid-cols-2">
-                {allAccounts.filter(a => a.isOwnedAccount).map((account, i) => (
+                {allAccounts.filter(a => a.name == "Savings Account" || a.name == "Investments").map((account, i) => (
                     <div key={i} className="flex flex-col items-center bg-amber-100 rounded-xl p-4 m-4 gap-1">
                         <h3 className="text-gray-700 font-bold">{account.name}</h3>
                         <div className="flex items-baseline gap-2">
@@ -119,40 +118,62 @@ function GamePage({fname, lname}: GameProps) {
             <p className="text-red-800">-{formatter.format(taxes)} taxes</p>
             <p className="text-red-800">-{formatter.format(livingExpenses)} living expenses</p>
             <br/>
-            <p className="text-green-700">= {formatter.format(takehomemoney)} take home</p>
+            <p className="text-green-700">= {formatter.format(0)} take home</p>
             <button className="w-80 text-xl h-10 font-bold" onClick={() => setPage(page + 1)}><h3>Next: Allocating
                 money</h3></button>
         </div>,
         <div className="flex flex-col gap-2 items-center">
             <h1>Allocations!</h1>
-            <p className="text-green-700">{formatter.format(takehomemoney)} to allocate</p>
-            <label className="mt-2">
-                Investments: <input name="pinvestments" className="w-12"
-                                    min="0"
-                                    defaultValue={pinvestments}
-                                    onChange={e => setpinvestments(Math.min(1000, Math.max(0, e.target.valueAsNumber)))}
-                                    type="number">
-            </input>% {formatter.format(takehomemoney * (pinvestments / 100))}
-            </label>
-            <label className="mt-2">
-                Retirement: <input name="pretirement" className="w-12"
-                                   min="0"
-                                   defaultValue={pretirement}
-                                   onChange={e => setpretirement(Math.min(1000, Math.max(0, e.target.valueAsNumber)))}
-                                   type="number">
-            </input>% {formatter.format(takehomemoney * (pretirement / 100))}
-            </label>
-            <label className="mt-2">
-                Leisure: <input name="pleisure" className="w-12"
-                                min="0"
-                                defaultValue={pleisure}
-                                onChange={e => setpleisure(Math.min(1000, Math.max(0, e.target.valueAsNumber)))}
-                                type="number">
-            </input>% {formatter.format(takehomemoney * pleisure / 100)}
-            </label>
-            <label className="mt-2">
-                Savings: {100 - pinvestments - pretirement - pleisure}% {formatter.format(newSavings)}
-            </label>
+            <div className="grid grid-cols-3 w-1/3">
+                <p className="text-green-700">Paycheck</p>
+                <p></p>
+                <p className="text-green-700">{formatter.format(salary)}</p>
+                <hr></hr>
+                <hr></hr>
+                <hr></hr>
+
+                <p>Retirement</p>
+                <p><input name="pretirement" className="w-12"
+                          min="0"
+                          defaultValue={pretirement}
+                          onChange={e => setpretirement(Math.min(1000, Math.max(0, e.target.valueAsNumber)))}
+                          type="number">
+                </input>%</p>
+                <p>{formatter.format(salary * pretirement / 100)}</p>
+
+
+                <p className="text-red-800">Taxes</p>
+                <p className="text-red-800">{Math.round(taxes / salary * 100)}%</p>
+                <p className="text-red-800">{formatter.format(taxes)}</p>
+
+
+                <p className="text-red-800">Living Expenses</p>
+                <p className="text-red-800">{Math.round(livingExpenses / salary * 100)}%</p>
+                <p className="text-red-800">{formatter.format(livingExpenses)}</p>
+
+                <p>Investments</p>
+                <p><input name="pinvestments" className="w-12"
+                          min="0"
+                          defaultValue={pinvestments}
+                          onChange={e => setpinvestments(Math.min(1000, Math.max(0, e.target.valueAsNumber)))}
+                          type="number">
+                </input>%</p>
+                <p>{formatter.format(salary * pinvestments / 100)}</p>
+
+                <p>Leisure</p>
+                <p><input name="pleisure" className="w-12"
+                          min="0"
+                          defaultValue={pleisure}
+                          onChange={e => setpleisure(Math.min(1000, Math.max(0, e.target.valueAsNumber)))}
+                          type="number">
+                </input>%</p>
+                <p>{formatter.format(salary * pleisure / 100)}</p>
+
+                <p className="text-yellow-600">Savings</p>
+                <p className="text-yellow-600">{Math.round(newSavings / salary * 100)}%</p>
+                <p className="text-yellow-600">{formatter.format(newSavings)}</p>
+            </div>
+
             <div className="flex gap-2">
                 <h3 className={newSavings > 0 ? "text-green-700" : "text-red-800"}>
                     New Balance: {formatter.format(savingsAccount.a.balance + newSavings)}</h3>
@@ -160,7 +181,7 @@ function GamePage({fname, lname}: GameProps) {
             <button className="w-80 text-xl h-10 font-bold" onClick={() => {
                 setPage(page + 1);
                 savingsAccount.a.balance += newSavings;
-                investmentAccount.a.balance += takehomemoney * pinvestments / 100
+                investmentAccount.a.balance += salary * pinvestments / 100
             }}><h3>Next: Investments</h3></button>
         </div>,
         <div className="flex flex-col gap-2 items-center">
@@ -182,26 +203,30 @@ function GamePage({fname, lname}: GameProps) {
                 </p>
                 <div className="flex gap-2">
                     <button className="w-40 text-xl h-10 font-bold" onClick={() => {
-                        setStocksToBuySellSell(Math.floor(investmentAccount.a.balance * 100 / indexFund.a.balance) / 100);
-                        setBuySellConfirm({func: (amount: number) => {
-                            amount = Math.min(amount, investmentAccount.a.balance / indexFund.a.balance);
-                            if (amount.valueOf() <= 0 || isNaN(amount)) return;
-                            indexFund.a.shares += amount;
-                            investmentAccount.a.balance -= amount * indexFund.a.balance;
-                            render();
-                        }});
+                        setStocksToBuySell(Math.floor(investmentAccount.a.balance * 100 / indexFund.a.balance) / 100);
+                        setBuySellConfirm({
+                            func: (amount: number) => {
+                                amount = Math.min(amount, investmentAccount.a.balance / indexFund.a.balance);
+                                if (amount.valueOf() <= 0 || isNaN(amount)) return;
+                                indexFund.a.shares += amount;
+                                investmentAccount.a.balance -= amount * indexFund.a.balance;
+                                render();
+                            }
+                        });
                         setStockBuySellText("Buy");
                         document.getElementById("buy-stock-modal")!.style.display = "block";
                     }}><h3>Buy</h3></button>
                     {indexFund.a.shares > 0 ? <button className="w-40 text-xl h-10 font-bold" onClick={() => {
-                        setStocksToBuySellSell(Math.floor(indexFund.a.shares * 100) / 100);
-                        setBuySellConfirm({func: (amount: number) => {
+                        setStocksToBuySell(Math.floor(indexFund.a.shares * 100) / 100);
+                        setBuySellConfirm({
+                            func: (amount: number) => {
                                 amount = Math.min(amount, indexFund.a.shares);
                                 if (amount.valueOf() <= 0 || isNaN(amount)) return;
                                 indexFund.a.shares -= amount;
                                 investmentAccount.a.balance += amount * indexFund.a.balance;
                                 render();
-                            }});
+                            }
+                        });
                         setStockBuySellText("Sell");
                         document.getElementById("buy-stock-modal")!.style.display = "block";
                     }}><h3>Sell</h3></button> : <></>}
@@ -231,13 +256,15 @@ function GamePage({fname, lname}: GameProps) {
             <div id="buy-stock-modal" className="flex modal justify-center">
                 <div
                     className="flex flex-col gap-2 ml-auto mr-auto mt-[20%] w-100 bg-amber-100 rounded-xl justify-center p-4">
-                    <h3 className="text-gray-700">How many Shares would you like to {stockBuySellText.toLowerCase()}?</h3>
+                    <h3 className="text-gray-700">How many Shares would you like
+                        to {stockBuySellText.toLowerCase()}?</h3>
                     <div className="flex">
                         <p className="text-xl text-gray-700! p-2">$</p>
                         <input name="buy-shares" className="w-80 bg-white rounded-xl p-1 text-gray-700"
                                min={0}
                                max={investmentAccount.a.balance / indexFund.a.balance}
                                value={stocksToBuySell}
+                               onChange={(e) => setStocksToBuySell(e.target.valueAsNumber)}
                                type="number">
                         </input>
                     </div>
