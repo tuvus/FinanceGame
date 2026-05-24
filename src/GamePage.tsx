@@ -113,18 +113,18 @@ function GamePage({fname, lname}: GameProps) {
             <button className="w-80 text-xl h-10 font-bold" onClick={() => setPage(page + 1)}><h3>Next: Paycheck</h3>
             </button>
         </div>,
+        // <div className="flex flex-col gap-2 items-center">
+        //     <h1>Payday!</h1>
+        //     <p className="text-yellow-600">{formatter.format(salary)} paycheck</p>
+        //     <p className="text-red-800">-{formatter.format(taxes)} taxes</p>
+        //     <p className="text-red-800">-{formatter.format(livingExpenses)} living expenses</p>
+        //     <br/>
+        //     <p className="text-green-700">= {formatter.format(0)} take home</p>
+        //     <button className="w-80 text-xl h-10 font-bold" onClick={() => setPage(page + 1)}><h3>Next: Allocating
+        //         money</h3></button>
+        // </div>,
         <div className="flex flex-col gap-2 items-center">
-            <h1>Payday!</h1>
-            <p className="text-yellow-600">{formatter.format(salary)} paycheck</p>
-            <p className="text-red-800">-{formatter.format(taxes)} taxes</p>
-            <p className="text-red-800">-{formatter.format(livingExpenses)} living expenses</p>
-            <br/>
-            <p className="text-green-700">= {formatter.format(0)} take home</p>
-            <button className="w-80 text-xl h-10 font-bold" onClick={() => setPage(page + 1)}><h3>Next: Allocating
-                money</h3></button>
-        </div>,
-        <div className="flex flex-col gap-2 items-center">
-            <h1>Allocations!</h1>
+            <h1>Allocations</h1>
             <div className="grid grid-cols-3 w-1/3">
                 <p className="text-green-700">Paycheck</p>
                 <p></p>
