@@ -4,43 +4,11 @@ import random from "random";
 import {useState} from "react";
 import {LineChart} from "./components/LineChart.tsx";
 import Select from 'react-select';
+import {Account, Stock} from "./Data.tsx";
+import StockCard from "./components/StockCard.tsx";
 
 type GameProps = {
     fname: string; lname: string;
-}
-
-class Account {
-    name: string;
-    balance: number;
-    diff: number | undefined;
-    history: { date: number, balance: number }[];
-    isOwnedAccount: boolean;
-
-    constructor(name: string, balance: number, date: number, isOwnedAccount: boolean) {
-        this.name = name;
-        this.balance = balance;
-        this.diff = undefined;
-        this.history = [{date: date, balance: balance}];
-        this.isOwnedAccount = isOwnedAccount;
-    }
-
-    endYear(date: number): void {
-        this.history = [...this.history, {date: date, balance: this.balance}];
-        this.diff = Math.floor((this.history[this.history.length - 1].balance - this.history[this.history.length - 2].balance) / Math.abs(this.history[this.history.length - 2].balance) * 100);
-    }
-}
-
-class Stock extends Account {
-    shares: number;
-
-    constructor(name: string, balance: number, date: number) {
-        super(name, balance, date, false);
-        this.shares = 0;
-    }
-
-    getValue(): number {
-        return this.shares * this.balance;
-    }
 }
 
 interface TransferFundsSelectState {
@@ -73,13 +41,6 @@ function GamePage({fname, lname}: GameProps) {
     const [transferFrom, setTransferFrom] = useState<TransferFundsSelectState>({selectedAccount: null});
     const [transferTo, setTransferTo] = useState<TransferFundsSelectState>({selectedAccount: null});
     const [fundsToTransfer, setFundsToTransfer] = useState(0)
-    const [stocksToBuySell, setStocksToBuySell] = useState(0)
-    const [buySellConfirm, setBuySellConfirm] = useState({
-        func: (amount: number) => {
-            console.log(amount.toString())
-        }
-    })
-    const [stockBuySellText, setStockBuySellText] = useState("Buy")
     const [inflation, setInflation] = useState(1)
 
 
@@ -190,57 +151,7 @@ function GamePage({fname, lname}: GameProps) {
             <p className="mt-2 text-yellow-600">
                 Uninvested: {formatter.format(investmentAccount.a.balance)}
             </p>
-            <div className="flex flex-col items-center bg-amber-100 rounded-xl p-4 m-4 gap-1">
-                <h3 className="text-gray-700 font-bold">Index fund</h3>
-                <div className="flex items-baseline gap-2">
-                    <p className="text-gray-700">{formatter.format(indexFund.a.balance)}</p>
-                    {indexFund.a.diff ? indexFund.a.diff >= 0 ? (<p className="text-green-700">+{indexFund.a.diff}%</p>)
-                        : <p className="text-red-800">{indexFund.a.diff}%</p> : <></>}
-                    <p className="text-gray-700">per share</p>
-                </div>
-
-                <p className="text-gray-700">
-                    Shares: {Math.round(indexFund.a.shares * 100) / 100} ({formatter.format(indexFund.a.getValue())})
-                </p>
-                <div className="flex gap-2">
-                    <button className="w-40 text-xl h-10 font-bold" onClick={() => {
-                        setStocksToBuySell(Math.floor(investmentAccount.a.balance * 100 / indexFund.a.balance) / 100);
-                        setBuySellConfirm({
-                            func: (amount: number) => {
-                                amount = Math.min(amount, investmentAccount.a.balance / indexFund.a.balance);
-                                if (amount.valueOf() <= 0 || isNaN(amount)) return;
-                                indexFund.a.shares += amount;
-                                investmentAccount.a.balance -= amount * indexFund.a.balance;
-                                render();
-                            }
-                        });
-                        setStockBuySellText("Buy");
-                        document.getElementById("buy-stock-modal")!.style.display = "block";
-                    }}><h3>Buy</h3></button>
-                    {indexFund.a.shares > 0 ? <button className="w-40 text-xl h-10 font-bold" onClick={() => {
-                        setStocksToBuySell(Math.floor(indexFund.a.shares * 100) / 100);
-                        setBuySellConfirm({
-                            func: (amount: number) => {
-                                amount = Math.min(amount, indexFund.a.shares);
-                                if (amount.valueOf() <= 0 || isNaN(amount)) return;
-                                indexFund.a.shares -= amount;
-                                investmentAccount.a.balance += amount * indexFund.a.balance;
-                                render();
-                            }
-                        });
-                        setStockBuySellText("Sell");
-                        document.getElementById("buy-stock-modal")!.style.display = "block";
-                    }}><h3>Sell</h3></button> : <></>}
-                </div>
-                <LineChart className="h-60 w-120" data={indexFund.a.history}
-                           index="date"
-                           showLegend={false}
-                           minValue={Math.min(...indexFund.a.history.map(h => h.balance))}
-                           maxValue={Math.max(...indexFund.a.history.map(h => h.balance))}
-                           aria-hidden="true"
-                           categories={["balance"]}
-                           valueFormatter={(number: number) => compactFormatter.format(number)}/>
-            </div>
+            <StockCard stock={indexFund} investmentAccount={investmentAccount} formatter={formatter} compactFormatter={compactFormatter} render={render}/>
             <button className="w-80 text-xl h-10 font-bold" onClick={() => {
                 setPage(0);
                 setYear(year + 1);
@@ -258,38 +169,7 @@ function GamePage({fname, lname}: GameProps) {
     return (
         <>
             {pages[page]}
-            <div id="buy-stock-modal" className="flex modal justify-center">
-                <div
-                    className="flex flex-col gap-2 ml-auto mr-auto mt-[20%] w-100 bg-amber-100 rounded-xl justify-center p-4">
-                    <h3 className="text-gray-700">How many Shares would you like
-                        to {stockBuySellText.toLowerCase()}?</h3>
-                    <div className="flex">
-                        <p className="text-xl text-gray-700! p-2">$</p>
-                        <input name="buy-shares" className="w-80 bg-white rounded-xl p-1 text-gray-700"
-                               min={0}
-                               max={investmentAccount.a.balance / indexFund.a.balance}
-                               value={stocksToBuySell}
-                               onChange={(e) => setStocksToBuySell(e.target.valueAsNumber)}
-                               type="number">
-                        </input>
-                    </div>
-
-                    <div className="flex gap-2 justify-center">
-                        <button
-                            onClick={() => document.getElementById("buy-stock-modal")!.style.display = "none"}
-                            className="p-2 w-25">Cancel
-                        </button>
-                        <button
-                            onClick={() => {
-                                buySellConfirm.func(stocksToBuySell);
-                                document.getElementById("buy-stock-modal")!.style.display = "none";
-                            }}
-                            className="p-2 w-25 bg-green-700!">{stockBuySellText}
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <div id="transfer-modal" className="flex modal justify-center">
+            <div id="transfer-modal" className="flex hmodal justify-center">
                 <div
                     className="flex flex-col gap-2 ml-auto mr-auto mt-[20%] w-100 bg-amber-100 rounded-xl justify-center p-4">
                     <h3 className="text-gray-700">Transfer Funds</h3>
