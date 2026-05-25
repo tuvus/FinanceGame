@@ -67,7 +67,7 @@ function GamePage({fname, lname}: GameProps) {
         setInflation(inflation * newInflation);
         setSalary(salary * newInflation);
         indexFund.a.balance *= newInflation;
-        bond.a.balance *= 1.022;
+        bond.a.balance *= 1.052;
 
         setPage(0);
         setYear(year + 1);
@@ -79,7 +79,6 @@ function GamePage({fname, lname}: GameProps) {
     };
 
 
-
     const pages = [
         <div className="flex flex-col gap-2 items-center">
             <h1>Year in review {year - 1}</h1>
@@ -88,7 +87,7 @@ function GamePage({fname, lname}: GameProps) {
                     <div key={i} className="flex flex-col items-center bg-amber-100 rounded-xl p-4 m-4 gap-1">
                         <h3 className="text-gray-700 font-bold">{account.name}</h3>
                         <div className="flex items-baseline gap-2">
-                            <p className="text-gray-700">{formatter.format(account.balance)}</p>
+                            <p className="text-gray-700">{formatter.format(account.getTotalValue())}</p>
                             {account.diff ? account.diff >= 0 ? (<p className="text-green-700">+{account.diff}%</p>)
                                 : <p className="text-red-800">{account.diff}%</p> : <></>}
                         </div>

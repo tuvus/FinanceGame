@@ -18,13 +18,13 @@ function StockCard({stock, investmentAccount, formatter, compactFormatter, rende
     const [minimized, setMinimized] = useState(true)
 
     return (<>
-        <div className="flex flex-col items-center bg-amber-100 rounded-xl p-4 m-4 gap-1 cursor-pointer"
+        <div className="flex flex-col items-center w-120 bg-amber-100 rounded-xl p-4 m-4 gap-1 cursor-pointer"
              onClick={() => setMinimized(!minimized)}>
             <h3 className="text-gray-700 font-bold">{stock.a.name}</h3>
             {stock.a.bond ?
                 <>
                     <div className="flex items-baseline gap-2">
-                        <p className="text-gray-700">2.2% Yearly Interest Rate</p>
+                        <p className="text-gray-700">5.2% Yearly Interest Rate</p>
                     </div>
                     <p className="text-gray-700">
                         Value: {formatter.format(investmentAccount.a.getStock(stock.a) * stock.a.balance)}
@@ -71,7 +71,7 @@ function StockCard({stock, investmentAccount, formatter, compactFormatter, rende
                 <div className="flex modal justify-center">
                     <div
                         className="flex flex-col gap-2 ml-auto mr-auto mb-auto mt-[20%] w-100 bg-amber-100 rounded-xl justify-center p-4">
-                        <h3 className="text-gray-700">How many Shares would you like to buy?</h3>
+                        <h3 className="text-gray-700">How many shares would you like to buy?</h3>
                         <div className="flex">
                             <p className="text-xl text-gray-700! p-2">$</p>
                             <input name="buy-shares" className="w-80 bg-white rounded-xl p-1 text-gray-700"
@@ -93,6 +93,7 @@ function StockCard({stock, investmentAccount, formatter, compactFormatter, rende
                                 className="p-2 w-25">Cancel
                             </button>
                             <button
+                                disabled={stocksToBuySell == 0}
                                 onClick={(e) => {
                                     e.stopPropagation()
                                     if (stocksToBuySell.valueOf() <= 0 || isNaN(stocksToBuySell)) return;
@@ -101,7 +102,7 @@ function StockCard({stock, investmentAccount, formatter, compactFormatter, rende
                                     render();
                                     setBuySellState(null);
                                 }}
-                                className="p-2 w-25 bg-green-700!">Buy
+                                className="p-2 w-25 enabled:bg-green-700!">Buy
                             </button>
                         </div>
                     </div>
