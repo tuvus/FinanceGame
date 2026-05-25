@@ -15,9 +15,11 @@ type StockProps = {
 function StockCard({stock, investmentAccount, formatter, compactFormatter, render}: StockProps) {
     const [stocksToBuySell, setStocksToBuySell] = useState(0);
     const [buySellState, setBuySellState] = useState<boolean | null>(null);
+    const [minimized, setMinimized] = useState(true)
 
     return (<>
-        <div className="flex flex-col items-center bg-amber-100 rounded-xl p-4 m-4 gap-1">
+        <div className="flex flex-col items-center bg-amber-100 rounded-xl p-4 m-4 gap-1 cursor-pointer"
+             onClick={() => setMinimized(!minimized)}>
             <h3 className="text-gray-700 font-bold">Index fund</h3>
             <div className="flex items-baseline gap-2">
                 <p className="text-gray-700">{formatter.format(stock.a.balance)}</p>
@@ -29,25 +31,29 @@ function StockCard({stock, investmentAccount, formatter, compactFormatter, rende
             <p className="text-gray-700">
                 Shares: {Math.round(investmentAccount.a.getStock(stock.a) * 100) / 100} ({formatter.format(investmentAccount.a.getStock(stock.a) * stock.a.balance)})
             </p>
-            <div className="flex gap-2">
-                <button className="w-40 text-xl h-10 font-bold" onClick={() => {
-                    setStocksToBuySell(Math.floor(investmentAccount.a.balance * 100 / stock.a.balance) / 100);
-                    setBuySellState(true);
-                }}><h3>Buy</h3></button>
-                {investmentAccount.a.getStock(stock.a) > 0 ?
-                    <button className="w-40 text-xl h-10 font-bold" onClick={() => {
-                        setStocksToBuySell(Math.floor(investmentAccount.a.getStock(stock.a) * 100) / 100);
-                        setBuySellState(false);
-                    }}><h3>Sell</h3></button> : <></>}
-            </div>
-            <LineChart className="h-60 w-120" data={stock.a.history}
-                       index="date"
-                       showLegend={false}
-                       minValue={Math.min(...stock.a.history.map(h => h.balance))}
-                       maxValue={Math.max(...stock.a.history.map(h => h.balance))}
-                       aria-hidden="true"
-                       categories={["balance"]}
-                       valueFormatter={(number: number) => compactFormatter.format(number)}/>
+            {minimized ? <></> : <>
+                <div className="flex gap-2">
+                    <button className="w-40 text-xl h-10 font-bold" onClick={(e) => {
+                        e.stopPropagation()
+                        setStocksToBuySell(Math.floor(investmentAccount.a.balance * 100 / stock.a.balance) / 100);
+                        setBuySellState(true);
+                    }}><h3>Buy</h3></button>
+                    {investmentAccount.a.getStock(stock.a) > 0 ?
+                        <button className="w-40 text-xl h-10 font-bold" onClick={(e) => {
+                            e.stopPropagation()
+                            setStocksToBuySell(Math.floor(investmentAccount.a.getStock(stock.a) * 100) / 100);
+                            setBuySellState(false);
+                        }}><h3>Sell</h3></button> : <></>}
+                </div>
+                <LineChart className="h-60 w-120" data={stock.a.history}
+                           index="date"
+                           showLegend={false}
+                           minValue={Math.min(...stock.a.history.map(h => h.balance))}
+                           maxValue={Math.max(...stock.a.history.map(h => h.balance))}
+                           aria-hidden="true"
+                           categories={["balance"]}
+                           valueFormatter={(number: number) => compactFormatter.format(number)}/>
+            </>}
         </div>
         {buySellState == null ? <></> : (buySellState ?
                 <div className="flex modal justify-center">
@@ -68,11 +74,15 @@ function StockCard({stock, investmentAccount, formatter, compactFormatter, rende
 
                         <div className="flex gap-2 justify-center">
                             <button
-                                onClick={() => setBuySellState(null)}
+                                onClick={(e) => {
+                                    e.stopPropagation()
+                                    setBuySellState(null)
+                                }}
                                 className="p-2 w-25">Cancel
                             </button>
                             <button
-                                onClick={() => {
+                                onClick={(e) => {
+                                    e.stopPropagation()
                                     if (stocksToBuySell.valueOf() <= 0 || isNaN(stocksToBuySell)) return;
                                     investmentAccount.a.addStock(stock.a, stocksToBuySell);
                                     investmentAccount.a.balance -= stocksToBuySell * stock.a.balance;
