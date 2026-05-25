@@ -24,16 +24,16 @@ function GamePage({fname, lname}: GameProps) {
         compactDisplay: "short"
     });
     const [year, setYear] = useState(random.int(1940, 2010));
-    const [savingsAccount] = useState({a: new Account("Savings Account", random.float(10000, 30000), year, true)});
+    const [savingsAccount] = useState({a: new Account("Savings Account", random.float(10000, 30000), year - 1, true)});
     const [page, setPage] = useState(0);
     const [salary, setSalary] = useState(60000);
     const [pinvestments, setpinvestments] = useState(2);
     const [pretirement, setpretirement] = useState(3);
     const [pleisure, setpleisure] = useState(5);
-    const [investmentAccount] = useState({a: new StockAccount("Investment Account", 0, year)});
-    const [retirementAccount] = useState({a: new StockAccount("Retirement Account", 0, year)});
-    const [investmentPortfolio] = useState({a: new Account("Investments", 0, year, false)});
-    const [indexFund] = useState({a: new Account("Index Fund", random.int(7000, 50000) / 100, year, false)});
+    const [investmentAccount] = useState({a: new StockAccount("Investment Account", 0, year - 1)});
+    const [retirementAccount] = useState({a: new StockAccount("Retirement Account", 0, year - 1)});
+    const [investmentPortfolio] = useState({a: new Account("Investments", 0, year - 1, false)});
+    const [indexFund] = useState({a: new Account("Index Fund", random.int(7000, 50000) / 100, year - 1, false)});
     const [allAccounts] = useState([savingsAccount.a, investmentAccount.a, retirementAccount.a, investmentPortfolio.a]);
     const [rerender, setRerender] = useState(false);
     const render = () => {
