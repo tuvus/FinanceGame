@@ -4,7 +4,7 @@ import random from "random";
 import {useState} from "react";
 import {LineChart} from "./components/LineChart.tsx";
 import Select from 'react-select';
-import {Account, StockAccount} from "./Data.tsx";
+import {Account, StockAccount, StockBond} from "./Data.tsx";
 import StockCard from "./components/StockCard.tsx";
 
 type GameProps = {
@@ -32,9 +32,9 @@ function GamePage({fname, lname}: GameProps) {
     const [pleisure, setpleisure] = useState(5);
     const [investmentAccount] = useState({a: new StockAccount("Investment Account", 0, year - 1)});
     const [retirementAccount] = useState({a: new StockAccount("Retirement Account", 0, year - 1)});
-    const [investmentPortfolio] = useState({a: new Account("Investments", 0, year - 1, false)});
-    const [indexFund] = useState({a: new Account("Index Fund", random.int(7000, 50000) / 100, year - 1, false)});
-    const [allAccounts] = useState([savingsAccount.a, investmentAccount.a, retirementAccount.a, investmentPortfolio.a]);
+    const [indexFund] = useState({a: new StockBond("Index Fund", random.int(7000, 50000) / 100, year - 1, false)});
+    const [bond] = useState({a: new StockBond("Bond", 1, year - 1, true)});
+    const [allAccounts] = useState([savingsAccount.a, investmentAccount.a, retirementAccount.a]);
     const [rerender, setRerender] = useState(false);
     const render = () => {
         setRerender(!rerender)
@@ -50,6 +50,11 @@ function GamePage({fname, lname}: GameProps) {
 
     const newSavings = salary * (100 - pinvestments - pretirement - pleisure) / 100 - taxes - livingExpenses;
 
+    const nextPage = () => {
+        setPage(page + 1);
+        if (page >= pages.length - 1) endYear();
+    }
+
     const endYear = () => {
         // Income and interest
         savingsAccount.a.balance += newSavings;
@@ -62,21 +67,24 @@ function GamePage({fname, lname}: GameProps) {
         setInflation(inflation * newInflation);
         setSalary(salary * newInflation);
         indexFund.a.balance *= newInflation;
+        bond.a.balance *= 1.022;
 
         setPage(0);
         setYear(year + 1);
 
         // History log
         indexFund.a.endYear(year);
-        investmentPortfolio.a.balance = investmentAccount.a.getTotalValue();
+        bond.a.endYear(year);
         allAccounts.forEach((account) => account.endYear(year));
     };
+
+
 
     const pages = [
         <div className="flex flex-col gap-2 items-center">
             <h1>Year in review {year - 1}</h1>
             <div className="grid grid-cols-2">
-                {allAccounts.filter(a => a.name == "Savings Account" || a.name == "Investments").map((account, i) => (
+                {allAccounts.map((account, i) => (
                     <div key={i} className="flex flex-col items-center bg-amber-100 rounded-xl p-4 m-4 gap-1">
                         <h3 className="text-gray-700 font-bold">{account.name}</h3>
                         <div className="flex items-baseline gap-2">
@@ -94,7 +102,7 @@ function GamePage({fname, lname}: GameProps) {
                                    valueFormatter={(number: number) => compactFormatter.format(number)}/>
                     </div>))}
             </div>
-            <button className="w-80 text-xl h-10 font-bold" onClick={() => setPage(page + 1)}><h3>Next: Paycheck</h3>
+            <button className="w-80 text-xl h-10 font-bold" onClick={() => nextPage()}><h3>Next: Paycheck</h3>
             </button>
         </div>,
         // <div className="flex flex-col gap-2 items-center">
@@ -163,9 +171,8 @@ function GamePage({fname, lname}: GameProps) {
                 <h3 className={newSavings > 0 ? "text-green-700" : "text-red-800"}>
                     New Balance: {formatter.format(savingsAccount.a.balance + newSavings)}</h3>
             </div>
-            <button className="w-80 text-xl h-10 font-bold" onClick={() => {
-                setPage(page + 1);
-            }}><h3>Next: Investments</h3></button>
+            <button className="w-80 text-xl h-10 font-bold" onClick={() => nextPage()}><h3>Next: Investments</h3>
+            </button>
         </div>,
         <div className="flex flex-col gap-2 items-center">
             <h1>Investment Portfolio</h1>
@@ -174,9 +181,10 @@ function GamePage({fname, lname}: GameProps) {
             </p>
             <StockCard stock={indexFund} investmentAccount={investmentAccount} formatter={formatter}
                        compactFormatter={compactFormatter} render={render}/>
-            <button className="w-80 text-xl h-10 font-bold" onClick={() => {
-                setPage(page + 1);
-            }}><h3>Next: Retirement</h3></button>
+            <StockCard stock={bond} investmentAccount={investmentAccount} formatter={formatter}
+                       compactFormatter={compactFormatter} render={render}/>
+            <button className="w-80 text-xl h-10 font-bold" onClick={() => nextPage()}><h3>Next: Retirement</h3>
+            </button>
         </div>,
         <div className="flex flex-col gap-2 items-center">
             <h1>Retirement Portfolio</h1>
@@ -185,9 +193,9 @@ function GamePage({fname, lname}: GameProps) {
             </p>
             <StockCard stock={indexFund} investmentAccount={retirementAccount} formatter={formatter}
                        compactFormatter={compactFormatter} render={render}/>
-            <button className="w-80 text-xl h-10 font-bold" onClick={() => {
-                endYear();
-            }}><h3>Next year</h3></button>
+            <StockCard stock={bond} investmentAccount={retirementAccount} formatter={formatter}
+                       compactFormatter={compactFormatter} render={render}/>
+            <button className="w-80 text-xl h-10 font-bold" onClick={() => nextPage()}><h3>Next year</h3></button>
         </div>
     ];
     return (

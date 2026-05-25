@@ -14,8 +14,21 @@ export class Account {
     }
 
     endYear(date: number): void {
-        this.history = [...this.history, {date: date, balance: this.balance}];
+        this.history = [...this.history, {date: date, balance: this.getTotalValue()}];
         this.diff = Math.floor((this.history[this.history.length - 1].balance - this.history[this.history.length - 2].balance) / Math.abs(this.history[this.history.length - 2].balance) * 100);
+    }
+
+    getTotalValue(): number {
+        return this.balance;
+    }
+}
+
+export class StockBond extends Account {
+    bond: boolean;
+
+    constructor(name: string, balance: number, date: number, bond: boolean) {
+        super(name, balance, date, false);
+        this.bond = bond;
     }
 }
 

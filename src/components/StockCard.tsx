@@ -1,11 +1,11 @@
 /* eslint-disable react-hooks/immutability */
 import "../App.css";
-import {Account, StockAccount} from "../Data.tsx";
+import {StockAccount, StockBond} from "../Data.tsx";
 import {LineChart} from "./LineChart.tsx";
 import {useState} from "react";
 
 type StockProps = {
-    stock: { a: Account },
+    stock: { a: StockBond },
     investmentAccount: { a: StockAccount },
     formatter: Intl.NumberFormat,
     compactFormatter: Intl.NumberFormat,
@@ -20,17 +20,29 @@ function StockCard({stock, investmentAccount, formatter, compactFormatter, rende
     return (<>
         <div className="flex flex-col items-center bg-amber-100 rounded-xl p-4 m-4 gap-1 cursor-pointer"
              onClick={() => setMinimized(!minimized)}>
-            <h3 className="text-gray-700 font-bold">Index fund</h3>
-            <div className="flex items-baseline gap-2">
-                <p className="text-gray-700">{formatter.format(stock.a.balance)}</p>
-                {stock.a.diff ? stock.a.diff >= 0 ? (<p className="text-green-700">+{stock.a.diff}%</p>)
-                    : <p className="text-red-800">{stock.a.diff}%</p> : <></>}
-                <p className="text-gray-700">per share</p>
-            </div>
-
-            <p className="text-gray-700">
-                Shares: {Math.round(investmentAccount.a.getStock(stock.a) * 100) / 100} ({formatter.format(investmentAccount.a.getStock(stock.a) * stock.a.balance)})
-            </p>
+            <h3 className="text-gray-700 font-bold">{stock.a.name}</h3>
+            {stock.a.bond ?
+                <>
+                    <div className="flex items-baseline gap-2">
+                        <p className="text-gray-700">2.2% Yearly Interest Rate</p>
+                    </div>
+                    <p className="text-gray-700">
+                        Value: {formatter.format(investmentAccount.a.getStock(stock.a) * stock.a.balance)}
+                    </p>
+                </>
+                :
+                <>
+                    <div className="flex items-baseline gap-2">
+                        <p className="text-gray-700">{formatter.format(stock.a.balance)}</p>
+                        {stock.a.diff ? stock.a.diff >= 0 ? (<p className="text-green-700">+{stock.a.diff}%</p>)
+                            : <p className="text-red-800">{stock.a.diff}%</p> : <></>}
+                        <p className="text-gray-700">per share</p>
+                    </div>
+                    <p className="text-gray-700">
+                        Shares: {Math.round(investmentAccount.a.getStock(stock.a) * 100) / 100} ({formatter.format(investmentAccount.a.getStock(stock.a) * stock.a.balance)})
+                    </p>
+                </>
+            }
             {minimized ? <></> : <>
                 <div className="flex gap-2">
                     <button className="w-40 text-xl h-10 font-bold" onClick={(e) => {
