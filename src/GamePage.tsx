@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/immutability */
 import './App.css'
 import random from "random";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {LineChart} from "./components/LineChart.tsx";
 import Select from 'react-select';
 import {Account, StockAccount, StockBond} from "./Data.tsx";
@@ -49,6 +49,10 @@ function GamePage({fname, lname}: GameProps) {
     const livingExpenses = 32000 * inflation;
 
     const newSavings = salary * (100 - pinvestments - pretirement - pleisure) / 100 - taxes - livingExpenses;
+
+    const previousPage = () => {
+        if (page != 0) setPage(page - 1);
+    }
 
     const nextPage = () => {
         setPage(page + 1);
@@ -101,8 +105,10 @@ function GamePage({fname, lname}: GameProps) {
                                    valueFormatter={(number: number) => compactFormatter.format(number)}/>
                     </div>))}
             </div>
-            <button className="w-80 text-xl h-10 font-bold" onClick={() => nextPage()}><h3>Next: Paycheck</h3>
-            </button>
+            <div className="flex gap-2 justify-center">
+                <button className="w-60 text-xl h-10 p-1 font-bold" onClick={() => nextPage()}><h3>Next: Paycheck</h3>
+                </button>
+            </div>
         </div>,
         // <div className="flex flex-col gap-2 items-center">
         //     <h1>Payday!</h1>
@@ -170,8 +176,13 @@ function GamePage({fname, lname}: GameProps) {
                 <h3 className={newSavings > 0 ? "text-green-700" : "text-red-800"}>
                     New Balance: {formatter.format(savingsAccount.a.balance + newSavings)}</h3>
             </div>
-            <button className="w-80 text-xl h-10 font-bold" onClick={() => nextPage()}><h3>Next: Investments</h3>
-            </button>
+            <div className="flex gap-2 justify-center">
+                <button className="w-24 text-xl h-10 p-1 font-bold" onClick={() => previousPage()}><h3>Back</h3>
+                </button>
+                <button className="w-60 text-xl h-10 p-1 font-bold" onClick={() => nextPage()}><h3>Next:
+                    Investments</h3>
+                </button>
+            </div>
         </div>,
         <div className="flex flex-col gap-2 items-center">
             <h1>Investment Portfolio</h1>
@@ -182,8 +193,12 @@ function GamePage({fname, lname}: GameProps) {
                        compactFormatter={compactFormatter} render={render}/>
             <StockCard stock={bond} investmentAccount={investmentAccount} formatter={formatter}
                        compactFormatter={compactFormatter} render={render}/>
-            <button className="w-80 text-xl h-10 font-bold" onClick={() => nextPage()}><h3>Next: Retirement</h3>
-            </button>
+            <div className="flex gap-2 justify-center">
+                <button className="w-24 text-xl h-10 p-1 font-bold" onClick={() => previousPage()}><h3>Back</h3>
+                </button>
+                <button className="w-60 text-xl h-10 p-1 font-bold" onClick={() => nextPage()}><h3>Next: Retirement</h3>
+                </button>
+            </div>
         </div>,
         <div className="flex flex-col gap-2 items-center">
             <h1>Retirement Portfolio</h1>
@@ -194,11 +209,16 @@ function GamePage({fname, lname}: GameProps) {
                        compactFormatter={compactFormatter} render={render}/>
             <StockCard stock={bond} investmentAccount={retirementAccount} formatter={formatter}
                        compactFormatter={compactFormatter} render={render}/>
-            <button className="w-80 text-xl h-10 font-bold" onClick={() => nextPage()}><h3>Next year</h3></button>
+            <div className="flex gap-2 justify-center">
+                <button className="w-24 text-xl h-10 p-1 font-bold" onClick={() => previousPage()}><h3>Back</h3>
+                </button>
+                <button className="w-50 text-xl h-10 p-1 font-bold" onClick={() => nextPage()}><h3>Next year</h3>
+                </button>
+            </div>
         </div>
     ];
     return (
-        <>
+        <div>
             {pages[page]}
             <div id="transfer-modal" className="flex hmodal justify-center">
                 <div
@@ -271,7 +291,7 @@ function GamePage({fname, lname}: GameProps) {
             <h2 className="absolute bottom-2 left-10">{fname} {lname}</h2>
             <p className="absolute bottom-4 right-10">{year}</p>
 
-        </>
+        </div>
     );
 }
 

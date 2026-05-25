@@ -128,6 +128,7 @@ function StockCard({stock, investmentAccount, formatter, compactFormatter, rende
                                 className="p-2 w-25">Cancel
                             </button>
                             <button
+                                disabled={stocksToBuySell == 0}
                                 onClick={() => {
                                     if (stocksToBuySell.valueOf() <= 0 || isNaN(stocksToBuySell)) return;
                                     investmentAccount.a.removeStock(stock.a, stocksToBuySell);
@@ -135,7 +136,7 @@ function StockCard({stock, investmentAccount, formatter, compactFormatter, rende
                                     render();
                                     setBuySellState(null);
                                 }}
-                                className="p-2 w-25 bg-green-700!">Sell
+                                className="p-2 w-25 enabled:bg-green-700!">Sell
                             </button>
                         </div>
                     </div>
