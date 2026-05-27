@@ -1,11 +1,12 @@
 /* eslint-disable react-hooks/immutability */
 import './App.css'
 import random from "random";
-import {useEffect, useState} from "react";
+import {useState} from "react";
 import {LineChart} from "./components/LineChart.tsx";
 import Select from 'react-select';
 import {Account, StockAccount, StockBond} from "./Data.tsx";
 import StockCard from "./components/StockCard.tsx";
+import CalculateTaxes from "./Utils.tsx";
 
 type GameProps = {
     fname: string; lname: string;
@@ -29,7 +30,7 @@ function GamePage({fname, lname}: GameProps) {
     const [salary, setSalary] = useState(60000);
     const [pinvestments, setpinvestments] = useState(2);
     const [pretirement, setpretirement] = useState(3);
-    const [pleisure, setpleisure] = useState(5);
+    const [pleisure, setpleisure] = useState(10);
     const [investmentAccount] = useState({a: new StockAccount("Investment Account", 0, year - 1)});
     const [retirementAccount] = useState({a: new StockAccount("Retirement Account", 0, year - 1)});
     const [indexFund] = useState({a: new StockBond("Index Fund", random.int(7000, 50000) / 100, year - 1, false)});
@@ -44,9 +45,22 @@ function GamePage({fname, lname}: GameProps) {
     const [fundsToTransfer, setFundsToTransfer] = useState(0)
     const [inflation, setInflation] = useState(1)
 
+    const monthlyItemizedLivingExpenses = [
+        {name: "Rent", amount: 1650},
+        {name: "Utilities", amount: 410},
+        {name: "Internet", amount: 40},
+        {name: "Phone Data", amount: 60},
+        {name: "Groceries", amount: 150},
+        {name: "Car Gas", amount: 110},
+        {name: "Car Maintenance", amount: 70},
+        {name: "Car Insurance", amount: 236},
+        {name: "Health Insurance", amount: 400},
+    ];
 
-    const taxes = (salary - (salary * pretirement / 100)) * .32;
-    const livingExpenses = 32000 * inflation;
+    const taxes = CalculateTaxes(salary - 15750);
+
+    const monthlyLivingExpenses = monthlyItemizedLivingExpenses.map(e => e.amount).reduce((sum, curr) => sum + curr, 0) * inflation;
+    const livingExpenses = monthlyLivingExpenses * 12;
 
     const newSavings = salary * (100 - pinvestments - pretirement - pleisure) / 100 - taxes - livingExpenses;
 
@@ -122,7 +136,7 @@ function GamePage({fname, lname}: GameProps) {
         // </div>,
         <div className="flex flex-col gap-2 items-center">
             <h1>Allocation</h1>
-            <div className="grid grid-cols-3 w-1/3">
+            <div className="grid grid-cols-3 w-1/2">
                 <p className="text-green-700">Paycheck</p>
                 <p></p>
                 <p className="text-green-700">{formatter.format(salary)}</p>
@@ -144,10 +158,14 @@ function GamePage({fname, lname}: GameProps) {
                 <p className="text-red-800">{Math.round(taxes / salary * 100)}%</p>
                 <p className="text-red-800">{formatter.format(taxes)}</p>
 
-
-                <p className="text-red-800">Living Expenses</p>
-                <p className="text-red-800">{Math.round(livingExpenses / salary * 100)}%</p>
-                <p className="text-red-800">{formatter.format(livingExpenses)}</p>
+                {monthlyItemizedLivingExpenses.map(({name, amount}, i) => {
+                    return ([
+                        <p className="text-red-800" key={i + "1"}>{name}</p>,
+                        <p className="text-red-800"
+                           key={i + "2"}>{Math.round(amount * 12 * inflation / salary * 100)}%</p>,
+                        <p className="text-red-800" key={i + "3"}>{formatter.format(amount * inflation * 12)}</p>
+                    ]);
+                })}
 
                 <p>Investments</p>
                 <p><input name="pinvestments" className="w-12"
@@ -166,6 +184,10 @@ function GamePage({fname, lname}: GameProps) {
                           type="number">
                 </input>%</p>
                 <p>{formatter.format(salary * pleisure / 100)}</p>
+
+                <hr/>
+                <hr/>
+                <hr/>
 
                 <p className="text-yellow-600">Savings</p>
                 <p className="text-yellow-600">{Math.round(newSavings / salary * 100)}%</p>
