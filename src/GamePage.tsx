@@ -314,22 +314,23 @@ function GamePage({fname, lname}: GameProps) {
                     </div>
                 </div>
             </div>
-            <div className="absolute flex bottom-0 g-4 justify-center w-full mb-3">
-                <h3 className="text-yellow-600">Bank Account: {formatter.format(savingsAccount.a.balance)}
-                </h3>
-                <button className="w-40 ml-4 text-lg h-8"
-                        onClick={() => {
-                            setFundsToTransfer(0);
-                            setTransferFrom({selectedAccount: null});
-                            setTransferTo({selectedAccount: null});
-                            document.getElementById("transfer-modal")!.style.display = "block";
-                        }}>Transfer
-                    Money
-                </button>
+            <div className="mb-20"></div>
+            <div className="fixed bottom-0 left-0 z-50 h-16 right-0 justify-center w-full p-2 bg-gray-900">
+                <div className="grid grid-cols-4 content-center align-items-middle mx-auto h-full ml-4 mr-4">
+                    <h2 className="justify-self-start align-self-middle">{fname} {lname}</h2>
+                    <h3 className="text-yellow-600 justify-self-end">Bank Account: {formatter.format(savingsAccount.a.balance)}</h3>
+                    <button className="w-40 ml-4 text-lg h-8 justify-self-left"
+                            onClick={() => {
+                                setFundsToTransfer(0);
+                                setTransferFrom({selectedAccount: null});
+                                setTransferTo({selectedAccount: null});
+                                document.getElementById("transfer-modal")!.style.display = "block";
+                            }}>Transfer
+                        Money
+                    </button>
+                    <p className="justify-self-end">{year}</p>
+                </div>
             </div>
-            <h2 className="absolute bottom-2 left-10">{fname} {lname}</h2>
-            <p className="absolute bottom-4 right-10">{year}</p>
-
         </div>
     );
 }
