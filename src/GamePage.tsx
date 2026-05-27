@@ -7,6 +7,7 @@ import Select from 'react-select';
 import {Account, StockAccount, StockBond} from "./Data.tsx";
 import StockCard from "./components/StockCard.tsx";
 import CalculateTaxes from "./Utils.tsx";
+import {DonutChart} from "./components/DonutChart.tsx";
 
 type GameProps = {
     fname: string; lname: string;
@@ -81,7 +82,7 @@ function GamePage({fname, lname}: GameProps) {
         indexFund.a.balance *= random.float(.85, 1.2);
 
         // Inflation
-        const newInflation = random.float(1.01, 1.03);
+        const newInflation = random.float(1.01, 1.04);
         setInflation(inflation * newInflation);
         setSalary(salary * newInflation);
         indexFund.a.balance *= newInflation;
@@ -118,6 +119,22 @@ function GamePage({fname, lname}: GameProps) {
                                    categories={["balance"]}
                                    valueFormatter={(number: number) => compactFormatter.format(number)}/>
                     </div>))}
+                <DonutChart className="h-full w-full m-auto p-4"
+                            data={[
+                                {name: "Cash", amount: allAccounts.reduce((sum, curr) => sum + curr.balance, 0)},
+                                {
+                                    name: "Stocks",
+                                    amount: allAccounts.filter(a => a instanceof StockAccount).map(a => a as StockAccount)
+                                        .reduce((sum, curr) => sum + curr.getStockValue(), 0)
+                                }, {
+                                    name: "Bonds",
+                                    amount: allAccounts.filter(a => a instanceof StockAccount).map(a => a as StockAccount)
+                                        .reduce((sum, curr) => sum + curr.getBondValue(), 0)
+                                }
+                            ]}
+                            label={"Total Assets: " + formatter.format(allAccounts.reduce((sum, curr) => sum + curr.getTotalValue(), 0))}
+                            category="name" value="amount" showLabel={true}
+                            valueFormatter={(number: number) => formatter.format(number)}/>
             </div>
             <div className="flex gap-2 justify-center">
                 <button className="w-60 text-xl h-10 p-1 font-bold" onClick={() => nextPage()}><h3>Next: Paycheck</h3>
