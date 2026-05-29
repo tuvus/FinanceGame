@@ -22,7 +22,7 @@ function App() {
     };
 
     const getPageElement = () => {
-        if (page == "game") return <GamePage fname={firstName} lname={lastName}/>
+        if (page == "game") return <GamePage fname={firstName} lname={lastName}/>;
         return <SetupPage fname={firstName} lname={lastName} startGame={startGame}/>;
     }
 

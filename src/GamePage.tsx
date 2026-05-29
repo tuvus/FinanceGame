@@ -1,13 +1,14 @@
 /* eslint-disable react-hooks/immutability */
 import './App.css'
 import random from "random";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {LineChart} from "./components/LineChart.tsx";
 import Select from 'react-select';
 import {Account, StockAccount, StockBond} from "./Data.tsx";
 import StockCard from "./components/StockCard.tsx";
 import CalculateTaxes from "./Utils.tsx";
 import {DonutChart} from "./components/DonutChart.tsx";
+import {LifeEvent, LifeEventManager} from "./EventManager.tsx";
 
 type GameProps = {
     fname: string; lname: string;
@@ -26,6 +27,7 @@ function GamePage({fname, lname}: GameProps) {
         compactDisplay: "short"
     });
     const [year, setYear] = useState(random.int(1940, 2010));
+    const [month, setMonth] = useState(1);
     const [savingsAccount] = useState({a: new Account("Savings Account", random.float(10000, 30000), year - 1, true)});
     const [page, setPage] = useState(0);
     const [salary, setSalary] = useState(60000);
@@ -70,8 +72,15 @@ function GamePage({fname, lname}: GameProps) {
     }
 
     const nextPage = () => {
+        if (page + 1 == pages.length - 1) {
+            if (lifeEventManager.lifeEvents.length == 0) {
+                lifeEventManager.AddEvent(
+                    new LifeEvent("Another year passes", year, 1,
+                        (<div><p>There were no special events this year.</p></div>))
+                );
+            }
+        }
         setPage(page + 1);
-        if (page >= pages.length - 1) endYear();
     }
 
     const endYear = () => {
@@ -97,6 +106,14 @@ function GamePage({fname, lname}: GameProps) {
         allAccounts.forEach((account) => account.endYear(year));
     };
 
+    const [lifeEventManager] = useState(new LifeEventManager(endYear, setMonth, render));
+    useEffect(() => {
+        lifeEventManager.AddEvent(
+            new LifeEvent("Event Tutorial", year, 1,
+                (<div><p>During the year you will encounter events that may have a financial impact.</p></div>))
+        );
+    }, [lifeEventManager]);
+    const activeEvent = lifeEventManager.GetActiveEvent(year, month);
 
     const pages = [
         <div className="flex flex-col gap-2 items-center">
@@ -141,16 +158,6 @@ function GamePage({fname, lname}: GameProps) {
                 </button>
             </div>
         </div>,
-        // <div className="flex flex-col gap-2 items-center">
-        //     <h1>Payday!</h1>
-        //     <p className="text-yellow-600">{formatter.format(salary)} paycheck</p>
-        //     <p className="text-red-800">-{formatter.format(taxes)} taxes</p>
-        //     <p className="text-red-800">-{formatter.format(livingExpenses)} living expenses</p>
-        //     <br/>
-        //     <p className="text-green-700">= {formatter.format(0)} take home</p>
-        //     <button className="w-80 text-xl h-10 font-bold" onClick={() => setPage(page + 1)}><h3>Next: Allocating
-        //         money</h3></button>
-        // </div>,
         <div className="flex flex-col gap-2 items-center">
             <h1>Allocation</h1>
             <div className="grid grid-cols-3 w-1/2">
@@ -251,9 +258,28 @@ function GamePage({fname, lname}: GameProps) {
             <div className="flex gap-2 justify-center">
                 <button className="w-24 text-xl h-10 p-1 font-bold" onClick={() => previousPage()}><h3>Back</h3>
                 </button>
-                <button className="w-50 text-xl h-10 p-1 font-bold" onClick={() => nextPage()}><h3>Next year</h3>
+                <button className="w-50 text-xl h-10 p-1 font-bold" onClick={() => nextPage()}><h3>Start the year</h3>
                 </button>
             </div>
+        </div>,
+        <div>
+            {activeEvent == null ?
+                <>
+                    <h1>Events</h1>
+                    <button className="w-50 text-xl h-10 p-1 font-bold" onClick={() => nextPage()}><h3>End of year</h3>
+                    </button>
+                </>
+                : <>
+                    <h1 className="mb-2">{activeEvent.name}</h1>
+                    {activeEvent.element}
+                    {!activeEvent.customContinue ?
+                        <button className="w-50 text-xl h-10 p-1 font-bold mt-2"
+                                onClick={() => lifeEventManager.NextEvent()}>
+                            <h3>Continue</h3>
+                        </button>
+                        : <></>}
+                </>
+            }
         </div>
     ];
     return (
@@ -318,7 +344,8 @@ function GamePage({fname, lname}: GameProps) {
             <div className="fixed bottom-0 left-0 z-50 h-16 right-0 justify-center w-full p-2 bg-gray-900">
                 <div className="grid grid-cols-4 content-center align-items-middle mx-auto h-full ml-4 mr-4">
                     <h2 className="justify-self-start align-self-middle">{fname} {lname}</h2>
-                    <h3 className="text-yellow-600 justify-self-end">Bank Account: {formatter.format(savingsAccount.a.balance)}</h3>
+                    <h3 className="text-yellow-600 justify-self-end">Bank
+                        Account: {formatter.format(savingsAccount.a.balance)}</h3>
                     <button className="w-40 ml-4 text-lg h-8 justify-self-left"
                             onClick={() => {
                                 setFundsToTransfer(0);
