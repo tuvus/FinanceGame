@@ -6,7 +6,7 @@ import {LineChart} from "./components/LineChart.tsx";
 import Select from 'react-select';
 import {Account, StockAccount, StockBond} from "./Data.tsx";
 import StockCard from "./components/StockCard.tsx";
-import CalculateTaxes from "./Utils.tsx";
+import {CalculateTaxes, GetDateString} from "./Utils.tsx";
 import {DonutChart} from "./components/DonutChart.tsx";
 import {LifeEvent, LifeEventManager} from "./EventManager.tsx";
 
@@ -26,18 +26,17 @@ function GamePage({fname, lname}: GameProps) {
         notation: "compact",
         compactDisplay: "short"
     });
-    const [year, setYear] = useState(random.int(1940, 2010));
-    const [month, setMonth] = useState(1);
-    const [savingsAccount] = useState({a: new Account("Savings Account", random.float(10000, 30000), year - 1, true)});
+    const [date] = useState({d: new Date(random.int(1940, 2010), 0)});
+    const [savingsAccount] = useState({a: new Account("Savings Account", random.float(10000, 30000), new Date(date.d.getFullYear() - 1, 0), true)});
     const [page, setPage] = useState(0);
     const [salary, setSalary] = useState(60000);
     const [pinvestments, setpinvestments] = useState(2);
     const [pretirement, setpretirement] = useState(3);
     const [pleisure, setpleisure] = useState(10);
-    const [investmentAccount] = useState({a: new StockAccount("Investment Account", 0, year - 1)});
-    const [retirementAccount] = useState({a: new StockAccount("Retirement Account", 0, year - 1)});
-    const [indexFund] = useState({a: new StockBond("Index Fund", random.int(7000, 50000) / 100, year - 1, false)});
-    const [bond] = useState({a: new StockBond("Bond", 1, year - 1, true)});
+    const [investmentAccount] = useState({a: new StockAccount("Investment Account", 0, new Date(date.d.getFullYear() - 1, 0))});
+    const [retirementAccount] = useState({a: new StockAccount("Retirement Account", 0, new Date(date.d.getFullYear() - 1, 0))});
+    const [indexFund] = useState({a: new StockBond("Index Fund", random.int(7000, 50000) / 100, new Date(date.d.getFullYear() - 1, 0), false)});
+    const [bond] = useState({a: new StockBond("Bond", 1, new Date(date.d.getFullYear() - 1, 0), true)});
     const [allAccounts] = useState([savingsAccount.a, investmentAccount.a, retirementAccount.a]);
     const [rerender, setRerender] = useState(false);
     const render = () => {
@@ -75,7 +74,7 @@ function GamePage({fname, lname}: GameProps) {
         if (page + 1 == pages.length - 1) {
             if (lifeEventManager.lifeEvents.length == 0) {
                 lifeEventManager.AddEvent(
-                    new LifeEvent("Another year passes", year, 1,
+                    new LifeEvent("Another year passes", date.d,
                         (<div><p>There were no special events this year.</p></div>))
                 );
             }
@@ -97,27 +96,27 @@ function GamePage({fname, lname}: GameProps) {
         indexFund.a.balance *= newInflation;
         bond.a.balance *= 1.052;
 
-        setPage(0);
-        setYear(year + 1);
-
         // History log
-        indexFund.a.endYear(year);
-        bond.a.endYear(year);
-        allAccounts.forEach((account) => account.endYear(year));
+        indexFund.a.endYear(date.d);
+        bond.a.endYear(date.d);
+        allAccounts.forEach((account) => account.endYear(date.d));
+
+        date.d.setFullYear(date.d.getFullYear() + 1);
+        setPage(0);
     };
 
-    const [lifeEventManager] = useState(new LifeEventManager(endYear, setMonth, render));
+    const [lifeEventManager] = useState(new LifeEventManager(date.d, endYear, render));
     useEffect(() => {
         lifeEventManager.AddEvent(
-            new LifeEvent("Event Tutorial", year, 1,
+            new LifeEvent("Event Tutorial", new Date(date.d.getFullYear(), 5),
                 (<div><p>During the year you will encounter events that may have a financial impact.</p></div>))
         );
     }, [lifeEventManager]);
-    const activeEvent = lifeEventManager.GetActiveEvent(year, month);
+    const activeEvent = lifeEventManager.GetActiveEvent(date.d);
 
     const pages = [
         <div className="flex flex-col gap-2 items-center">
-            <h1>Year in review {year - 1}</h1>
+            <h1>Year in review {date.d.getFullYear() - 1}</h1>
             <div className="grid grid-cols-2">
                 {allAccounts.map((account, i) => (
                     <div key={i} className="flex flex-col items-center bg-amber-100 rounded-xl p-4 m-4 gap-1">
@@ -127,10 +126,11 @@ function GamePage({fname, lname}: GameProps) {
                             {account.diff ? account.diff >= 0 ? (<p className="text-green-700">+{account.diff}%</p>)
                                 : <p className="text-red-800">{account.diff}%</p> : <></>}
                         </div>
-                        <LineChart className="h-40 w-120" data={account.history}
-                                   index="date"
+                        <LineChart className="h-40 w-120"
+                                   data={account.history}
+                                   index="dateString"
                                    showLegend={false}
-                                   minValue={Math.min(...account.history.map(h => h.balance))}
+                                   minValue={Math.min(0, Math.min(...account.history.map(h => h.balance)))}
                                    maxValue={Math.max(...account.history.map(h => h.balance))}
                                    aria-hidden="true"
                                    categories={["balance"]}
@@ -341,7 +341,7 @@ function GamePage({fname, lname}: GameProps) {
                 </div>
             </div>
             <div className="mb-20"></div>
-            <div className="fixed bottom-0 left-0 z-50 h-16 right-0 justify-center w-full p-2 bg-gray-900">
+            <div className="fixed bottom-0 left-0 z-50 h-16 right-0 justify-center w-full p-2 rounded-4xl bg-gray-900">
                 <div className="grid grid-cols-4 content-center align-items-middle mx-auto h-full ml-4 mr-4">
                     <h2 className="justify-self-start align-self-middle">{fname} {lname}</h2>
                     <h3 className="text-yellow-600 justify-self-end">Bank
@@ -355,7 +355,7 @@ function GamePage({fname, lname}: GameProps) {
                             }}>Transfer
                         Money
                     </button>
-                    <p className="justify-self-end">{year}</p>
+                    <p className="justify-self-end">{GetDateString(date.d)}</p>
                 </div>
             </div>
         </div>

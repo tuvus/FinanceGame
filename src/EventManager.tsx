@@ -3,16 +3,14 @@ import type {ReactElement} from "react";
 
 export class LifeEvent {
     name: string;
-    year: number;
-    month: number;
+    date: Date;
     element: ReactElement;
     customContinue: boolean;
     lifeEventManager: LifeEventManager | null = null;
 
-    constructor(name: string, year: number, month: number, element: ReactElement, customContinue: boolean = false) {
+    constructor(name: string, date: Date, element: ReactElement, customContinue: boolean = false) {
         this.name = name;
-        this.year = year;
-        this.month = month;
+        this.date = date;
         this.element = element;
         this.customContinue = customContinue;
     }
@@ -20,40 +18,39 @@ export class LifeEvent {
 
 export class LifeEventManager {
     lifeEvents: LifeEvent[];
+    date: Date;
     endYear: () => void;
-    setMonth: (month: number) => void;
     render: () => void;
 
-    constructor(endYear: () => void, setMonth: (month: number) => void, render: () => void) {
+    constructor(date: Date, endYear: () => void, render: () => void) {
         this.lifeEvents = [];
+        this.date = date;
         this.endYear = endYear;
-        this.setMonth = setMonth;
         this.render = render;
     }
 
     AddEvent(lifeEvent: LifeEvent) {
         lifeEvent.lifeEventManager = this;
         this.lifeEvents = [...this.lifeEvents, lifeEvent];
-        this.lifeEvents.sort((a, b) => b.year + b.month / 12 - a.year - a.month / 12);
+        this.lifeEvents.sort((a, b) => b.date.getTime() - a.date.getTime());
     }
 
     NextEvent() {
-        const year = this.lifeEvents[0].year;
-        const month = this.lifeEvents[0].month;
+        const date = this.lifeEvents[0].date;
         this.lifeEvents.pop();
-        if (this.GetActiveEvent(year, month) == null) {
+        if (this.GetActiveEvent(date) == null) {
             this.endYear();
             return;
         }
 
-        this.setMonth(this.lifeEvents[0].month);
-        this.render();
+        console.log("set date" + this.lifeEvents[0].date.toDateString())
+        this.date.setDate(this.lifeEvents[0].date.getDate());
     }
 
-    GetActiveEvent(year: number, month: number): LifeEvent | null {
+    GetActiveEvent(date: Date): LifeEvent | null {
         if (this.lifeEvents.length > 0
-            && this.lifeEvents[0].year == year
-            && this.lifeEvents[0].month == month)
+            && this.lifeEvents[0].date.getFullYear() == date.getFullYear()
+            && this.lifeEvents[0].date.getUTCMonth() >= date.getMonth())
             return this.lifeEvents[0];
         return null;
     }

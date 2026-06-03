@@ -2,19 +2,26 @@ export class Account {
     name: string;
     balance: number;
     diff: number | undefined;
-    history: { date: number, balance: number }[];
+    history: { date: Date, dateString: string, balance: number }[];
     isOwnedAccount: boolean;
 
-    constructor(name: string, balance: number, date: number, isOwnedAccount: boolean) {
+    constructor(name: string, balance: number, date: Date, isOwnedAccount: boolean) {
         this.name = name;
         this.balance = balance;
         this.diff = undefined;
-        this.history = [{date: date, balance: balance}];
+        this.history = [{date: date, dateString: this.getDateString(date), balance: balance}];
         this.isOwnedAccount = isOwnedAccount;
     }
 
-    endYear(date: number): void {
-        this.history = [...this.history, {date: date, balance: this.getTotalValue()}];
+    getDateString(date: Date) {
+        if (date.getMonth() == 0) {
+            return "1/" + date.getFullYear();
+        }
+        return date.getMonth().toString();
+    }
+
+    endYear(date: Date): void {
+        this.history = [...this.history, {date: date, dateString: this.getDateString(date), balance: this.getTotalValue()}];
         this.diff = Math.floor((this.history[this.history.length - 1].balance - this.history[this.history.length - 2].balance) / Math.abs(this.history[this.history.length - 2].balance) * 100);
     }
 
@@ -26,7 +33,7 @@ export class Account {
 export class StockBond extends Account {
     bond: boolean;
 
-    constructor(name: string, balance: number, date: number, bond: boolean) {
+    constructor(name: string, balance: number, date: Date, bond: boolean) {
         super(name, balance, date, false);
         this.bond = bond;
     }
@@ -35,7 +42,7 @@ export class StockBond extends Account {
 export class StockAccount extends Account {
     positions: Map<StockBond, number>;
 
-    constructor(name: string, balance: number, date: number) {
+    constructor(name: string, balance: number, date: Date) {
         super(name, balance, date, true);
         this.positions = new Map<StockBond, number>();
     }

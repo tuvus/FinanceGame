@@ -58,7 +58,7 @@ function StockCard({stock, investmentAccount, formatter, compactFormatter, rende
                         }}><h3>Sell</h3></button> : <></>}
                 </div>
                 <LineChart className="h-60 w-120" data={stock.a.history}
-                           index="date"
+                           index="dateString"
                            showLegend={false}
                            minValue={Math.min(...stock.a.history.map(h => h.balance))}
                            maxValue={Math.max(...stock.a.history.map(h => h.balance))}

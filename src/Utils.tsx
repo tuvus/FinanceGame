@@ -1,4 +1,4 @@
-function CalculateTaxes(taxableAmount: number): number {
+export function CalculateTaxes(taxableAmount: number): number {
     const taxBrackets = [
         {percent: 10, to: 11925},
         {percent: 12, to: 48475},
@@ -16,4 +16,6 @@ function CalculateTaxes(taxableAmount: number): number {
     return tax;
 }
 
-export default CalculateTaxes;
+export function GetDateString(date: Date): string {
+    return date.toDateString().substring(date.toDateString().indexOf(" ") + 1);
+}
