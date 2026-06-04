@@ -22,11 +22,11 @@ export class LifeEventManager {
     endYear: () => void;
     render: () => void;
 
-    constructor(date: Date, endYear: () => void, render: () => void) {
-        this.lifeEvents = [];
+    constructor(date: Date, endYear: () => void, render: () => void, startingEvents: LifeEvent[]) {
         this.date = date;
         this.endYear = endYear;
         this.render = render;
+        this.lifeEvents = startingEvents;
     }
 
     AddEvent(lifeEvent: LifeEvent) {
@@ -37,21 +37,33 @@ export class LifeEventManager {
 
     NextEvent() {
         const date = this.lifeEvents[0].date;
-        this.lifeEvents.pop();
+        this.lifeEvents = this.lifeEvents.splice(1);
+
         if (this.GetActiveEvent(date) == null) {
             this.endYear();
             return;
         }
 
-        console.log("set date" + this.lifeEvents[0].date.toDateString())
         this.date.setDate(this.lifeEvents[0].date.getDate());
+        this.render();
+    }
+
+    ReplaceEvent(lifeEvent: LifeEvent) {
+        this.lifeEvents[0] = lifeEvent;
+        this.PrintEvents();
+        this.date.setDate(this.lifeEvents[0].date.getDate());
+        this.render();
     }
 
     GetActiveEvent(date: Date): LifeEvent | null {
         if (this.lifeEvents.length > 0
             && this.lifeEvents[0].date.getFullYear() == date.getFullYear()
-            && this.lifeEvents[0].date.getUTCMonth() >= date.getMonth())
+            && this.lifeEvents[0].date.getMonth() >= date.getMonth())
             return this.lifeEvents[0];
         return null;
+    }
+
+    PrintEvents() {
+        console.log(this.lifeEvents.map(le => le.name).join(", "));
     }
 }

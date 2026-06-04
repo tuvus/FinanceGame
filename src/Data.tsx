@@ -1,3 +1,16 @@
+
+export class Character {
+    firstName: string;
+    lastName: string;
+    salary: number;
+
+    constructor(firstName: string, lastName: string) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.salary = 0;
+    }
+}
+
 export class Account {
     name: string;
     balance: number;

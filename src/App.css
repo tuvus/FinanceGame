@@ -45,3 +45,7 @@ label {
     overflow: auto; /* Enable scroll if needed */
     background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
 }
+
+.panelButton {
+   @apply not-hover:bg-amber-100 hover:bg-amber-200 transition-all duration-600 hover:cursor-pointer hover:scale-110
+}
