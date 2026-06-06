@@ -35,6 +35,11 @@ export class LifeEventManager {
         this.lifeEvents.sort((a, b) => b.date.getTime() - a.date.getTime());
     }
 
+    RemoveFirstEvent() {
+        this.lifeEvents = this.lifeEvents.splice(1);
+        this.render();
+    }
+
     NextEvent() {
         const date = this.lifeEvents[0].date;
         this.lifeEvents = this.lifeEvents.splice(1);
@@ -50,7 +55,6 @@ export class LifeEventManager {
 
     ReplaceEvent(lifeEvent: LifeEvent) {
         this.lifeEvents[0] = lifeEvent;
-        this.PrintEvents();
         this.date.setDate(this.lifeEvents[0].date.getDate());
         this.render();
     }

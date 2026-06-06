@@ -27,9 +27,9 @@ function GamePage({fname, lname}: GameProps) {
         compactDisplay: "short"
     });
     const [date] = useState({d: new Date(random.int(1940, 2010), 0)});
-    const [savingsAccount] = useState({a: new Account("Savings Account", random.float(10000, 30000), new Date(date.d.getFullYear() - 1, 0), true)});
+    const [savingsAccount] = useState({a: new Account("Savings Account", 0, new Date(date.d.getFullYear() - 1, 0), true)});
     const [page, setPage] = useState(999);
-    const [character] = useState(new Character(fname, lname))
+    const [character] = useState(new Character(fname, lname));
     const [pinvestments, setpinvestments] = useState(2);
     const [pretirement, setpretirement] = useState(3);
     const [pleisure, setpleisure] = useState(10);
@@ -38,9 +38,10 @@ function GamePage({fname, lname}: GameProps) {
     const [indexFund] = useState({a: new StockBond("Index Fund", random.int(7000, 50000) / 100, new Date(date.d.getFullYear() - 1, 0), false)});
     const [bond] = useState({a: new StockBond("Bond", 1, new Date(date.d.getFullYear() - 1, 0), true)});
     const [allAccounts] = useState([savingsAccount.a, investmentAccount.a, retirementAccount.a]);
-    const [rerender, setRerender] = useState(false);
+    const [rerender, setRerender] = useState(0);
     const render = () => {
-        setRerender(!rerender)
+        // eslint-disable-next-line react-hooks/purity
+        setRerender(Math.random() + rerender)
     };
     const [transferFrom, setTransferFrom] = useState<TransferFundsSelectState>({selectedAccount: null});
     const [transferTo, setTransferTo] = useState<TransferFundsSelectState>({selectedAccount: null});
@@ -59,13 +60,6 @@ function GamePage({fname, lname}: GameProps) {
         {name: "Health Insurance", amount: 400},
     ];
 
-    const taxes = CalculateTaxes(character.salary - 15750);
-
-    const monthlyLivingExpenses = monthlyItemizedLivingExpenses.map(e => e.amount).reduce((sum, curr) => sum + curr, 0) * inflation;
-    const livingExpenses = monthlyLivingExpenses * 12;
-
-    const newSavings = character.salary * (100 - pinvestments - pretirement - pleisure) / 100 - taxes - livingExpenses;
-
     const previousPage = () => {
         if (page != 0) setPage(page - 1);
     }
@@ -83,6 +77,9 @@ function GamePage({fname, lname}: GameProps) {
     }
 
     const endYear = () => {
+        const livingExpenses= monthlyItemizedLivingExpenses.map(e => e.amount).reduce((sum, curr) => sum + curr, 0) * inflation * 12;
+
+        const newSavings = character.salary * (100 - pinvestments - pretirement - pleisure) / 100 - CalculateTaxes(Math.max(0, character.salary - 15750)) - livingExpenses;
         // Income and interest
         savingsAccount.a.balance += newSavings;
         investmentAccount.a.balance += character.salary * pinvestments / 100
@@ -103,7 +100,14 @@ function GamePage({fname, lname}: GameProps) {
 
         date.d.setFullYear(date.d.getFullYear() + 1);
         setPage(0);
-    };
+    }
+
+    const taxes = CalculateTaxes(Math.max(0, character.salary - 15750));
+
+    const monthlyLivingExpenses = monthlyItemizedLivingExpenses.map(e => e.amount).reduce((sum, curr) => sum + curr, 0) * inflation;
+    const livingExpenses = monthlyLivingExpenses * 12;
+
+    const newSavings = character.salary * (100 - pinvestments - pretirement - pleisure) / 100 - taxes - livingExpenses;
 
     const [lifeEventManager] = useState(new LifeEventManager(date.d, endYear, render, [
         new LifeEvent("Education", date.d, <>
@@ -111,7 +115,8 @@ function GamePage({fname, lname}: GameProps) {
             <div className="flex justify-center gap-8 mt-6">
                 <div className="rounded-xl p-2 panelButton"
                      onClick={() => {
-                         character.salary = 48000;
+                         character.salary = 48000 * random.float(.95, 1.1);
+                         savingsAccount.a.balance = 30000 * random.float(.7, 1.3);
                          lifeEventManager.NextEvent();
                      }}>
                     <h3 className="text-gray-700 font-bold">High School</h3>
@@ -120,7 +125,8 @@ function GamePage({fname, lname}: GameProps) {
                 </div>
                 <div className="rounded-xl p-2 panelButton"
                      onClick={() => {
-                         character.salary = 53000;
+                         character.salary = 53000 * random.float(.95, 1.3);
+                         savingsAccount.a.balance = 8000 * random.float(.7, 1.3);
                          lifeEventManager.NextEvent();
                      }}>
                     <h3 className="text-gray-700 font-bold">Trade School</h3>
@@ -130,10 +136,11 @@ function GamePage({fname, lname}: GameProps) {
                 <div className="rounded-xl p-2 panelButton"
                      onClick={() => {
                          lifeEventManager.ReplaceEvent(new LifeEvent("Choosing a College", date.d, <>
-                             <div className="flex justify-center gap-4">
+                             <div className="flex justify-center gap-8">
                                  <div className="rounded-xl p-2 panelButton"
                                       onClick={() => {
-                                          character.salary = 57000;
+                                          character.salary = 57000 * random.float(.90, 1.3);
+                                          savingsAccount.a.balance = -34000 * random.float(.7, 1.3);
                                           lifeEventManager.NextEvent();
                                       }}>
                                      <h3 className="text-gray-700 font-bold">Community College</h3>
@@ -142,7 +149,8 @@ function GamePage({fname, lname}: GameProps) {
                                  </div>
                                  <div className="rounded-xl p-2 panelButton"
                                       onClick={() => {
-                                          character.salary = 80000;
+                                          character.salary = 80000 * random.float(.85, 1.3);
+                                          savingsAccount.a.balance = -130000 * random.float(.7, 1.3);
                                           lifeEventManager.NextEvent();
                                       }}>
                                      <h3 className="text-gray-700 font-bold">Public University</h3>
@@ -151,7 +159,8 @@ function GamePage({fname, lname}: GameProps) {
                                  </div>
                                  <div className="rounded-xl p-2 panelButton"
                                       onClick={() => {
-                                          character.salary = 97000;
+                                          character.salary = 92000 * random.float(.80, 1.2);
+                                          savingsAccount.a.balance = -238000 * random.float(.7, 1.3);
                                           lifeEventManager.NextEvent();
                                       }}>
                                      <h3 className="text-gray-700 font-bold">Private University</h3>
@@ -167,7 +176,14 @@ function GamePage({fname, lname}: GameProps) {
                 </div>
             </div>
         </>, true),
-        new LifeEvent("Moving Out", date.d, <><h2>Its time to start your journey!</h2></>),
+        new LifeEvent("Moving Out", date.d, <>
+            <h2>Its time to start your journey!</h2>
+            <button className="w-50 text-xl h-10 p-1 font-bold mt-2" onClick={() => {
+                lifeEventManager.RemoveFirstEvent()
+                date.d.setFullYear(date.d.getFullYear() + 1);
+                setPage(0);
+            }}><h3>Start!</h3></button>
+        </>, true),
         new LifeEvent("Event Tutorial", new Date(date.d.getFullYear() + 1, 5),
             (<div><p>During the year you will encounter events that may have a financial impact.</p></div>)),
     ]));
@@ -279,7 +295,7 @@ function GamePage({fname, lname}: GameProps) {
 
             <div className="flex gap-2">
                 <h3 className={newSavings > 0 ? "text-green-700" : "text-red-800"}>
-                    New Balance: {formatter.format(savingsAccount.a.balance + newSavings)}</h3>
+                    Predicted Balance: {formatter.format(savingsAccount.a.balance + newSavings)}</h3>
             </div>
             <div className="flex gap-2 justify-center">
                 <button className="w-24 text-xl h-10 p-1 font-bold" onClick={() => previousPage()}><h3>Back</h3>
@@ -335,8 +351,7 @@ function GamePage({fname, lname}: GameProps) {
                         <button className="w-50 text-xl h-10 p-1 font-bold mt-2"
                                 onClick={() => lifeEventManager.NextEvent()}>
                             <h3>Continue</h3>
-                        </button>
-                        : <></>}
+                        </button> : <></>}
                 </>
             }
         </div>
