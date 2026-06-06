@@ -77,7 +77,7 @@ function GamePage({fname, lname}: GameProps) {
     }
 
     const endYear = () => {
-        const livingExpenses= monthlyItemizedLivingExpenses.map(e => e.amount).reduce((sum, curr) => sum + curr, 0) * inflation * 12;
+        const livingExpenses = monthlyItemizedLivingExpenses.map(e => e.amount).reduce((sum, curr) => sum + curr, 0) * inflation * 12;
 
         const newSavings = character.salary * (100 - pinvestments - pretirement - pleisure) / 100 - CalculateTaxes(Math.max(0, character.salary - 15750)) - livingExpenses;
         // Income and interest
@@ -113,31 +113,32 @@ function GamePage({fname, lname}: GameProps) {
         new LifeEvent("Education", date.d, <>
             <h2>Choose your education path</h2>
             <div className="flex justify-center gap-8 mt-6">
-                <div className="rounded-xl p-2 panelButton"
+                <div className="eventButton panelButton"
                      onClick={() => {
                          character.salary = 48000 * random.float(.95, 1.1);
                          savingsAccount.a.balance = 30000 * random.float(.7, 1.3);
                          lifeEventManager.NextEvent();
                      }}>
                     <h3 className="text-gray-700 font-bold">High School</h3>
-                    <p className="text-gray-700">Started working earlier</p>
-                    <p className="text-gray-700">Large amount of savings</p>
+                    <p className="text-gray-700">High school graduates that go straight into the workforce start making
+                        money earlier and can start building their wealth.</p>
                 </div>
-                <div className="rounded-xl p-2 panelButton"
+                <div className="eventButton panelButton"
                      onClick={() => {
                          character.salary = 53000 * random.float(.95, 1.3);
                          savingsAccount.a.balance = 8000 * random.float(.7, 1.3);
                          lifeEventManager.NextEvent();
                      }}>
                     <h3 className="text-gray-700 font-bold">Trade School</h3>
-                    <p className="text-gray-700">Trained in a specialized work area</p>
-                    <p className="text-gray-700">Some savings</p>
+                    <p className="text-gray-700">The experience from a trade school certificate helps entry into more
+                        specialized work areas. This is a two year program, balancing education and going into the
+                        workforce early.</p>
                 </div>
-                <div className="rounded-xl p-2 panelButton"
+                <div className="eventButton panelButton"
                      onClick={() => {
                          lifeEventManager.ReplaceEvent(new LifeEvent("Choosing a College", date.d, <>
                              <div className="flex justify-center gap-8">
-                                 <div className="rounded-xl p-2 panelButton"
+                                 <div className="eventButton panelButton"
                                       onClick={() => {
                                           character.salary = 57000 * random.float(.90, 1.3);
                                           savingsAccount.a.balance = -34000 * random.float(.7, 1.3);
@@ -147,7 +148,7 @@ function GamePage({fname, lname}: GameProps) {
                                      <p className="text-gray-700">Obtain an associates degree</p>
                                      <p className="text-gray-700">Cheaper than other colleges</p>
                                  </div>
-                                 <div className="rounded-xl p-2 panelButton"
+                                 <div className="eventButton panelButton"
                                       onClick={() => {
                                           character.salary = 80000 * random.float(.85, 1.3);
                                           savingsAccount.a.balance = -130000 * random.float(.7, 1.3);
@@ -157,7 +158,7 @@ function GamePage({fname, lname}: GameProps) {
                                      <p className="text-gray-700">Obtain a bachelors degree</p>
                                      <p className="text-gray-700">Moderately expensive</p>
                                  </div>
-                                 <div className="rounded-xl p-2 panelButton"
+                                 <div className="eventButton panelButton"
                                       onClick={() => {
                                           character.salary = 92000 * random.float(.80, 1.2);
                                           savingsAccount.a.balance = -238000 * random.float(.7, 1.3);
