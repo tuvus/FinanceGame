@@ -326,7 +326,10 @@ function GamePage({fname, lname}: GameProps) {
                                                         min="0"
                                                         max={Math.min(24500 * inflation / character.salary * 100, 100)}
                                                         defaultValue={character.pretirement}
-                                                        onChange={e => {character.pretirement = Math.min(1000, Math.max(0, e.target.valueAsNumber)); render();}}
+                                                        onChange={e => {
+                                                            character.pretirement = Math.min(1000, Math.max(0, e.target.valueAsNumber));
+                                                            render();
+                                                        }}
                                                         type="number">
                     </input>%</p>
                     <p className="text-gray-700">{formatter.format(character.salary * character.pretirement / 100)}</p>
@@ -356,7 +359,10 @@ function GamePage({fname, lname}: GameProps) {
                     <p className="text-gray-700"><input name="character.pinvestments" className="w-12 text-end"
                                                         min="0"
                                                         defaultValue={character.pinvestments}
-                                                        onChange={e => {character.pinvestments = Math.min(1000, Math.max(0, e.target.valueAsNumber)); render();}}
+                                                        onChange={e => {
+                                                            character.pinvestments = Math.min(1000, Math.max(0, e.target.valueAsNumber));
+                                                            render();
+                                                        }}
                                                         type="number">
                     </input>%</p>
                     <p className="text-gray-700">{formatter.format(character.salary * character.pinvestments / 100)}</p>
@@ -365,7 +371,10 @@ function GamePage({fname, lname}: GameProps) {
                     <p className="text-gray-700"><input name="character.pleisure" className="w-12 text-end"
                                                         min="0"
                                                         defaultValue={character.pleisure}
-                                                        onChange={e => {character.pleisure = Math.min(1000, Math.max(0, e.target.valueAsNumber)); render()}}
+                                                        onChange={e => {
+                                                            character.pleisure = Math.min(1000, Math.max(0, e.target.valueAsNumber));
+                                                            render()
+                                                        }}
                                                         type="number">
                     </input>%</p>
                     <p className="text-gray-700">{formatter.format(character.salary * character.pleisure / 100)}</p>
@@ -400,15 +409,15 @@ function GamePage({fname, lname}: GameProps) {
         <div className="flex flex-col gap-2 items-center">
             <h1>Loans</h1>
             {character.loans.length == 0 ?
-                <p className="mt-2 text-green-700">
+                <h2 className="mt-2 text-green-700!">
                     Total Debt: {formatter.format(character.totalLoans.balance)}
-                </p> :
-                <p className="mt-2 text-red-800">
+                </h2> :
+                <h2 className="mt-2 text-red-800!">
                     Total Debt: {formatter.format(character.totalLoans.balance)}
-                </p>
+                </h2>
             }
             {character.loans.map((loan) =>
-                <div key={loan.name} className="flex flex-col items-center w-120 bg-amber-100 rounded-xl p-4 m-4 gap-1">
+                <div key={loan.name} className="flex flex-col items-center w-124 bg-amber-100 rounded-xl p-4 m-4 gap-1">
                     <h3 className="text-gray-700 font-bold">{loan.name}</h3>
                     <p className="text-gray-700">Interest Rate: {Math.round(loan.interestRate * 100 - 100)}%
                         ({formatter.format(loan.balance * (loan.interestRate - 1))})</p>
@@ -440,9 +449,9 @@ function GamePage({fname, lname}: GameProps) {
         </div>,
         <div className="flex flex-col gap-2 items-center">
             <h1>Investment Portfolio</h1>
-            <p className="mt-2 text-yellow-600">
+            <h2 className="mt-2 text-yellow-600! font-bold">
                 Uninvested: {formatter.format(investmentAccount.a.balance)}
-            </p>
+            </h2>
             <StockCard stock={indexFund} investmentAccount={investmentAccount} formatter={formatter}
                        compactFormatter={compactFormatter} render={render}/>
             <StockCard stock={bond} investmentAccount={investmentAccount} formatter={formatter}
@@ -456,9 +465,9 @@ function GamePage({fname, lname}: GameProps) {
         </div>,
         <div className="flex flex-col gap-2 items-center">
             <h1>Retirement Portfolio</h1>
-            <p className="mt-2 text-yellow-600">
+            <h2 className="mt-2 text-yellow-600!">
                 Uninvested: {formatter.format(retirementAccount.a.balance)}
-            </p>
+            </h2>
             <StockCard stock={indexFund} investmentAccount={retirementAccount} formatter={formatter}
                        compactFormatter={compactFormatter} render={render}/>
             <StockCard stock={bond} investmentAccount={retirementAccount} formatter={formatter}
@@ -509,7 +518,7 @@ function GamePage({fname, lname}: GameProps) {
 
                     <div className="flex">
                         <p className="text-xl text-gray-700! p-2">$</p>
-                        <input name="transfer-funds" className="w-80 bg-white rounded-xl p-1 text-gray-700"
+                        <input name="transfer-funds" className="w-80 bg-gray-300 rounded-xl p-1 text-gray-700"
                                autoFocus={true}
                                min=""
                                max={Math.min(transferFrom.selectedAccount?.balance ?? 0, transferTo.selectedAccount?.balance ?? 0)}
@@ -568,7 +577,7 @@ function GamePage({fname, lname}: GameProps) {
 
                     <div className="flex">
                         <p className="text-xl text-gray-700! p-2">$</p>
-                        <input name="transfer-funds" className="w-80 bg-white rounded-xl p-1 text-gray-700"
+                        <input name="transfer-funds" className="w-80 bg-gray-300 rounded-xl p-1 text-gray-700"
                                min=""
                                max={transferFrom.selectedAccount?.balance ?? 0}
                                disabled={transferFrom.selectedAccount == null}
@@ -605,19 +614,19 @@ function GamePage({fname, lname}: GameProps) {
             <div className="fixed bottom-1 left-1 z-50 h-16 right-1 justify-center p-2 rounded-2xl bg-amber-100">
                 <div className="grid grid-cols-4 content-center align-items-middle mx-auto h-full ml-4 mr-4">
                     <h2 className="justify-self-start text-gray-700! align-self-middle">{fname} {lname}</h2>
-                    <h2 className="text-yellow-600! justify-self-end mt-2">{formatter.format(savingsAccount.a.balance)}</h2>
-                    {(page < pages.length ?
-                        <button className="w-50 ml-4 text-xl font-bold h-10 justify-self-left"
-                                onClick={() => {
-                                    setFundsToTransfer(NaN);
-                                    setTransferFrom({selectedAccount: null});
-                                    setTransferTo({selectedAccount: null});
-                                    document.getElementById("transfer-modal")!.style.display = "block";
-                                    document.getElementById("debt-modal")!.style.display = "none";
-                                }}>Transfer
-                            Money
-                        </button>
-                        : <div></div>)}
+                    {(page < pages.length ? [
+                            <h2 className="text-yellow-600! justify-self-end mt-2">{formatter.format(savingsAccount.a.balance)}</h2>,
+                            <button className="w-50 ml-4 text-xl font-bold h-10 justify-self-left"
+                                    onClick={() => {
+                                        setFundsToTransfer(NaN);
+                                        setTransferFrom({selectedAccount: null});
+                                        setTransferTo({selectedAccount: null});
+                                        document.getElementById("transfer-modal")!.style.display = "block";
+                                        document.getElementById("debt-modal")!.style.display = "none";
+                                    }}>Transfer
+                                Money
+                            </button>]
+                        : [<div></div>,<div></div>])}
                     <h2 className="justify-self-end text-gray-700!">{GetDateString(date.d)}</h2>
                 </div>
             </div>

@@ -18,7 +18,7 @@ function StockCard({stock, investmentAccount, formatter, compactFormatter, rende
     const [minimized, setMinimized] = useState(true)
 
     return (<>
-        <div className="flex flex-col items-center w-120 bg-amber-100 rounded-xl p-4 m-4 gap-1 cursor-pointer"
+        <div className="flex flex-col items-center w-124 bg-amber-100 rounded-xl p-4 m-4 gap-1 cursor-pointer"
              onClick={() => setMinimized(!minimized)}>
             <h3 className="text-gray-700 font-bold">{stock.a.name}</h3>
             {stock.a.bond ?
