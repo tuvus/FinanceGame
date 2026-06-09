@@ -574,23 +574,73 @@ function GamePage({fname, lname}: GameProps) {
                     className="flex flex-col gap-2 ml-auto mr-auto mt-[20%] w-100 bg-amber-100 rounded-xl justify-center p-4"
                     onClick={e => e.stopPropagation()}>
                     <h3 className="text-gray-700">Transfer Funds</h3>
-                    <Select options={character.accounts.filter(a => a.isOwnedAccount)}
-                            getOptionLabel={a => a.name}
-                            value={transferFrom.selectedAccount}
-                            isSearchable={false}
-                            onChange={(a: Account | null) => {
-                                let to = transferTo.selectedAccount;
-                                if (a == to) to = transferFrom.selectedAccount;
-                                setTransferFrom({selectedAccount: a});
-                                setTransferTo({selectedAccount: to});
-                            }}></Select>
+                    <Select
+                        options={character.accounts.filter(a => a.isOwnedAccount)}
+                        getOptionLabel={a => a.name}
+                        value={transferFrom.selectedAccount}
+                        isSearchable={false}
+                        styles={{
+                            control: (baseStyles, state) => ({
+                                ...baseStyles, backgroundColor: "#d1d5dc", borderRadius: 10,
+                                border: state.isFocused ? "2px solid #fe9a00" : "2px solid #cccccc",
+                                "&:hover": {
+                                    border: "2px solid #fe9a00",
+                                },
+                                "&:focus": {
+                                    border: "2px solid #fe9a00",
+                                    boxShadow: "none"
+                                },
+                                boxShadow: "none"
+                            }),
+                            placeholder: (baseStyles, state) => ({
+                                ...baseStyles, fontSize: 20
+                            }),
+                            singleValue: (baseStyles, state) => ({
+                                ...baseStyles, fontSize: 20
+                            }),
+                            option: (baseStyles, state) => ({
+                                ...baseStyles, color: "#364153", backgroundColor: state.isFocused? "#d1d5dc": undefined, borderRadius: 10
+                            })
+                        }}
+                        onChange={(a: Account | null) => {
+                            let to = transferTo.selectedAccount;
+                            if (a == to) to = transferFrom.selectedAccount;
+                            setTransferFrom({selectedAccount: a});
+                            setTransferTo({selectedAccount: to});
+                        }}></Select>
                     {transferFrom.selectedAccount ?
-                        <p className="text-gray-700 text-lg!">Balance: {formatter.format(transferFrom.selectedAccount!.balance)}</p> : <></>}
+                        <p className="text-gray-700 text-lg!">Balance: {formatter.format(transferFrom.selectedAccount!.balance)}
+                        </p>
+                        : <></>
+                    }
                     <Select
                         options={character.accounts.filter(a => a != transferFrom.selectedAccount && a.isOwnedAccount)}
                         getOptionLabel={a => a.name}
                         value={transferTo.selectedAccount}
                         isSearchable={false}
+                        styles={{
+                            control: (baseStyles, state) => ({
+                                ...baseStyles, backgroundColor: "#d1d5dc", borderRadius: 10,
+                                border: state.isFocused ? "2px solid #fe9a00" : "2px solid #cccccc",
+                                "&:hover": {
+                                    border: "2px solid #fe9a00",
+                                },
+                                "&:focus": {
+                                    border: "2px solid #fe9a00",
+                                    boxShadow: "none"
+                                },
+                                boxShadow: "none"
+                            }),
+                            placeholder: (baseStyles, state) => ({
+                                ...baseStyles, fontSize: 20
+                            }),
+                            singleValue: (baseStyles, state) => ({
+                                ...baseStyles, fontSize: 20
+                            }),
+                            option: (baseStyles, state) => ({
+                                ...baseStyles, color: "#364153", backgroundColor: state.isFocused? "#d1d5dc": undefined, borderRadius: 10
+                            })
+                        }}
                         onChange={(a: Account | null) => setTransferTo({selectedAccount: a})}></Select>
 
                     <div className="flex">
