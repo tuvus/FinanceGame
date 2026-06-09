@@ -683,8 +683,8 @@ function GamePage({fname, lname}: GameProps) {
                 <div className="grid grid-cols-4 content-center align-items-middle mx-auto h-full ml-4 mr-4">
                     <h2 className="justify-self-start text-gray-700! align-self-middle">{fname} {lname}</h2>
                     {(page < pages.length ? [
-                            <h2 className="text-yellow-600! justify-self-end mt-2">{formatter.format(savingsAccount.a.balance)}</h2>,
-                            <button className="w-50 ml-4 text-xl font-bold h-10 justify-self-left"
+                            <h2 className="text-yellow-600! justify-self-end mt-2" key="1">{formatter.format(savingsAccount.a.balance)}</h2>,
+                            <button className="w-50 ml-4 text-xl font-bold h-10 justify-self-left" key="2"
                                     onClick={() => {
                                         setFundsToTransfer(NaN);
                                         setTransferFrom({selectedAccount: null});
@@ -694,7 +694,7 @@ function GamePage({fname, lname}: GameProps) {
                                     }}>Transfer
                                 Money
                             </button>]
-                        : [<div></div>, <div></div>])}
+                        : [<div key="1"></div>, <div key="2"></div>])}
                     <h2 className="justify-self-end text-gray-700!">{GetDateString(date.d)}</h2>
                 </div>
             </div>
