@@ -1,10 +1,10 @@
 /* eslint-disable react-hooks/immutability */
 import './App.css'
 import random from "random";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {LineChart} from "./components/LineChart.tsx";
 import Select from 'react-select';
-import {Account, Character, StockAccount, StockBond} from "./Data.tsx";
+import {Account, Character, GameState, Loan, StockAccount, StockBond} from "./Data.tsx";
 import StockCard from "./components/StockCard.tsx";
 import {CalculateTaxes, GetDateString} from "./Utils.tsx";
 import {DonutChart} from "./components/DonutChart.tsx";
@@ -29,7 +29,8 @@ function GamePage({fname, lname}: GameProps) {
     const [date] = useState({d: new Date(random.int(1940, 2010), 0)});
     const [savingsAccount] = useState({a: new Account("Savings Account", 0, new Date(date.d.getFullYear() - 1, 0), true)});
     const [page, setPage] = useState(999);
-    const [character] = useState(new Character(fname, lname));
+    const [gameState] = useState({s: new GameState()});
+    const [character] = useState(new Character(fname, lname, date.d));
     const [pinvestments, setpinvestments] = useState(2);
     const [pretirement, setpretirement] = useState(3);
     const [pleisure, setpleisure] = useState(10);
@@ -37,7 +38,6 @@ function GamePage({fname, lname}: GameProps) {
     const [retirementAccount] = useState({a: new StockAccount("Retirement Account", 0, new Date(date.d.getFullYear() - 1, 0))});
     const [indexFund] = useState({a: new StockBond("Index Fund", random.int(7000, 50000) / 100, new Date(date.d.getFullYear() - 1, 0), false)});
     const [bond] = useState({a: new StockBond("Bond", 1, new Date(date.d.getFullYear() - 1, 0), true)});
-    const [allAccounts] = useState([savingsAccount.a, investmentAccount.a, retirementAccount.a]);
     const [rerender, setRerender] = useState(0);
     const render = () => {
         // eslint-disable-next-line react-hooks/purity
@@ -61,7 +61,8 @@ function GamePage({fname, lname}: GameProps) {
     ];
 
     const previousPage = () => {
-        if (page != 0) setPage(page - 1);
+        if (page == 3 && character.loans.length == 0) setPage(page - 2);
+        else if (page != 0) setPage(page - 1);
     }
 
     const nextPage = () => {
@@ -73,13 +74,17 @@ function GamePage({fname, lname}: GameProps) {
                 );
             }
         }
-        setPage(page + 1);
+        if (page == 1 && character.loans.length == 0) {
+            setPage(page + 2);
+        } else {
+            setPage(page + 1);
+        }
     }
 
     const endYear = () => {
         const livingExpenses = monthlyItemizedLivingExpenses.map(e => e.amount).reduce((sum, curr) => sum + curr, 0) * inflation * 12;
 
-        const newSavings = character.salary * (100 - pinvestments - pretirement - pleisure) / 100 - CalculateTaxes(Math.max(0, character.salary - 15750)) - livingExpenses;
+        const newSavings = character.salary * (100 - pinvestments - pretirement - pleisure) / 100 - CalculateTaxes(Math.max(0, character.salary * (1 - pretirement / 100) - 15750)) - livingExpenses;
         // Income and interest
         savingsAccount.a.balance += newSavings;
         investmentAccount.a.balance += character.salary * pinvestments / 100
@@ -89,25 +94,26 @@ function GamePage({fname, lname}: GameProps) {
         // Inflation
         const newInflation = random.float(1.01, 1.04);
         setInflation(inflation * newInflation);
-        character.salary *= newInflation;
         indexFund.a.balance *= newInflation;
         bond.a.balance *= 1.052;
 
         // History log
         indexFund.a.endYear(date.d);
         bond.a.endYear(date.d);
-        allAccounts.forEach((account) => account.endYear(date.d));
+        character.endYear(date.d, newInflation);
 
         date.d.setFullYear(date.d.getFullYear() + 1);
         setPage(0);
     }
 
-    const taxes = CalculateTaxes(Math.max(0, character.salary - 15750));
+    const taxes = CalculateTaxes(Math.max(0, character.salary * (1 - pretirement / 100) - 15750));
 
     const monthlyLivingExpenses = monthlyItemizedLivingExpenses.map(e => e.amount).reduce((sum, curr) => sum + curr, 0) * inflation;
     const livingExpenses = monthlyLivingExpenses * 12;
 
     const newSavings = character.salary * (100 - pinvestments - pretirement - pleisure) / 100 - taxes - livingExpenses;
+    const ploans = character.loans.reduce((sum, l) => sum + l.getPayment(), 0) / character.salary * 100;
+
 
     const [lifeEventManager] = useState(new LifeEventManager(date.d, endYear, render, [
         new LifeEvent("Education", date.d, <>
@@ -126,7 +132,8 @@ function GamePage({fname, lname}: GameProps) {
                 <div className="eventButton panelButton"
                      onClick={() => {
                          character.salary = 53000 * random.float(.95, 1.3);
-                         savingsAccount.a.balance = 8000 * random.float(.7, 1.3);
+                         savingsAccount.a.balance = 12000 * random.float(.7, 1.3);
+                         character.addLoan(new Loan("College", 6000 * random.float(.7, 1.3), date.d, savingsAccount.a, 1.067, true));
                          lifeEventManager.NextEvent();
                      }}>
                     <h3 className="text-gray-700 font-bold">Trade School</h3>
@@ -142,7 +149,8 @@ function GamePage({fname, lname}: GameProps) {
                                  <div className="eventButton panelButton"
                                       onClick={() => {
                                           character.salary = 57000 * random.float(.90, 1.3);
-                                          savingsAccount.a.balance = -34000 * random.float(.7, 1.3);
+                                          savingsAccount.a.balance = 2000 * random.float(.7, 1.3);
+                                          character.addLoan(new Loan("College", 10000 * random.float(.7, 1.3), date.d, savingsAccount.a, 1.067, true));
                                           lifeEventManager.NextEvent();
                                       }}>
                                      <h3 className="text-gray-700 font-bold">Community College</h3>
@@ -153,7 +161,8 @@ function GamePage({fname, lname}: GameProps) {
                                  <div className="eventButton panelButton"
                                       onClick={() => {
                                           character.salary = 80000 * random.float(.85, 1.3);
-                                          savingsAccount.a.balance = -130000 * random.float(.7, 1.3);
+                                          savingsAccount.a.balance = 1000 * random.float(.7, 1.3);
+                                          character.addLoan(new Loan("College", 34000 * random.float(.7, 1.3), date.d, savingsAccount.a, 1.067, true));
                                           lifeEventManager.NextEvent();
                                       }}>
                                      <h3 className="text-gray-700 font-bold">Public University</h3>
@@ -163,8 +172,9 @@ function GamePage({fname, lname}: GameProps) {
                                  </div>
                                  <div className="eventButton panelButton"
                                       onClick={() => {
-                                          character.salary = 92000 * random.float(.80, 1.2);
-                                          savingsAccount.a.balance = -238000 * random.float(.7, 1.3);
+                                          character.salary = 83000 * random.float(.80, 1.2);
+                                          savingsAccount.a.balance = 4000 * random.float(.7, 1.3);
+                                          character.addLoan(new Loan("College", 47000 * random.float(.7, 1.3), date.d, savingsAccount.a, 1.067, true));
                                           lifeEventManager.NextEvent();
                                       }}>
                                      <h3 className="text-gray-700 font-bold">Private University</h3>
@@ -194,11 +204,55 @@ function GamePage({fname, lname}: GameProps) {
     ]));
     const activeEvent = lifeEventManager.GetActiveEvent(date.d);
 
+    useEffect(() => {
+        character.accounts = [savingsAccount.a, investmentAccount.a, retirementAccount.a];
+        document.addEventListener("keyup", (e) => {
+            if (e.key == "PageUp") {
+                if (document.getElementById("transfer-modal")!.style.display == "block") {
+                    document.getElementById("transfer-confirm")!.click();
+                    e.stopImmediatePropagation();
+                    return;
+                }
+                if (document.getElementById("debt-modal")!.style.display == "block") {
+                    document.getElementById("debt-confirm")!.click();
+                    e.stopImmediatePropagation();
+                    return;
+                }
+                if (gameState.s.page < pages.length - 1) {
+                    gameState.s.nextPage();
+                    e.stopImmediatePropagation();
+                } else if (lifeEventManager.GetActiveEvent(date.d) != null && !lifeEventManager.GetActiveEvent(date.d)!.customContinue) {
+                    lifeEventManager.NextEvent();
+                    e.stopImmediatePropagation();
+                }
+            } else if (e.key == "PageDown") {
+                if (document.getElementById("transfer-modal")!.style.display == "block") {
+                    document.getElementById("transfer-cancel")!.click();
+                    e.stopImmediatePropagation();
+                    return;
+                }
+                if (document.getElementById("debt-modal")!.style.display == "block") {
+                    document.getElementById("debt-cancel")!.click();
+                    e.stopImmediatePropagation();
+                    return;
+                }
+                if (gameState.s.page < pages.length - 1) {
+                    gameState.s.previousPage();
+                    e.stopImmediatePropagation();
+                }
+            }
+        });
+    }, [])
+
+    gameState.s.page = page;
+    gameState.s.nextPage = nextPage;
+    gameState.s.previousPage = previousPage;
+
     const pages = [
         <div className="flex flex-col gap-2 items-center">
             <h1>Year in review {date.d.getFullYear() - 1}</h1>
             <div className="grid grid-cols-2">
-                {allAccounts.map((account, i) => (
+                {character.accounts.map((account, i) => (
                     <div key={i} className="flex flex-col items-center bg-amber-100 rounded-xl p-4 m-4 gap-1">
                         <h3 className="text-gray-700 font-bold">{account.name}</h3>
                         <div className="flex items-baseline gap-2">
@@ -218,18 +272,21 @@ function GamePage({fname, lname}: GameProps) {
                     </div>))}
                 <DonutChart className="h-full w-full m-auto p-4"
                             data={[
-                                {name: "Cash", amount: allAccounts.reduce((sum, curr) => sum + curr.balance, 0)},
+                                {name: "Cash", amount: character.accounts.reduce((sum, curr) => sum + curr.balance, 0)},
                                 {
                                     name: "Stocks",
-                                    amount: allAccounts.filter(a => a instanceof StockAccount).map(a => a as StockAccount)
+                                    amount: character.accounts.filter(a => a instanceof StockAccount).map(a => a as StockAccount)
                                         .reduce((sum, curr) => sum + curr.getStockValue(), 0)
                                 }, {
                                     name: "Bonds",
-                                    amount: allAccounts.filter(a => a instanceof StockAccount).map(a => a as StockAccount)
+                                    amount: character.accounts.filter(a => a instanceof StockAccount).map(a => a as StockAccount)
                                         .reduce((sum, curr) => sum + curr.getBondValue(), 0)
+                                }, {
+                                    name: "Loans",
+                                    amount: character.totalLoans.getTotalValue()
                                 }
                             ]}
-                            label={"Total Assets: " + formatter.format(allAccounts.reduce((sum, curr) => sum + curr.getTotalValue(), 0))}
+                            label={"Total Assets: " + formatter.format(character.accounts.reduce((sum, curr) => sum + curr.getTotalValue(), 0))}
                             category="name" value="amount" showLabel={true}
                             valueFormatter={(number: number) => formatter.format(number)}/>
             </div>
@@ -271,6 +328,13 @@ function GamePage({fname, lname}: GameProps) {
                     ]);
                 })}
 
+                {character.loans.length > 0 ? [
+                    <p className="text-red-800" key="111">Loans</p>,
+                    <p className="text-red-800" key="222">{Math.round(ploans)}%</p>,
+                    <p className="text-red-800"
+                       key="333">{formatter.format(character.loans.reduce((sum, l) => sum + l.getPayment(), 0))}</p>
+                ] : []}
+
                 <p>Investments</p>
                 <p><input name="pinvestments" className="w-12"
                           min="0"
@@ -302,6 +366,52 @@ function GamePage({fname, lname}: GameProps) {
                 <h3 className={newSavings > 0 ? "text-green-700" : "text-red-800"}>
                     Predicted Balance: {formatter.format(savingsAccount.a.balance + newSavings)}</h3>
             </div>
+            <div className="flex gap-2 justify-center">
+                <button className="w-24 text-xl h-10 p-1 font-bold" onClick={() => previousPage()}><h3>Back</h3>
+                </button>
+                {character.loans.length > 0 ?
+                    <button className="w-60 text-xl h-10 p-1 font-bold" onClick={() => nextPage()}><h3>Next:
+                        Loans</h3>
+                    </button> :
+                    <button className="w-60 text-xl h-10 p-1 font-bold" onClick={() => nextPage()}><h3>Next:
+                        Investments</h3>
+                    </button>
+                }
+            </div>
+        </div>,
+        <div className="flex flex-col gap-2 items-center">
+            <h1>Loans</h1>
+            {character.loans.length == 0 ?
+                <p className="mt-2 text-green-700">
+                    Total Debt: {formatter.format(character.totalLoans.balance)}
+                </p> :
+                <p className="mt-2 text-red-800">
+                    Total Debt: {formatter.format(character.totalLoans.balance)}
+                </p>
+            }
+            {character.loans.map((loan) =>
+                <div key={loan.name} className="flex flex-col items-center w-120 bg-amber-100 rounded-xl p-4 m-4 gap-1">
+                    <h3 className="text-gray-700 font-bold">{loan.name}</h3>
+                    <p className="text-gray-700">Interest Rate: {Math.round(loan.interestRate * 100 - 100)}%
+                        ({formatter.format(loan.balance * (loan.interestRate - 1))})</p>
+                    <LineChart className="h-60 w-120" data={loan.history}
+                               index="dateString"
+                               showLegend={false}
+                               minValue={Math.min(...loan.history.map(h => h.balance))}
+                               maxValue={Math.max(...loan.history.map(h => h.balance))}
+                               aria-hidden="true"
+                               categories={["balance"]}
+                               valueFormatter={(number: number) => compactFormatter.format(number)}/>
+                    <button className="w-60 text-xl h-10 font-bold" onClick={(e) => {
+                        e.stopPropagation()
+                        setFundsToTransfer(0);
+                        setTransferFrom({selectedAccount: savingsAccount.a});
+                        setTransferTo({selectedAccount: loan});
+                        document.getElementById("debt-modal")!.style.display = "block";
+                        document.getElementById("transfer-modal")!.style.display = "none";
+                    }}><h3>Pay Immediately</h3></button>
+                </div>
+            )}
             <div className="flex gap-2 justify-center">
                 <button className="w-24 text-xl h-10 p-1 font-bold" onClick={() => previousPage()}><h3>Back</h3>
                 </button>
@@ -364,11 +474,57 @@ function GamePage({fname, lname}: GameProps) {
     return (
         <div>
             {pages[Math.min(page, pages.length - 1)]}
+            <div id="debt-modal" className="flex hmodal justify-center">
+                <div
+                    className="flex flex-col gap-2 ml-auto mr-auto mt-[20%] w-100 bg-amber-100 rounded-xl justify-center p-4">
+                    <h3 className="text-gray-700">Pay Debt</h3>
+                    <p className="text-gray-700 text-lg!">{transferFrom.selectedAccount?.name}</p>
+                    <p className="text-gray-700 text-lg!">Balance: {formatter.format(transferFrom.selectedAccount?.balance ?? 0)}</p>
+                    <p className="text-gray-700 text-lg!">{transferTo.selectedAccount?.name}</p>
+                    <p className="text-red-800 text-lg!">Credit:
+                        -{formatter.format(transferTo.selectedAccount?.balance ?? 0)}</p>
+
+                    <div className="flex">
+                        <p className="text-xl text-gray-700! p-2">$</p>
+                        <input name="transfer-funds" className="w-80 bg-white rounded-xl p-1 text-gray-700"
+                               autoFocus={true}
+                               min=""
+                               max={Math.min(transferFrom.selectedAccount?.balance ?? 0, transferTo.selectedAccount?.balance ?? 0)}
+                               value={fundsToTransfer}
+                               onChange={e => setFundsToTransfer(e.target.valueAsNumber)}
+                               type="number">
+                        </input>
+                    </div>
+
+                    <div className="flex gap-2 justify-center">
+                        <button
+                            id="debt-cancel"
+                            onClick={() => document.getElementById("debt-modal")!.style.display = "none"}
+                            className="p-2 w-25">Cancel
+                        </button>
+                        <button
+                            id="debt-confirm"
+                            disabled={isNaN(fundsToTransfer) || fundsToTransfer <= 0}
+                            onClick={() => {
+                                if (transferFrom.selectedAccount != null && transferTo.selectedAccount != null && transferFrom.selectedAccount != transferTo.selectedAccount) {
+                                    const toTransfer = Math.min(Math.min(fundsToTransfer, transferFrom.selectedAccount.balance), transferTo.selectedAccount.balance);
+                                    transferFrom.selectedAccount.balance -= toTransfer;
+                                    transferTo.selectedAccount.balance -= toTransfer;
+                                    character.refreshLoans();
+                                    render();
+                                }
+                                document.getElementById("debt-modal")!.style.display = "none";
+                            }}
+                            className="p-2 w-25 enabled:bg-green-700! disabled:bg-gray-400!">Pay Debt
+                        </button>
+                    </div>
+                </div>
+            </div>
             <div id="transfer-modal" className="flex hmodal justify-center">
                 <div
                     className="flex flex-col gap-2 ml-auto mr-auto mt-[20%] w-100 bg-amber-100 rounded-xl justify-center p-4">
                     <h3 className="text-gray-700">Transfer Funds</h3>
-                    <Select options={allAccounts.filter(a => a.isOwnedAccount)}
+                    <Select options={character.accounts.filter(a => a.isOwnedAccount)}
                             getOptionLabel={a => a.name}
                             value={transferFrom.selectedAccount}
                             isSearchable={false}
@@ -380,11 +536,12 @@ function GamePage({fname, lname}: GameProps) {
                             }}></Select>
                     {transferFrom.selectedAccount ?
                         <p className="text-gray-700 text-lg!">Balance: {formatter.format(transferFrom.selectedAccount!.balance)}</p> : <></>}
-                    <Select options={allAccounts.filter(a => a != transferFrom.selectedAccount && a.isOwnedAccount)}
-                            getOptionLabel={a => a.name}
-                            value={transferTo.selectedAccount}
-                            isSearchable={false}
-                            onChange={(a: Account | null) => setTransferTo({selectedAccount: a})}></Select>
+                    <Select
+                        options={character.accounts.filter(a => a != transferFrom.selectedAccount && a.isOwnedAccount)}
+                        getOptionLabel={a => a.name}
+                        value={transferTo.selectedAccount}
+                        isSearchable={false}
+                        onChange={(a: Account | null) => setTransferTo({selectedAccount: a})}></Select>
 
                     <div className="flex">
                         <p className="text-xl text-gray-700! p-2">$</p>
@@ -400,11 +557,13 @@ function GamePage({fname, lname}: GameProps) {
 
                     <div className="flex gap-2 justify-center">
                         <button
+                            id="transfer-cancel"
                             onClick={() => document.getElementById("transfer-modal")!.style.display = "none"}
                             className="p-2 w-25">Cancel
                         </button>
                         <button
-                            disabled={transferFrom.selectedAccount == null || transferTo.selectedAccount == null}
+                            id="transfer-confirm"
+                            disabled={transferFrom.selectedAccount == null || transferTo.selectedAccount == null || isNaN(fundsToTransfer) || fundsToTransfer <= 0}
                             onClick={() => {
                                 if (transferFrom.selectedAccount != null && transferTo.selectedAccount != null && transferFrom.selectedAccount != transferTo.selectedAccount) {
                                     const toTransfer = Math.min(fundsToTransfer, transferFrom.selectedAccount.balance);
@@ -427,10 +586,11 @@ function GamePage({fname, lname}: GameProps) {
                         Account: {formatter.format(savingsAccount.a.balance)}</h3>
                     <button className="w-40 ml-4 text-lg h-8 justify-self-left"
                             onClick={() => {
-                                setFundsToTransfer(0);
+                                setFundsToTransfer(NaN);
                                 setTransferFrom({selectedAccount: null});
                                 setTransferTo({selectedAccount: null});
                                 document.getElementById("transfer-modal")!.style.display = "block";
+                                document.getElementById("debt-modal")!.style.display = "none";
                             }}>Transfer
                         Money
                     </button>
