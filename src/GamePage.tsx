@@ -325,9 +325,9 @@ function GamePage({fname, lname}: GameProps) {
                 })}
 
                 {character.loans.length > 0 ? [
-                    <p className="text-red-800">Loans</p>,
-                    <p className="text-red-800">{Math.round(ploans)}%</p>,
-                    <p className="text-red-800">{formatter.format(character.loans.reduce((sum, l) => sum + l.getPayment(), 0))}</p>
+                    <p className="text-red-800" key="111">Loans</p>,
+                    <p className="text-red-800" key="222">{Math.round(ploans)}%</p>,
+                    <p className="text-red-800" key="333">{formatter.format(character.loans.reduce((sum, l) => sum + l.getPayment(), 0))}</p>
                 ] : []}
 
                 <p>Investments</p>
@@ -385,7 +385,7 @@ function GamePage({fname, lname}: GameProps) {
                 </p>
             }
             {character.loans.map((loan) =>
-                <div className="flex flex-col items-center w-120 bg-amber-100 rounded-xl p-4 m-4 gap-1">
+                <div key={loan.name} className="flex flex-col items-center w-120 bg-amber-100 rounded-xl p-4 m-4 gap-1">
                     <h3 className="text-gray-700 font-bold">{loan.name}</h3>
                     <p className="text-gray-700">Interest Rate: {Math.round(loan.interestRate * 100 - 100)}%
                         ({formatter.format(loan.balance * (loan.interestRate - 1))})</p>
