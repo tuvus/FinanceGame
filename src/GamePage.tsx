@@ -203,12 +203,38 @@ function GamePage({fname, lname}: GameProps) {
     useEffect(() => {
         character.accounts = [savingsAccount.a, investmentAccount.a, retirementAccount.a];
         document.addEventListener("keyup", (e) => {
-            if (e.key == "Enter") {
-                if (gameState.s.page < pages.length - 1) {
+            if (e.key == "PageUp") {
+                if (document.getElementById("transfer-modal")!.style.display == "block") {
+                    document.getElementById("transfer-confirm")!.click();
                     e.stopPropagation();
+                    return;
+                }
+                if (document.getElementById("debt-modal")!.style.display == "block") {
+                    document.getElementById("debt-confirm")!.click();
+                    e.stopPropagation();
+                    return;
+                }
+                if (gameState.s.page < pages.length - 1) {
                     gameState.s.nextPage();
+                    e.stopPropagation();
                 } else if (lifeEventManager.GetActiveEvent(date.d) != null && !lifeEventManager.GetActiveEvent(date.d)!.customContinue) {
                     lifeEventManager.NextEvent();
+                    e.stopPropagation();
+                }
+            } else if (e.key == "PageDown") {
+                if (document.getElementById("transfer-modal")!.style.display == "block") {
+                    document.getElementById("transfer-cancel")!.click();
+                    e.stopPropagation();
+                    return;
+                }
+                if (document.getElementById("debt-modal")!.style.display == "block") {
+                    document.getElementById("debt-cancel")!.click();
+                    e.stopPropagation();
+                    return;
+                }
+                if (gameState.s.page < pages.length - 1) {
+                    gameState.s.previousPage();
+                    e.stopPropagation();
                 }
             }
         });
@@ -216,6 +242,7 @@ function GamePage({fname, lname}: GameProps) {
 
     gameState.s.page = page;
     gameState.s.nextPage = nextPage;
+    gameState.s.previousPage = previousPage;
 
     const pages = [
         <div className="flex flex-col gap-2 items-center">
@@ -349,13 +376,19 @@ function GamePage({fname, lname}: GameProps) {
         </div>,
         <div className="flex flex-col gap-2 items-center">
             <h1>Loans</h1>
-            <p className="mt-2 text-red-800">
-                Total Debt: {formatter.format(character.totalLoans.balance)}
-            </p>
+            {character.loans.length == 0 ?
+                <p className="mt-2 text-green-700">
+                    Total Debt: {formatter.format(character.totalLoans.balance)}
+                </p> :
+                <p className="mt-2 text-red-800">
+                    Total Debt: {formatter.format(character.totalLoans.balance)}
+                </p>
+            }
             {character.loans.map((loan) =>
-                <div className="flex flex-col items-center w-120 bg-amber-100 rounded-xl p-4 m-4 gap-1 cursor-pointer">
+                <div className="flex flex-col items-center w-120 bg-amber-100 rounded-xl p-4 m-4 gap-1">
                     <h3 className="text-gray-700 font-bold">{loan.name}</h3>
-                    <p className="text-gray-700">Interest Rate: {Math.round(loan.interestRate * 100 - 100)}%</p>
+                    <p className="text-gray-700">Interest Rate: {Math.round(loan.interestRate * 100 - 100)}%
+                        ({formatter.format(loan.balance * (loan.interestRate - 1))})</p>
                     <LineChart className="h-60 w-120" data={loan.history}
                                index="dateString"
                                showLegend={false}
@@ -364,6 +397,14 @@ function GamePage({fname, lname}: GameProps) {
                                aria-hidden="true"
                                categories={["balance"]}
                                valueFormatter={(number: number) => compactFormatter.format(number)}/>
+                    <button className="w-60 text-xl h-10 font-bold" onClick={(e) => {
+                        e.stopPropagation()
+                        setFundsToTransfer(0);
+                        setTransferFrom({selectedAccount: savingsAccount.a});
+                        setTransferTo({selectedAccount: loan});
+                        document.getElementById("debt-modal")!.style.display = "block";
+                        document.getElementById("transfer-modal")!.style.display = "none";
+                    }}><h3>Pay Immediately</h3></button>
                 </div>
             )}
             <div className="flex gap-2 justify-center">
@@ -428,6 +469,52 @@ function GamePage({fname, lname}: GameProps) {
     return (
         <div>
             {pages[Math.min(page, pages.length - 1)]}
+            <div id="debt-modal" className="flex hmodal justify-center">
+                <div
+                    className="flex flex-col gap-2 ml-auto mr-auto mt-[20%] w-100 bg-amber-100 rounded-xl justify-center p-4">
+                    <h3 className="text-gray-700">Pay Debt</h3>
+                    <p className="text-gray-700 text-lg!">{transferFrom.selectedAccount?.name}</p>
+                    <p className="text-gray-700 text-lg!">Balance: {formatter.format(transferFrom.selectedAccount?.balance ?? 0)}</p>
+                    <p className="text-gray-700 text-lg!">{transferTo.selectedAccount?.name}</p>
+                    <p className="text-red-800 text-lg!">Credit:
+                        -{formatter.format(transferTo.selectedAccount?.balance ?? 0)}</p>
+
+                    <div className="flex">
+                        <p className="text-xl text-gray-700! p-2">$</p>
+                        <input name="transfer-funds" className="w-80 bg-white rounded-xl p-1 text-gray-700"
+                               autoFocus={true}
+                               min=""
+                               max={Math.min(transferFrom.selectedAccount?.balance ?? 0, transferTo.selectedAccount?.balance ?? 0)}
+                               value={fundsToTransfer}
+                               onChange={e => setFundsToTransfer(e.target.valueAsNumber)}
+                               type="number">
+                        </input>
+                    </div>
+
+                    <div className="flex gap-2 justify-center">
+                        <button
+                            id="debt-cancel"
+                            onClick={() => document.getElementById("debt-modal")!.style.display = "none"}
+                            className="p-2 w-25">Cancel
+                        </button>
+                        <button
+                            id="debt-confirm"
+                            disabled={isNaN(fundsToTransfer) || fundsToTransfer <= 0}
+                            onClick={() => {
+                                if (transferFrom.selectedAccount != null && transferTo.selectedAccount != null && transferFrom.selectedAccount != transferTo.selectedAccount) {
+                                    const toTransfer = Math.min(Math.min(fundsToTransfer, transferFrom.selectedAccount.balance), transferTo.selectedAccount.balance);
+                                    transferFrom.selectedAccount.balance -= toTransfer;
+                                    transferTo.selectedAccount.balance -= toTransfer;
+                                    character.refreshLoans();
+                                    render();
+                                }
+                                document.getElementById("debt-modal")!.style.display = "none";
+                            }}
+                            className="p-2 w-25 enabled:bg-green-700! disabled:bg-gray-400!">Pay Debt
+                        </button>
+                    </div>
+                </div>
+            </div>
             <div id="transfer-modal" className="flex hmodal justify-center">
                 <div
                     className="flex flex-col gap-2 ml-auto mr-auto mt-[20%] w-100 bg-amber-100 rounded-xl justify-center p-4">
@@ -465,11 +552,13 @@ function GamePage({fname, lname}: GameProps) {
 
                     <div className="flex gap-2 justify-center">
                         <button
+                            id="transfer-cancel"
                             onClick={() => document.getElementById("transfer-modal")!.style.display = "none"}
                             className="p-2 w-25">Cancel
                         </button>
                         <button
-                            disabled={transferFrom.selectedAccount == null || transferTo.selectedAccount == null}
+                            id="transfer-confirm"
+                            disabled={transferFrom.selectedAccount == null || transferTo.selectedAccount == null || isNaN(fundsToTransfer) || fundsToTransfer <= 0}
                             onClick={() => {
                                 if (transferFrom.selectedAccount != null && transferTo.selectedAccount != null && transferFrom.selectedAccount != transferTo.selectedAccount) {
                                     const toTransfer = Math.min(fundsToTransfer, transferFrom.selectedAccount.balance);
@@ -492,10 +581,11 @@ function GamePage({fname, lname}: GameProps) {
                         Account: {formatter.format(savingsAccount.a.balance)}</h3>
                     <button className="w-40 ml-4 text-lg h-8 justify-self-left"
                             onClick={() => {
-                                setFundsToTransfer(0);
+                                setFundsToTransfer(NaN);
                                 setTransferFrom({selectedAccount: null});
                                 setTransferTo({selectedAccount: null});
                                 document.getElementById("transfer-modal")!.style.display = "block";
+                                document.getElementById("debt-modal")!.style.display = "none";
                             }}>Transfer
                         Money
                     </button>

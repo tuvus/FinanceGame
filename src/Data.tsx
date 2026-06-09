@@ -19,14 +19,18 @@ export class Character {
         this.salary *= inflation;
         this.accounts.forEach((account) => account.endYear(date));
         this.loans.forEach(l => l.endLoanYear(date, inflation));
-        this.loans = this.loans.filter(l => l.balance >= 0.01);
-        this.totalLoans.balance = this.loans.reduce((sum, a) => sum + a.balance, 0);
+        this.refreshLoans();
         this.totalLoans.endYear(date);
     }
 
     addLoan(loan: Loan) {
         this.loans = [...this.loans, loan];
         this.totalLoans.balance += loan.balance;
+    }
+
+    refreshLoans() {
+        this.loans = this.loans.filter(l => l.balance >= 0.01);
+        this.totalLoans.balance = this.loans.reduce((sum, a) => sum + a.balance, 0);
     }
 }
 
@@ -124,7 +128,7 @@ export class Loan extends Account {
         super(name, balance, date, false);
         this.linkedAccount = linkedAccount;
         this.interestRate = interestRate;
-        this.minimumPayment = balance * (interestRate * 1.1 - 1) ;
+        this.minimumPayment = balance * (interestRate * 1.1 - 1);
         this.setPayment = this.minimumPayment;
         this.fixed = fixed;
     }
@@ -142,11 +146,14 @@ export class Loan extends Account {
     }
 
     getPayment(): number {
-       return Math.min(this.balance, this.setPayment);
+        return Math.min(this.balance, this.setPayment);
     }
 }
 
 export class GameState {
     page: number = 0;
-    nextPage =  (): void => {} ;
+    nextPage = (): void => {
+    };
+    previousPage = (): void => {
+    };
 }
