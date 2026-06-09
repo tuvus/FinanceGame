@@ -324,6 +324,7 @@ function GamePage({fname, lname}: GameProps) {
                     <p className="text-gray-700">Retirement</p>
                     <p className="text-gray-700"><input name="character.pretirement" className="w-12 text-end"
                                                         min="0"
+                                                        max={Math.min(24500 * inflation / character.salary * 100, 100)}
                                                         defaultValue={character.pretirement}
                                                         onChange={e => {character.pretirement = Math.min(1000, Math.max(0, e.target.valueAsNumber)); render();}}
                                                         type="number">
