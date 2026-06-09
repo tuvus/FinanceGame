@@ -31,9 +31,6 @@ function GamePage({fname, lname}: GameProps) {
     const [page, setPage] = useState(999);
     const [gameState] = useState({s: new GameState()});
     const [character] = useState(new Character(fname, lname, date.d));
-    const [pinvestments, setpinvestments] = useState(2);
-    const [pretirement, setpretirement] = useState(3);
-    const [pleisure, setpleisure] = useState(10);
     const [investmentAccount] = useState({a: new StockAccount("Investment Account", 0, new Date(date.d.getFullYear() - 1, 0))});
     const [retirementAccount] = useState({a: new StockAccount("Retirement Account", 0, new Date(date.d.getFullYear() - 1, 0))});
     const [indexFund] = useState({a: new StockBond("Index Fund", random.int(7000, 50000) / 100, new Date(date.d.getFullYear() - 1, 0), false)});
@@ -83,12 +80,16 @@ function GamePage({fname, lname}: GameProps) {
 
     const endYear = () => {
         const livingExpenses = monthlyItemizedLivingExpenses.map(e => e.amount).reduce((sum, curr) => sum + curr, 0) * inflation * 12;
+        const taxes = CalculateTaxes(Math.max(0, character.salary * (1 - character.pretirement / 100) - 15750));
+        const newSavings = character.salary * (100 - character.pinvestments - character.pretirement - character.pleisure) / 100 - taxes - livingExpenses;
 
-        const newSavings = character.salary * (100 - pinvestments - pretirement - pleisure) / 100 - CalculateTaxes(Math.max(0, character.salary * (1 - pretirement / 100) - 15750)) - livingExpenses;
+        // Go on trips!
+        character.satisfaction += 8 + character.satisfaction * character.pleisure / 100 / inflation;
+
         // Income and interest
         savingsAccount.a.balance += newSavings;
-        investmentAccount.a.balance += character.salary * pinvestments / 100
-        retirementAccount.a.balance += character.salary * pretirement / 100
+        investmentAccount.a.balance += character.salary * character.pinvestments / 100
+        retirementAccount.a.balance += character.salary * character.pretirement / 100
         indexFund.a.balance *= random.float(.85, 1.2);
 
         // Inflation
@@ -106,12 +107,12 @@ function GamePage({fname, lname}: GameProps) {
         setPage(0);
     }
 
-    const taxes = CalculateTaxes(Math.max(0, character.salary * (1 - pretirement / 100) - 15750));
+    const taxes = CalculateTaxes(Math.max(0, character.salary * (1 - character.pretirement / 100) - 15750));
 
     const monthlyLivingExpenses = monthlyItemizedLivingExpenses.map(e => e.amount).reduce((sum, curr) => sum + curr, 0) * inflation;
     const livingExpenses = monthlyLivingExpenses * 12;
 
-    const newSavings = character.salary * (100 - pinvestments - pretirement - pleisure) / 100 - taxes - livingExpenses;
+    const newSavings = character.salary * (100 - character.pinvestments - character.pretirement - character.pleisure) / 100 - taxes - livingExpenses;
     const ploans = character.loans.reduce((sum, l) => sum + l.getPayment(), 0) / character.salary * 100;
 
 
@@ -123,6 +124,7 @@ function GamePage({fname, lname}: GameProps) {
                      onClick={() => {
                          character.salary = 48000 * random.float(.95, 1.1);
                          savingsAccount.a.balance = 30000 * random.float(.7, 1.3);
+                         character.satisfaction = 40 * random.float(.9, 1.3);
                          lifeEventManager.NextEvent();
                      }}>
                     <h3 className="text-gray-700 font-bold">High School</h3>
@@ -133,6 +135,7 @@ function GamePage({fname, lname}: GameProps) {
                      onClick={() => {
                          character.salary = 53000 * random.float(.95, 1.3);
                          savingsAccount.a.balance = 12000 * random.float(.7, 1.3);
+                         character.satisfaction = 42 * random.float(.9, 1.3);
                          character.addLoan(new Loan("College", 6000 * random.float(.7, 1.3), date.d, savingsAccount.a, 1.067, true));
                          lifeEventManager.NextEvent();
                      }}>
@@ -150,6 +153,7 @@ function GamePage({fname, lname}: GameProps) {
                                       onClick={() => {
                                           character.salary = 57000 * random.float(.90, 1.3);
                                           savingsAccount.a.balance = 2000 * random.float(.7, 1.3);
+                                          character.satisfaction = 44 * random.float(.9, 1.3);
                                           character.addLoan(new Loan("College", 10000 * random.float(.7, 1.3), date.d, savingsAccount.a, 1.067, true));
                                           lifeEventManager.NextEvent();
                                       }}>
@@ -162,6 +166,7 @@ function GamePage({fname, lname}: GameProps) {
                                       onClick={() => {
                                           character.salary = 80000 * random.float(.85, 1.3);
                                           savingsAccount.a.balance = 1000 * random.float(.7, 1.3);
+                                          character.satisfaction = 50 * random.float(.9, 1.3);
                                           character.addLoan(new Loan("College", 34000 * random.float(.7, 1.3), date.d, savingsAccount.a, 1.067, true));
                                           lifeEventManager.NextEvent();
                                       }}>
@@ -174,6 +179,7 @@ function GamePage({fname, lname}: GameProps) {
                                       onClick={() => {
                                           character.salary = 83000 * random.float(.80, 1.2);
                                           savingsAccount.a.balance = 4000 * random.float(.7, 1.3);
+                                          character.satisfaction = 48 * random.float(.9, 1.3);
                                           character.addLoan(new Loan("College", 47000 * random.float(.7, 1.3), date.d, savingsAccount.a, 1.067, true));
                                           lifeEventManager.NextEvent();
                                       }}>
@@ -307,13 +313,13 @@ function GamePage({fname, lname}: GameProps) {
                     <hr></hr>
 
                     <p className="text-gray-700">Retirement</p>
-                    <p className="text-gray-700"><input name="pretirement" className="w-12"
-                              min="0"
-                              defaultValue={pretirement}
-                              onChange={e => setpretirement(Math.min(1000, Math.max(0, e.target.valueAsNumber)))}
-                              type="number">
+                    <p className="text-gray-700"><input name="character.pretirement" className="w-12 text-end"
+                                                        min="0"
+                                                        defaultValue={character.pretirement}
+                                                        onChange={e => {character.pretirement = Math.min(1000, Math.max(0, e.target.valueAsNumber)); render();}}
+                                                        type="number">
                     </input>%</p>
-                    <p className="text-gray-700">{formatter.format(character.salary * pretirement / 100)}</p>
+                    <p className="text-gray-700">{formatter.format(character.salary * character.pretirement / 100)}</p>
 
 
                     <p className="text-red-800">Taxes</p>
@@ -337,22 +343,22 @@ function GamePage({fname, lname}: GameProps) {
                     ] : []}
 
                     <p className="text-gray-700">Investments</p>
-                    <p className="text-gray-700"><input name="pinvestments" className="w-12"
-                              min="0"
-                              defaultValue={pinvestments}
-                              onChange={e => setpinvestments(Math.min(1000, Math.max(0, e.target.valueAsNumber)))}
-                              type="number">
+                    <p className="text-gray-700"><input name="character.pinvestments" className="w-12 text-end"
+                                                        min="0"
+                                                        defaultValue={character.pinvestments}
+                                                        onChange={e => {character.pinvestments = Math.min(1000, Math.max(0, e.target.valueAsNumber)); render();}}
+                                                        type="number">
                     </input>%</p>
-                    <p className="text-gray-700">{formatter.format(character.salary * pinvestments / 100)}</p>
+                    <p className="text-gray-700">{formatter.format(character.salary * character.pinvestments / 100)}</p>
 
                     <p className="text-gray-700">Leisure</p>
-                    <p className="text-gray-700"><input name="pleisure" className="w-12"
-                              min="0"
-                              defaultValue={pleisure}
-                              onChange={e => setpleisure(Math.min(1000, Math.max(0, e.target.valueAsNumber)))}
-                              type="number">
+                    <p className="text-gray-700"><input name="character.pleisure" className="w-12 text-end"
+                                                        min="0"
+                                                        defaultValue={character.pleisure}
+                                                        onChange={e => {character.pleisure = Math.min(1000, Math.max(0, e.target.valueAsNumber)); render()}}
+                                                        type="number">
                     </input>%</p>
-                    <p className="text-gray-700">{formatter.format(character.salary * pleisure / 100)}</p>
+                    <p className="text-gray-700">{formatter.format(character.salary * character.pleisure / 100)}</p>
 
                     <hr/>
                     <hr/>
@@ -475,9 +481,11 @@ function GamePage({fname, lname}: GameProps) {
     ];
     return (
         <div>
-            <div className="fixed right-1 p-2 rounded-2xl justify-end bg-amber-100 mt-1">
-                <h2 className="text-gray-700! pt-1">Satisfaction: 10000</h2>
-            </div>
+            {page < pages.length ?
+                <div className="fixed right-1 p-2 rounded-2xl justify-end bg-amber-100 mt-1">
+                    <h2 className="text-gray-700! pt-1 pl-2 pr-2">Satisfaction: {Math.floor(character.satisfaction)}</h2>
+                </div>
+                : <></>}
             {pages[Math.min(page, pages.length - 1)]}
             <div id="debt-modal" className="flex hmodal justify-center">
                 <div

@@ -2,6 +2,9 @@ export class Character {
     firstName: string;
     lastName: string;
     salary: number;
+    pinvestments: number;
+    pretirement: number;
+    pleisure: number;
     accounts: Account[];
     loans: Loan[];
     totalLoans: Account;
@@ -11,6 +14,9 @@ export class Character {
         this.firstName = firstName;
         this.lastName = lastName;
         this.salary = 0;
+        this.pinvestments = 2;
+        this.pretirement = 3;
+        this.pleisure = 5;
         this.accounts = [];
         this.loans = [];
         this.totalLoans = new Account("Loans", 0, date, false);
