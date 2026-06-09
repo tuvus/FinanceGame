@@ -88,6 +88,15 @@ function GamePage({fname, lname}: GameProps) {
 
         // Income and interest
         savingsAccount.a.balance += newSavings;
+        if (savingsAccount.a.balance < 0) {
+            const loan = character.loans.find(l => l.name == "Credit Card Debt");
+            if (loan == undefined) {
+                character.addLoan(new Loan("Credit Card Debt", -savingsAccount.a.balance, date.d, savingsAccount.a, 1.27, false));
+            } else {
+                loan.balance += -savingsAccount.a.balance;
+            }
+            savingsAccount.a.balance = 0;
+        }
         investmentAccount.a.balance += character.salary * character.pinvestments / 100
         retirementAccount.a.balance += character.salary * character.pretirement / 100
         indexFund.a.balance *= random.float(.85, 1.2);
