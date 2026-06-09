@@ -61,7 +61,8 @@ function GamePage({fname, lname}: GameProps) {
     ];
 
     const previousPage = () => {
-        if (page != 0) setPage(page - 1);
+        if (page == 3 && character.loans.length == 0) setPage(page - 2);
+        else if (page != 0) setPage(page - 1);
     }
 
     const nextPage = () => {
@@ -73,7 +74,11 @@ function GamePage({fname, lname}: GameProps) {
                 );
             }
         }
-        setPage(page + 1);
+        if (page == 1 && character.loans.length == 0) {
+            setPage(page + 2);
+        } else {
+            setPage(page + 1);
+        }
     }
 
     const endYear = () => {
@@ -128,7 +133,7 @@ function GamePage({fname, lname}: GameProps) {
                      onClick={() => {
                          character.salary = 53000 * random.float(.95, 1.3);
                          savingsAccount.a.balance = 12000 * random.float(.7, 1.3);
-                         character.addLoan(new Loan("College", 6000 * random.float(.7, 1.3), date.d, savingsAccount.a, 1.02));
+                         character.addLoan(new Loan("College", 6000 * random.float(.7, 1.3), date.d, savingsAccount.a, 1.067, true));
                          lifeEventManager.NextEvent();
                      }}>
                     <h3 className="text-gray-700 font-bold">Trade School</h3>
@@ -144,7 +149,7 @@ function GamePage({fname, lname}: GameProps) {
                                       onClick={() => {
                                           character.salary = 57000 * random.float(.90, 1.3);
                                           savingsAccount.a.balance = 2000 * random.float(.7, 1.3);
-                                          character.addLoan(new Loan("College", 10000 * random.float(.7, 1.3), date.d, savingsAccount.a, 1.02));
+                                          character.addLoan(new Loan("College", 10000 * random.float(.7, 1.3), date.d, savingsAccount.a, 1.067, true));
                                           lifeEventManager.NextEvent();
                                       }}>
                                      <h3 className="text-gray-700 font-bold">Community College</h3>
@@ -155,7 +160,7 @@ function GamePage({fname, lname}: GameProps) {
                                       onClick={() => {
                                           character.salary = 80000 * random.float(.85, 1.3);
                                           savingsAccount.a.balance = 1000 * random.float(.7, 1.3);
-                                          character.addLoan(new Loan("College", 34000 * random.float(.7, 1.3), date.d, savingsAccount.a, 1.02));
+                                          character.addLoan(new Loan("College", 34000 * random.float(.7, 1.3), date.d, savingsAccount.a, 1.067, true));
                                           lifeEventManager.NextEvent();
                                       }}>
                                      <h3 className="text-gray-700 font-bold">Public University</h3>
@@ -166,7 +171,7 @@ function GamePage({fname, lname}: GameProps) {
                                       onClick={() => {
                                           character.salary = 83000 * random.float(.80, 1.2);
                                           savingsAccount.a.balance = 4000 * random.float(.7, 1.3);
-                                          character.addLoan(new Loan("College", 47000 * random.float(.7, 1.3), date.d, savingsAccount.a, 1.02));
+                                          character.addLoan(new Loan("College", 47000 * random.float(.7, 1.3), date.d, savingsAccount.a, 1.067, true));
                                           lifeEventManager.NextEvent();
                                       }}>
                                      <h3 className="text-gray-700 font-bold">Private University</h3>
@@ -329,6 +334,38 @@ function GamePage({fname, lname}: GameProps) {
                 <h3 className={newSavings > 0 ? "text-green-700" : "text-red-800"}>
                     Predicted Balance: {formatter.format(savingsAccount.a.balance + newSavings)}</h3>
             </div>
+            <div className="flex gap-2 justify-center">
+                <button className="w-24 text-xl h-10 p-1 font-bold" onClick={() => previousPage()}><h3>Back</h3>
+                </button>
+                {character.loans.length > 0 ?
+                    <button className="w-60 text-xl h-10 p-1 font-bold" onClick={() => nextPage()}><h3>Next:
+                        Loans</h3>
+                    </button> :
+                    <button className="w-60 text-xl h-10 p-1 font-bold" onClick={() => nextPage()}><h3>Next:
+                        Investments</h3>
+                    </button>
+                }
+            </div>
+        </div>,
+        <div className="flex flex-col gap-2 items-center">
+            <h1>Loans</h1>
+            <p className="mt-2 text-red-800">
+                Total Debt: {formatter.format(character.totalLoans.balance)}
+            </p>
+            {character.loans.map((loan) =>
+                <div className="flex flex-col items-center w-120 bg-amber-100 rounded-xl p-4 m-4 gap-1 cursor-pointer">
+                    <h3 className="text-gray-700 font-bold">{loan.name}</h3>
+                    <p className="text-gray-700">Interest Rate: {Math.round(loan.interestRate * 100 - 100)}%</p>
+                    <LineChart className="h-60 w-120" data={loan.history}
+                               index="dateString"
+                               showLegend={false}
+                               minValue={Math.min(...loan.history.map(h => h.balance))}
+                               maxValue={Math.max(...loan.history.map(h => h.balance))}
+                               aria-hidden="true"
+                               categories={["balance"]}
+                               valueFormatter={(number: number) => compactFormatter.format(number)}/>
+                </div>
+            )}
             <div className="flex gap-2 justify-center">
                 <button className="w-24 text-xl h-10 p-1 font-bold" onClick={() => previousPage()}><h3>Back</h3>
                 </button>

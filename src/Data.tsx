@@ -118,18 +118,20 @@ export class Loan extends Account {
     interestRate: number;
     minimumPayment: number;
     setPayment: number;
+    fixed: boolean;
 
-    constructor(name: string, balance: number, date: Date, linkedAccount: Account, interestRate: number) {
+    constructor(name: string, balance: number, date: Date, linkedAccount: Account, interestRate: number, fixed: boolean) {
         super(name, balance, date, false);
         this.linkedAccount = linkedAccount;
         this.interestRate = interestRate;
         this.minimumPayment = balance * (interestRate * 1.1 - 1) ;
         this.setPayment = this.minimumPayment;
+        this.fixed = fixed;
     }
 
     endLoanYear(date: Date, inflation: number): void {
         this.balance *= inflation;
-        this.balance *= this.interestRate;
+        if (!this.fixed) this.balance *= this.interestRate;
         const toTransfer = Math.min(this.getPayment(), this.linkedAccount.balance);
         this.linkedAccount.balance -= toTransfer;
         this.balance -= toTransfer;
