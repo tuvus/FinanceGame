@@ -4,7 +4,7 @@ import random from "random";
 import {useEffect, useState} from "react";
 import {LineChart} from "./components/LineChart.tsx";
 import Select from 'react-select';
-import {Account, Character, Loan, StockAccount, StockBond} from "./Data.tsx";
+import {Account, Character, GameState, Loan, StockAccount, StockBond} from "./Data.tsx";
 import StockCard from "./components/StockCard.tsx";
 import {CalculateTaxes, GetDateString} from "./Utils.tsx";
 import {DonutChart} from "./components/DonutChart.tsx";
@@ -29,6 +29,7 @@ function GamePage({fname, lname}: GameProps) {
     const [date] = useState({d: new Date(random.int(1940, 2010), 0)});
     const [savingsAccount] = useState({a: new Account("Savings Account", 0, new Date(date.d.getFullYear() - 1, 0), true)});
     const [page, setPage] = useState(999);
+    const [gameState] = useState({s: new GameState()});
     const [character] = useState(new Character(fname, lname, date.d));
     const [pinvestments, setpinvestments] = useState(2);
     const [pretirement, setpretirement] = useState(3);
@@ -108,9 +109,6 @@ function GamePage({fname, lname}: GameProps) {
     const newSavings = character.salary * (100 - pinvestments - pretirement - pleisure) / 100 - taxes - livingExpenses;
     const ploans = character.loans.reduce((sum, l) => sum + l.getPayment(), 0) / character.salary * 100;
 
-    useEffect(() => {
-        character.accounts = [savingsAccount.a, investmentAccount.a, retirementAccount.a];
-    }, [])
 
     const [lifeEventManager] = useState(new LifeEventManager(date.d, endYear, render, [
         new LifeEvent("Education", date.d, <>
@@ -129,7 +127,8 @@ function GamePage({fname, lname}: GameProps) {
                 <div className="eventButton panelButton"
                      onClick={() => {
                          character.salary = 53000 * random.float(.95, 1.3);
-                         savingsAccount.a.balance = 8000 * random.float(.7, 1.3);
+                         savingsAccount.a.balance = 12000 * random.float(.7, 1.3);
+                         character.addLoan(new Loan("College", 6000 * random.float(.7, 1.3), date.d, savingsAccount.a, 1.02));
                          lifeEventManager.NextEvent();
                      }}>
                     <h3 className="text-gray-700 font-bold">Trade School</h3>
@@ -145,7 +144,7 @@ function GamePage({fname, lname}: GameProps) {
                                       onClick={() => {
                                           character.salary = 57000 * random.float(.90, 1.3);
                                           savingsAccount.a.balance = 2000 * random.float(.7, 1.3);
-                                          character.addLoan(new Loan("College", 12000 * random.float(.7, 1.3), date.d, savingsAccount.a, 1.02));
+                                          character.addLoan(new Loan("College", 10000 * random.float(.7, 1.3), date.d, savingsAccount.a, 1.02));
                                           lifeEventManager.NextEvent();
                                       }}>
                                      <h3 className="text-gray-700 font-bold">Community College</h3>
@@ -195,6 +194,23 @@ function GamePage({fname, lname}: GameProps) {
             (<div><p>During the year you will encounter events that may have a financial impact.</p></div>)),
     ]));
     const activeEvent = lifeEventManager.GetActiveEvent(date.d);
+
+    useEffect(() => {
+        character.accounts = [savingsAccount.a, investmentAccount.a, retirementAccount.a];
+        document.addEventListener("keyup", (e) => {
+            if (e.key == "Enter") {
+                if (gameState.s.page < pages.length - 1) {
+                    e.stopPropagation();
+                    gameState.s.nextPage();
+                } else if (lifeEventManager.GetActiveEvent(date.d) != null && !lifeEventManager.GetActiveEvent(date.d)!.customContinue) {
+                    lifeEventManager.NextEvent();
+                }
+            }
+        });
+    }, [])
+
+    gameState.s.page = page;
+    gameState.s.nextPage = nextPage;
 
     const pages = [
         <div className="flex flex-col gap-2 items-center">

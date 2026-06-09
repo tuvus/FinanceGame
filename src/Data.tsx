@@ -143,3 +143,8 @@ export class Loan extends Account {
        return Math.min(this.balance, this.setPayment);
     }
 }
+
+export class GameState {
+    page: number = 0;
+    nextPage =  (): void => {} ;
+}
