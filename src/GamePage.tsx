@@ -582,8 +582,7 @@ function GamePage({fname, lname}: GameProps) {
             <div className="fixed bottom-0 left-0 z-50 h-16 right-0 justify-center w-full p-2 rounded-4xl bg-gray-900">
                 <div className="grid grid-cols-4 content-center align-items-middle mx-auto h-full ml-4 mr-4">
                     <h2 className="justify-self-start align-self-middle">{fname} {lname}</h2>
-                    <h3 className="text-yellow-600 justify-self-end mt-2">Bank
-                        Account: {formatter.format(savingsAccount.a.balance)}</h3>
+                    <h2 className="text-yellow-600! justify-self-end mt-2">{formatter.format(savingsAccount.a.balance)}</h2>
                     {(page < pages.length ?
                         <button className="w-40 ml-4 text-lg h-8 justify-self-left mt-1"
                                 onClick={() => {

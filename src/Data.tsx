@@ -5,6 +5,7 @@ export class Character {
     accounts: Account[];
     loans: Loan[];
     totalLoans: Account;
+    satisfaction: number;
 
     constructor(firstName: string, lastName: string, date: Date) {
         this.firstName = firstName;
@@ -13,6 +14,7 @@ export class Character {
         this.accounts = [];
         this.loans = [];
         this.totalLoans = new Account("Loans", 0, date, false);
+        this.satisfaction = 0;
     }
 
     endYear(date: Date, inflation: number) {
