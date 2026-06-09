@@ -1,10 +1,10 @@
 /* eslint-disable react-hooks/immutability */
 import './App.css'
 import random from "random";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {LineChart} from "./components/LineChart.tsx";
 import Select from 'react-select';
-import {Account, Character, StockAccount, StockBond} from "./Data.tsx";
+import {Account, Character, Loan, StockAccount, StockBond} from "./Data.tsx";
 import StockCard from "./components/StockCard.tsx";
 import {CalculateTaxes, GetDateString} from "./Utils.tsx";
 import {DonutChart} from "./components/DonutChart.tsx";
@@ -29,7 +29,7 @@ function GamePage({fname, lname}: GameProps) {
     const [date] = useState({d: new Date(random.int(1940, 2010), 0)});
     const [savingsAccount] = useState({a: new Account("Savings Account", 0, new Date(date.d.getFullYear() - 1, 0), true)});
     const [page, setPage] = useState(999);
-    const [character] = useState(new Character(fname, lname));
+    const [character] = useState(new Character(fname, lname, date.d));
     const [pinvestments, setpinvestments] = useState(2);
     const [pretirement, setpretirement] = useState(3);
     const [pleisure, setpleisure] = useState(10);
@@ -37,7 +37,6 @@ function GamePage({fname, lname}: GameProps) {
     const [retirementAccount] = useState({a: new StockAccount("Retirement Account", 0, new Date(date.d.getFullYear() - 1, 0))});
     const [indexFund] = useState({a: new StockBond("Index Fund", random.int(7000, 50000) / 100, new Date(date.d.getFullYear() - 1, 0), false)});
     const [bond] = useState({a: new StockBond("Bond", 1, new Date(date.d.getFullYear() - 1, 0), true)});
-    const [allAccounts] = useState([savingsAccount.a, investmentAccount.a, retirementAccount.a]);
     const [rerender, setRerender] = useState(0);
     const render = () => {
         // eslint-disable-next-line react-hooks/purity
@@ -89,14 +88,13 @@ function GamePage({fname, lname}: GameProps) {
         // Inflation
         const newInflation = random.float(1.01, 1.04);
         setInflation(inflation * newInflation);
-        character.salary *= newInflation;
         indexFund.a.balance *= newInflation;
         bond.a.balance *= 1.052;
 
         // History log
         indexFund.a.endYear(date.d);
         bond.a.endYear(date.d);
-        allAccounts.forEach((account) => account.endYear(date.d));
+        character.endYear(date.d, newInflation);
 
         date.d.setFullYear(date.d.getFullYear() + 1);
         setPage(0);
@@ -108,6 +106,11 @@ function GamePage({fname, lname}: GameProps) {
     const livingExpenses = monthlyLivingExpenses * 12;
 
     const newSavings = character.salary * (100 - pinvestments - pretirement - pleisure) / 100 - taxes - livingExpenses;
+    const ploans = character.loans.reduce((sum, l) => sum + l.setPayment, 0) / character.salary;
+
+    useEffect(() => {
+        character.accounts = [savingsAccount.a, investmentAccount.a, retirementAccount.a];
+    }, [])
 
     const [lifeEventManager] = useState(new LifeEventManager(date.d, endYear, render, [
         new LifeEvent("Education", date.d, <>
@@ -141,7 +144,8 @@ function GamePage({fname, lname}: GameProps) {
                                  <div className="eventButton panelButton"
                                       onClick={() => {
                                           character.salary = 57000 * random.float(.90, 1.3);
-                                          savingsAccount.a.balance = -34000 * random.float(.7, 1.3);
+                                          savingsAccount.a.balance = 2000 * random.float(.7, 1.3);
+                                          character.addLoan(new Loan("College", 12000 * random.float(.7, 1.3), date.d, savingsAccount.a, 1.02));
                                           lifeEventManager.NextEvent();
                                       }}>
                                      <h3 className="text-gray-700 font-bold">Community College</h3>
@@ -151,7 +155,8 @@ function GamePage({fname, lname}: GameProps) {
                                  <div className="eventButton panelButton"
                                       onClick={() => {
                                           character.salary = 80000 * random.float(.85, 1.3);
-                                          savingsAccount.a.balance = -130000 * random.float(.7, 1.3);
+                                          savingsAccount.a.balance = 1000 * random.float(.7, 1.3);
+                                          character.addLoan(new Loan("College", 34000 * random.float(.7, 1.3), date.d, savingsAccount.a, 1.02));
                                           lifeEventManager.NextEvent();
                                       }}>
                                      <h3 className="text-gray-700 font-bold">Public University</h3>
@@ -160,8 +165,9 @@ function GamePage({fname, lname}: GameProps) {
                                  </div>
                                  <div className="eventButton panelButton"
                                       onClick={() => {
-                                          character.salary = 92000 * random.float(.80, 1.2);
-                                          savingsAccount.a.balance = -238000 * random.float(.7, 1.3);
+                                          character.salary = 83000 * random.float(.80, 1.2);
+                                          savingsAccount.a.balance = 4000 * random.float(.7, 1.3);
+                                          character.addLoan(new Loan("College", 47000 * random.float(.7, 1.3), date.d, savingsAccount.a, 1.02));
                                           lifeEventManager.NextEvent();
                                       }}>
                                      <h3 className="text-gray-700 font-bold">Private University</h3>
@@ -194,7 +200,7 @@ function GamePage({fname, lname}: GameProps) {
         <div className="flex flex-col gap-2 items-center">
             <h1>Year in review {date.d.getFullYear() - 1}</h1>
             <div className="grid grid-cols-2">
-                {allAccounts.map((account, i) => (
+                {character.accounts.map((account, i) => (
                     <div key={i} className="flex flex-col items-center bg-amber-100 rounded-xl p-4 m-4 gap-1">
                         <h3 className="text-gray-700 font-bold">{account.name}</h3>
                         <div className="flex items-baseline gap-2">
@@ -214,18 +220,21 @@ function GamePage({fname, lname}: GameProps) {
                     </div>))}
                 <DonutChart className="h-full w-full m-auto p-4"
                             data={[
-                                {name: "Cash", amount: allAccounts.reduce((sum, curr) => sum + curr.balance, 0)},
+                                {name: "Cash", amount: character.accounts.reduce((sum, curr) => sum + curr.balance, 0)},
                                 {
                                     name: "Stocks",
-                                    amount: allAccounts.filter(a => a instanceof StockAccount).map(a => a as StockAccount)
+                                    amount: character.accounts.filter(a => a instanceof StockAccount).map(a => a as StockAccount)
                                         .reduce((sum, curr) => sum + curr.getStockValue(), 0)
                                 }, {
                                     name: "Bonds",
-                                    amount: allAccounts.filter(a => a instanceof StockAccount).map(a => a as StockAccount)
+                                    amount: character.accounts.filter(a => a instanceof StockAccount).map(a => a as StockAccount)
                                         .reduce((sum, curr) => sum + curr.getBondValue(), 0)
+                                }, {
+                                    name: "Loans",
+                                    amount: character.totalLoans.getTotalValue()
                                 }
                             ]}
-                            label={"Total Assets: " + formatter.format(allAccounts.reduce((sum, curr) => sum + curr.getTotalValue(), 0))}
+                            label={"Total Assets: " + formatter.format(character.accounts.reduce((sum, curr) => sum + curr.getTotalValue(), 0))}
                             category="name" value="amount" showLabel={true}
                             valueFormatter={(number: number) => formatter.format(number)}/>
             </div>
@@ -266,6 +275,12 @@ function GamePage({fname, lname}: GameProps) {
                         <p className="text-red-800" key={i + "3"}>{formatter.format(amount * inflation * 12)}</p>
                     ]);
                 })}
+
+                {character.loans.length > 0 ? [
+                    <p className="text-red-800">Loans</p>,
+                    <p className="text-red-800">{Math.round(ploans * 100)}%</p>,
+                    <p className="text-red-800">{formatter.format(character.loans.reduce((sum, l) => sum + l.setPayment, 0))}</p>
+                ] : []}
 
                 <p>Investments</p>
                 <p><input name="pinvestments" className="w-12"
@@ -364,7 +379,7 @@ function GamePage({fname, lname}: GameProps) {
                 <div
                     className="flex flex-col gap-2 ml-auto mr-auto mt-[20%] w-100 bg-amber-100 rounded-xl justify-center p-4">
                     <h3 className="text-gray-700">Transfer Funds</h3>
-                    <Select options={allAccounts.filter(a => a.isOwnedAccount)}
+                    <Select options={character.accounts.filter(a => a.isOwnedAccount)}
                             getOptionLabel={a => a.name}
                             value={transferFrom.selectedAccount}
                             isSearchable={false}
@@ -376,11 +391,12 @@ function GamePage({fname, lname}: GameProps) {
                             }}></Select>
                     {transferFrom.selectedAccount ?
                         <p className="text-gray-700 text-lg!">Balance: {formatter.format(transferFrom.selectedAccount!.balance)}</p> : <></>}
-                    <Select options={allAccounts.filter(a => a != transferFrom.selectedAccount && a.isOwnedAccount)}
-                            getOptionLabel={a => a.name}
-                            value={transferTo.selectedAccount}
-                            isSearchable={false}
-                            onChange={(a: Account | null) => setTransferTo({selectedAccount: a})}></Select>
+                    <Select
+                        options={character.accounts.filter(a => a != transferFrom.selectedAccount && a.isOwnedAccount)}
+                        getOptionLabel={a => a.name}
+                        value={transferTo.selectedAccount}
+                        isSearchable={false}
+                        onChange={(a: Account | null) => setTransferTo({selectedAccount: a})}></Select>
 
                     <div className="flex">
                         <p className="text-xl text-gray-700! p-2">$</p>
