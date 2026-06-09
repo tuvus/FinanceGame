@@ -78,7 +78,7 @@ function GamePage({fname, lname}: GameProps) {
     const endYear = () => {
         const livingExpenses = monthlyItemizedLivingExpenses.map(e => e.amount).reduce((sum, curr) => sum + curr, 0) * inflation * 12;
 
-        const newSavings = character.salary * (100 - pinvestments - pretirement - pleisure) / 100 - CalculateTaxes(Math.max(0, character.salary - 15750)) - livingExpenses;
+        const newSavings = character.salary * (100 - pinvestments - pretirement - pleisure) / 100 - CalculateTaxes(Math.max(0, character.salary * (1 - pretirement / 100) - 15750)) - livingExpenses;
         // Income and interest
         savingsAccount.a.balance += newSavings;
         investmentAccount.a.balance += character.salary * pinvestments / 100
@@ -100,13 +100,13 @@ function GamePage({fname, lname}: GameProps) {
         setPage(0);
     }
 
-    const taxes = CalculateTaxes(Math.max(0, character.salary - 15750));
+    const taxes = CalculateTaxes(Math.max(0, character.salary * (1 - pretirement / 100) - 15750));
 
     const monthlyLivingExpenses = monthlyItemizedLivingExpenses.map(e => e.amount).reduce((sum, curr) => sum + curr, 0) * inflation;
     const livingExpenses = monthlyLivingExpenses * 12;
 
     const newSavings = character.salary * (100 - pinvestments - pretirement - pleisure) / 100 - taxes - livingExpenses;
-    const ploans = character.loans.reduce((sum, l) => sum + l.setPayment, 0) / character.salary;
+    const ploans = character.loans.reduce((sum, l) => sum + l.getPayment(), 0) / character.salary * 100;
 
     useEffect(() => {
         character.accounts = [savingsAccount.a, investmentAccount.a, retirementAccount.a];
@@ -278,8 +278,8 @@ function GamePage({fname, lname}: GameProps) {
 
                 {character.loans.length > 0 ? [
                     <p className="text-red-800">Loans</p>,
-                    <p className="text-red-800">{Math.round(ploans * 100)}%</p>,
-                    <p className="text-red-800">{formatter.format(character.loans.reduce((sum, l) => sum + l.setPayment, 0))}</p>
+                    <p className="text-red-800">{Math.round(ploans)}%</p>,
+                    <p className="text-red-800">{formatter.format(character.loans.reduce((sum, l) => sum + l.getPayment(), 0))}</p>
                 ] : []}
 
                 <p>Investments</p>

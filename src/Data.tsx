@@ -19,7 +19,7 @@ export class Character {
         this.salary *= inflation;
         this.accounts.forEach((account) => account.endYear(date));
         this.loans.forEach(l => l.endLoanYear(date, inflation));
-        this.loans = this.loans.filter(l => l.balance < 0.00001);
+        this.loans = this.loans.filter(l => l.balance >= 0.01);
         this.totalLoans.balance = this.loans.reduce((sum, a) => sum + a.balance, 0);
         this.totalLoans.endYear(date);
     }
@@ -130,12 +130,16 @@ export class Loan extends Account {
     endLoanYear(date: Date, inflation: number): void {
         this.balance *= inflation;
         this.balance *= this.interestRate;
-        const toTransfer = Math.min(Math.min(this.linkedAccount.balance, this.setPayment), this.balance);
+        const toTransfer = Math.min(this.getPayment(), this.linkedAccount.balance);
         this.linkedAccount.balance -= toTransfer;
         this.balance -= toTransfer;
         super.endYear(date);
         if (this.balance < 0.00001) return;
         // Todo: find a better formula for not paying the minimum due
         if (toTransfer < this.minimumPayment) this.balance += (this.minimumPayment - toTransfer) * 2;
+    }
+
+    getPayment(): number {
+       return Math.min(this.balance, this.setPayment);
     }
 }
