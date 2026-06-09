@@ -206,35 +206,35 @@ function GamePage({fname, lname}: GameProps) {
             if (e.key == "PageUp") {
                 if (document.getElementById("transfer-modal")!.style.display == "block") {
                     document.getElementById("transfer-confirm")!.click();
-                    e.stopPropagation();
+                    e.stopImmediatePropagation();
                     return;
                 }
                 if (document.getElementById("debt-modal")!.style.display == "block") {
                     document.getElementById("debt-confirm")!.click();
-                    e.stopPropagation();
+                    e.stopImmediatePropagation();
                     return;
                 }
                 if (gameState.s.page < pages.length - 1) {
                     gameState.s.nextPage();
-                    e.stopPropagation();
+                    e.stopImmediatePropagation();
                 } else if (lifeEventManager.GetActiveEvent(date.d) != null && !lifeEventManager.GetActiveEvent(date.d)!.customContinue) {
                     lifeEventManager.NextEvent();
-                    e.stopPropagation();
+                    e.stopImmediatePropagation();
                 }
             } else if (e.key == "PageDown") {
                 if (document.getElementById("transfer-modal")!.style.display == "block") {
                     document.getElementById("transfer-cancel")!.click();
-                    e.stopPropagation();
+                    e.stopImmediatePropagation();
                     return;
                 }
                 if (document.getElementById("debt-modal")!.style.display == "block") {
                     document.getElementById("debt-cancel")!.click();
-                    e.stopPropagation();
+                    e.stopImmediatePropagation();
                     return;
                 }
                 if (gameState.s.page < pages.length - 1) {
                     gameState.s.previousPage();
-                    e.stopPropagation();
+                    e.stopImmediatePropagation();
                 }
             }
         });
@@ -327,7 +327,8 @@ function GamePage({fname, lname}: GameProps) {
                 {character.loans.length > 0 ? [
                     <p className="text-red-800" key="111">Loans</p>,
                     <p className="text-red-800" key="222">{Math.round(ploans)}%</p>,
-                    <p className="text-red-800" key="333">{formatter.format(character.loans.reduce((sum, l) => sum + l.getPayment(), 0))}</p>
+                    <p className="text-red-800"
+                       key="333">{formatter.format(character.loans.reduce((sum, l) => sum + l.getPayment(), 0))}</p>
                 ] : []}
 
                 <p>Investments</p>
