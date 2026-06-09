@@ -297,74 +297,76 @@ function GamePage({fname, lname}: GameProps) {
         </div>,
         <div className="flex flex-col gap-2 items-center">
             <h1>Allocation</h1>
-            <div className="grid grid-cols-3 w-1/2">
-                <p className="text-green-700">Paycheck</p>
-                <p></p>
-                <p className="text-green-700">{formatter.format(character.salary)}</p>
-                <hr></hr>
-                <hr></hr>
-                <hr></hr>
+            <div className="flex flex-col gap-2 w-1/2 rounded-2xl bg-amber-100 items-center pt-2 pb-2">
+                <div className="grid grid-cols-3 w-full">
+                    <p className="text-green-700">Paycheck</p>
+                    <p></p>
+                    <p className="text-green-700">{formatter.format(character.salary)}</p>
+                    <hr></hr>
+                    <hr></hr>
+                    <hr></hr>
 
-                <p>Retirement</p>
-                <p><input name="pretirement" className="w-12"
-                          min="0"
-                          defaultValue={pretirement}
-                          onChange={e => setpretirement(Math.min(1000, Math.max(0, e.target.valueAsNumber)))}
-                          type="number">
-                </input>%</p>
-                <p>{formatter.format(character.salary * pretirement / 100)}</p>
+                    <p className="text-gray-700">Retirement</p>
+                    <p className="text-gray-700"><input name="pretirement" className="w-12"
+                              min="0"
+                              defaultValue={pretirement}
+                              onChange={e => setpretirement(Math.min(1000, Math.max(0, e.target.valueAsNumber)))}
+                              type="number">
+                    </input>%</p>
+                    <p className="text-gray-700">{formatter.format(character.salary * pretirement / 100)}</p>
 
 
-                <p className="text-red-800">Taxes</p>
-                <p className="text-red-800">{Math.round(taxes / character.salary * 100)}%</p>
-                <p className="text-red-800">{formatter.format(taxes)}</p>
+                    <p className="text-red-800">Taxes</p>
+                    <p className="text-red-800">{Math.round(taxes / character.salary * 100)}%</p>
+                    <p className="text-red-800">{formatter.format(taxes)}</p>
 
-                {monthlyItemizedLivingExpenses.map(({name, amount}, i) => {
-                    return ([
-                        <p className="text-red-800" key={i + "1"}>{name}</p>,
+                    {monthlyItemizedLivingExpenses.map(({name, amount}, i) => {
+                        return ([
+                            <p className="text-red-800" key={i + "1"}>{name}</p>,
+                            <p className="text-red-800"
+                               key={i + "2"}>{Math.round(amount * 12 * inflation / character.salary * 100)}%</p>,
+                            <p className="text-red-800" key={i + "3"}>{formatter.format(amount * inflation * 12)}</p>
+                        ]);
+                    })}
+
+                    {character.loans.length > 0 ? [
+                        <p className="text-red-800" key="111">Loans</p>,
+                        <p className="text-red-800" key="222">{Math.round(ploans)}%</p>,
                         <p className="text-red-800"
-                           key={i + "2"}>{Math.round(amount * 12 * inflation / character.salary * 100)}%</p>,
-                        <p className="text-red-800" key={i + "3"}>{formatter.format(amount * inflation * 12)}</p>
-                    ]);
-                })}
+                           key="333">{formatter.format(character.loans.reduce((sum, l) => sum + l.getPayment(), 0))}</p>
+                    ] : []}
 
-                {character.loans.length > 0 ? [
-                    <p className="text-red-800" key="111">Loans</p>,
-                    <p className="text-red-800" key="222">{Math.round(ploans)}%</p>,
-                    <p className="text-red-800"
-                       key="333">{formatter.format(character.loans.reduce((sum, l) => sum + l.getPayment(), 0))}</p>
-                ] : []}
+                    <p className="text-gray-700">Investments</p>
+                    <p className="text-gray-700"><input name="pinvestments" className="w-12"
+                              min="0"
+                              defaultValue={pinvestments}
+                              onChange={e => setpinvestments(Math.min(1000, Math.max(0, e.target.valueAsNumber)))}
+                              type="number">
+                    </input>%</p>
+                    <p className="text-gray-700">{formatter.format(character.salary * pinvestments / 100)}</p>
 
-                <p>Investments</p>
-                <p><input name="pinvestments" className="w-12"
-                          min="0"
-                          defaultValue={pinvestments}
-                          onChange={e => setpinvestments(Math.min(1000, Math.max(0, e.target.valueAsNumber)))}
-                          type="number">
-                </input>%</p>
-                <p>{formatter.format(character.salary * pinvestments / 100)}</p>
+                    <p className="text-gray-700">Leisure</p>
+                    <p className="text-gray-700"><input name="pleisure" className="w-12"
+                              min="0"
+                              defaultValue={pleisure}
+                              onChange={e => setpleisure(Math.min(1000, Math.max(0, e.target.valueAsNumber)))}
+                              type="number">
+                    </input>%</p>
+                    <p className="text-gray-700">{formatter.format(character.salary * pleisure / 100)}</p>
 
-                <p>Leisure</p>
-                <p><input name="pleisure" className="w-12"
-                          min="0"
-                          defaultValue={pleisure}
-                          onChange={e => setpleisure(Math.min(1000, Math.max(0, e.target.valueAsNumber)))}
-                          type="number">
-                </input>%</p>
-                <p>{formatter.format(character.salary * pleisure / 100)}</p>
+                    <hr/>
+                    <hr/>
+                    <hr/>
 
-                <hr/>
-                <hr/>
-                <hr/>
+                    <p className="text-yellow-600">Savings</p>
+                    <p className="text-yellow-600">{Math.round(newSavings / character.salary * 100)}%</p>
+                    <p className="text-yellow-600">{formatter.format(newSavings)}</p>
+                </div>
 
-                <p className="text-yellow-600">Savings</p>
-                <p className="text-yellow-600">{Math.round(newSavings / character.salary * 100)}%</p>
-                <p className="text-yellow-600">{formatter.format(newSavings)}</p>
-            </div>
-
-            <div className="flex gap-2">
-                <h3 className={newSavings > 0 ? "text-green-700" : "text-red-800"}>
-                    Predicted Balance: {formatter.format(savingsAccount.a.balance + newSavings)}</h3>
+                <div className="flex gap-2">
+                    <h3 className={newSavings > 0 ? "text-green-700" : "text-red-800"}>
+                        Predicted Balance: {formatter.format(savingsAccount.a.balance + newSavings)}</h3>
+                </div>
             </div>
             <div className="flex gap-2 justify-center">
                 <button className="w-24 text-xl h-10 p-1 font-bold" onClick={() => previousPage()}><h3>Back</h3>
@@ -473,6 +475,9 @@ function GamePage({fname, lname}: GameProps) {
     ];
     return (
         <div>
+            <div className="fixed right-1 p-2 rounded-2xl justify-end bg-amber-100 mt-1">
+                <h2 className="text-gray-700! pt-1">Satisfaction: 10000</h2>
+            </div>
             {pages[Math.min(page, pages.length - 1)]}
             <div id="debt-modal" className="flex hmodal justify-center">
                 <div
@@ -579,12 +584,12 @@ function GamePage({fname, lname}: GameProps) {
                 </div>
             </div>
             <div className="mb-20"></div>
-            <div className="fixed bottom-0 left-0 z-50 h-16 right-0 justify-center w-full p-2 rounded-4xl bg-gray-900">
+            <div className="fixed bottom-1 left-1 z-50 h-16 right-1 justify-center p-2 rounded-2xl bg-amber-100">
                 <div className="grid grid-cols-4 content-center align-items-middle mx-auto h-full ml-4 mr-4">
-                    <h2 className="justify-self-start align-self-middle">{fname} {lname}</h2>
+                    <h2 className="justify-self-start text-gray-700! align-self-middle">{fname} {lname}</h2>
                     <h2 className="text-yellow-600! justify-self-end mt-2">{formatter.format(savingsAccount.a.balance)}</h2>
                     {(page < pages.length ?
-                        <button className="w-40 ml-4 text-lg h-8 justify-self-left mt-1"
+                        <button className="w-50 ml-4 text-xl font-bold h-10 justify-self-left"
                                 onClick={() => {
                                     setFundsToTransfer(NaN);
                                     setTransferFrom({selectedAccount: null});
@@ -595,7 +600,7 @@ function GamePage({fname, lname}: GameProps) {
                             Money
                         </button>
                         : <div></div>)}
-                    <p className="justify-self-end">{GetDateString(date.d)}</p>
+                    <h2 className="justify-self-end text-gray-700!">{GetDateString(date.d)}</h2>
                 </div>
             </div>
         </div>
