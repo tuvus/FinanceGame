@@ -222,7 +222,18 @@ function GamePage({fname, lname}: GameProps) {
     useEffect(() => {
         character.accounts = [savingsAccount.a, investmentAccount.a, retirementAccount.a];
         document.addEventListener("keyup", (e) => {
-            if (e.key == "PageUp") {
+            if (e.key == "Enter") {
+                if (document.getElementById("transfer-modal")!.style.display == "block") {
+                    document.getElementById("transfer-confirm")!.click();
+                    e.stopImmediatePropagation();
+                    return;
+                }
+                if (document.getElementById("debt-modal")!.style.display == "block") {
+                    document.getElementById("debt-confirm")!.click();
+                    e.stopImmediatePropagation();
+                    return;
+                }
+            } else if (e.key == "n") {
                 if (document.getElementById("transfer-modal")!.style.display == "block") {
                     document.getElementById("transfer-confirm")!.click();
                     e.stopImmediatePropagation();
@@ -240,7 +251,7 @@ function GamePage({fname, lname}: GameProps) {
                     lifeEventManager.NextEvent();
                     e.stopImmediatePropagation();
                 }
-            } else if (e.key == "PageDown") {
+            } else if (e.key == "b") {
                 if (document.getElementById("transfer-modal")!.style.display == "block") {
                     document.getElementById("transfer-cancel")!.click();
                     e.stopImmediatePropagation();
@@ -322,16 +333,17 @@ function GamePage({fname, lname}: GameProps) {
                     <hr></hr>
 
                     <p className="text-gray-700">Retirement</p>
-                    <p className="text-gray-700"><input name="character.pretirement" className="w-12 text-end"
-                                                        min="0"
-                                                        max={Math.min(24500 * inflation / character.salary * 100, 100)}
-                                                        defaultValue={character.pretirement}
-                                                        onChange={e => {
-                                                            character.pretirement = Math.min(1000, Math.max(0, e.target.valueAsNumber));
-                                                            render();
-                                                        }}
-                                                        type="number">
-                    </input>%</p>
+                    <p className="text-gray-700">
+                        <input name="character.pretirement" className="w-12 text-end"
+                               min="0"
+                               max={Math.min(24500 * inflation / character.salary * 100, 100)}
+                               defaultValue={character.pretirement}
+                               onChange={e => {
+                                   character.pretirement = Math.min(1000, Math.max(0, e.target.valueAsNumber));
+                                   render();
+                               }}
+                               type="number">
+                        </input>%</p>
                     <p className="text-gray-700">{formatter.format(character.salary * character.pretirement / 100)}</p>
 
 
@@ -356,27 +368,29 @@ function GamePage({fname, lname}: GameProps) {
                     ] : []}
 
                     <p className="text-gray-700">Investments</p>
-                    <p className="text-gray-700"><input name="character.pinvestments" className="w-12 text-end"
-                                                        min="0"
-                                                        defaultValue={character.pinvestments}
-                                                        onChange={e => {
-                                                            character.pinvestments = Math.min(1000, Math.max(0, e.target.valueAsNumber));
-                                                            render();
-                                                        }}
-                                                        type="number">
-                    </input>%</p>
+                    <p className="text-gray-700">
+                        <input name="character.pinvestments" className="w-12 text-end"
+                               min="0"
+                               defaultValue={character.pinvestments}
+                               onChange={e => {
+                                   character.pinvestments = Math.min(1000, Math.max(0, e.target.valueAsNumber));
+                                   render();
+                               }}
+                               type="number">
+                        </input>%</p>
                     <p className="text-gray-700">{formatter.format(character.salary * character.pinvestments / 100)}</p>
 
                     <p className="text-gray-700">Leisure</p>
-                    <p className="text-gray-700"><input name="character.pleisure" className="w-12 text-end"
-                                                        min="0"
-                                                        defaultValue={character.pleisure}
-                                                        onChange={e => {
-                                                            character.pleisure = Math.min(1000, Math.max(0, e.target.valueAsNumber));
-                                                            render()
-                                                        }}
-                                                        type="number">
-                    </input>%</p>
+                    <p className="text-gray-700">
+                        <input name="character.pleisure" className="w-12 text-end"
+                               min="0"
+                               defaultValue={character.pleisure}
+                               onChange={e => {
+                                   character.pleisure = Math.min(1000, Math.max(0, e.target.valueAsNumber));
+                                   render()
+                               }}
+                               type="number">
+                        </input>%</p>
                     <p className="text-gray-700">{formatter.format(character.salary * character.pleisure / 100)}</p>
 
                     <hr/>
@@ -506,9 +520,11 @@ function GamePage({fname, lname}: GameProps) {
                 </div>
                 : <></>}
             {pages[Math.min(page, pages.length - 1)]}
-            <div id="debt-modal" className="flex hmodal justify-center">
+            <div id="debt-modal" className="flex hmodal justify-center"
+                 onClick={() => document.getElementById("debt-modal")!.style.display = "none"}>
                 <div
-                    className="flex flex-col gap-2 ml-auto mr-auto mt-[20%] w-100 bg-amber-100 rounded-xl justify-center p-4">
+                    className="flex flex-col gap-2 ml-auto mr-auto mt-[20%] w-100 bg-amber-100 rounded-xl justify-center p-4"
+                    onClick={e => e.stopPropagation()}>
                     <h3 className="text-gray-700">Pay Debt</h3>
                     <p className="text-gray-700 text-lg!">{transferFrom.selectedAccount?.name}</p>
                     <p className="text-gray-700 text-lg!">Balance: {formatter.format(transferFrom.selectedAccount?.balance ?? 0)}</p>
@@ -552,9 +568,11 @@ function GamePage({fname, lname}: GameProps) {
                     </div>
                 </div>
             </div>
-            <div id="transfer-modal" className="flex hmodal justify-center">
+            <div id="transfer-modal" className="flex hmodal justify-center"
+                 onClick={() => document.getElementById("transfer-modal")!.style.display = "none"}>
                 <div
-                    className="flex flex-col gap-2 ml-auto mr-auto mt-[20%] w-100 bg-amber-100 rounded-xl justify-center p-4">
+                    className="flex flex-col gap-2 ml-auto mr-auto mt-[20%] w-100 bg-amber-100 rounded-xl justify-center p-4"
+                    onClick={e => e.stopPropagation()}>
                     <h3 className="text-gray-700">Transfer Funds</h3>
                     <Select options={character.accounts.filter(a => a.isOwnedAccount)}
                             getOptionLabel={a => a.name}
@@ -611,7 +629,7 @@ function GamePage({fname, lname}: GameProps) {
                 </div>
             </div>
             <div className="mb-20"></div>
-            <div className="fixed bottom-1 left-1 z-50 h-16 right-1 justify-center p-2 rounded-2xl bg-amber-100">
+            <div className="fixed bottom-1 left-1 z-9 h-16 right-1 justify-center p-2 rounded-2xl bg-amber-100">
                 <div className="grid grid-cols-4 content-center align-items-middle mx-auto h-full ml-4 mr-4">
                     <h2 className="justify-self-start text-gray-700! align-self-middle">{fname} {lname}</h2>
                     {(page < pages.length ? [
@@ -626,7 +644,7 @@ function GamePage({fname, lname}: GameProps) {
                                     }}>Transfer
                                 Money
                             </button>]
-                        : [<div></div>,<div></div>])}
+                        : [<div></div>, <div></div>])}
                     <h2 className="justify-self-end text-gray-700!">{GetDateString(date.d)}</h2>
                 </div>
             </div>
