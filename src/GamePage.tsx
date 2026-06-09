@@ -120,8 +120,8 @@ function GamePage({fname, lname}: GameProps) {
                          lifeEventManager.NextEvent();
                      }}>
                     <h3 className="text-gray-700 font-bold">High School</h3>
-                    <p className="text-gray-700">High school graduates that go straight into the workforce start making
-                        money earlier and can start building their wealth.</p>
+                    <p className="text-gray-700">Graduates that go straight into the workforce start building their
+                        wealth earlier and don't have to spend money on education.</p>
                 </div>
                 <div className="eventButton panelButton"
                      onClick={() => {
@@ -130,9 +130,10 @@ function GamePage({fname, lname}: GameProps) {
                          lifeEventManager.NextEvent();
                      }}>
                     <h3 className="text-gray-700 font-bold">Trade School</h3>
-                    <p className="text-gray-700">The experience from a trade school certificate helps entry into more
-                        specialized work areas. This is a two year program, balancing education and going into the
-                        workforce early.</p>
+                    <p className="text-gray-700">Trade school is around a one year program that emphasizes going into
+                        the
+                        workforce early. The practical experience from a trade school certificate allows entry
+                        into more specialized work areas.</p>
                 </div>
                 <div className="eventButton panelButton"
                      onClick={() => {
@@ -145,8 +146,9 @@ function GamePage({fname, lname}: GameProps) {
                                           lifeEventManager.NextEvent();
                                       }}>
                                      <h3 className="text-gray-700 font-bold">Community College</h3>
-                                     <p className="text-gray-700">Obtain an associates degree</p>
-                                     <p className="text-gray-700">Cheaper than other colleges</p>
+                                     <p className="text-gray-700">An associates degree is a two year program that
+                                         balances college education and going into the workforce early. It is less
+                                         expensive than other colleges, but won't be as specialized.</p>
                                  </div>
                                  <div className="eventButton panelButton"
                                       onClick={() => {
@@ -155,8 +157,9 @@ function GamePage({fname, lname}: GameProps) {
                                           lifeEventManager.NextEvent();
                                       }}>
                                      <h3 className="text-gray-700 font-bold">Public University</h3>
-                                     <p className="text-gray-700">Obtain a bachelors degree</p>
-                                     <p className="text-gray-700">Moderately expensive</p>
+                                     <p className="text-gray-700">A bachelors degree is a four year program that focuses
+                                         on a specific topic. Public universities provide more depth, but can be
+                                         expensive.</p>
                                  </div>
                                  <div className="eventButton panelButton"
                                       onClick={() => {
@@ -165,15 +168,16 @@ function GamePage({fname, lname}: GameProps) {
                                           lifeEventManager.NextEvent();
                                       }}>
                                      <h3 className="text-gray-700 font-bold">Private University</h3>
-                                     <p className="text-gray-700">Obtain a bachelors degree</p>
-                                     <p className="text-gray-700">Very expensive</p>
+                                     <p className="text-gray-700">A bachelors degree is a four year program that focuses
+                                         on a specific topic. While private universities are expensive they
+                                         are often more prestigious.</p>
                                  </div>
                              </div>
                          </>, true));
                      }}>
                     <h3 className="text-gray-700 font-bold">College</h3>
-                    <p className="text-gray-700">Obtained a bachelors degree</p>
-                    <p className="text-gray-700">Can be expensive</p>
+                    <p className="text-gray-700">Obtaining an associates or bachelors degree allows entry into
+                        specialized areas. College degrees can be expensive and may need to be paid through loans.</p>
                 </div>
             </div>
         </>, true),
