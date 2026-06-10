@@ -17,13 +17,13 @@ function SetupPage({fname, lname, startGame}: SetupProps) {
             <div className="flex flex-col items-center gap-2 p-4 bg-amber-100 rounded-xl">
                 <h2 className="text-gray-700! m-2 p-2">Choose your character name</h2>
                 <label className="text-gray-700">
-                    First Name: <input name="characterFName" className="w-38 text-gray-700 bg-gray-300 rounded-xl p-1"
+                    First Name: <input name="characterFName" className="w-38 text-gray-700 bg-gray-200 rounded-xl p-1"
                                        defaultValue={firstName}
                                        onChange={e => setFirstname(e.target.value)}
                                        type="text"></input>
                 </label>
                 <label className="text-gray-700">
-                    Last Name: <input name="characterLName" className="w-38 text-gray-700 bg-gray-300 rounded-xl p-1"
+                    Last Name: <input name="characterLName" className="w-38 text-gray-700 bg-gray-200 rounded-xl p-1"
                                       defaultValue={lastName}
                                       onChange={e => setLastName(e.target.value)}
                                       type="text"></input>

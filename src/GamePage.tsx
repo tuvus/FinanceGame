@@ -534,7 +534,7 @@ function GamePage({fname, lname}: GameProps) {
 
                     <div className="flex">
                         <p className="text-xl text-gray-700! p-2">$</p>
-                        <input name="transfer-funds" className="w-80 bg-gray-300 rounded-xl p-1 text-gray-700"
+                        <input name="transfer-funds" className="w-80 bg-gray-200 rounded-xl p-1 text-gray-700"
                                autoFocus={true}
                                min=""
                                max={Math.min(transferFrom.selectedAccount?.balance ?? 0, transferTo.selectedAccount?.balance ?? 0)}
@@ -581,7 +581,7 @@ function GamePage({fname, lname}: GameProps) {
                         isSearchable={false}
                         styles={{
                             control: (baseStyles, state) => ({
-                                ...baseStyles, backgroundColor: "#d1d5dc", borderRadius: 10,
+                                ...baseStyles, backgroundColor: "#e5e7eb", borderRadius: 10,
                                 border: state.isFocused ? "2px solid #fe9a00" : "2px solid #cccccc",
                                 "&:hover": {
                                     border: "2px solid #fe9a00",
@@ -601,7 +601,7 @@ function GamePage({fname, lname}: GameProps) {
                             option: (baseStyles, state) => ({
                                 ...baseStyles,
                                 color: "#364153",
-                                backgroundColor: state.isFocused ? "#d1d5dc" : undefined,
+                                backgroundColor: state.isFocused ? "#e5e7eb" : undefined,
                                 borderRadius: 10
                             })
                         }}
@@ -623,7 +623,7 @@ function GamePage({fname, lname}: GameProps) {
                         isSearchable={false}
                         styles={{
                             control: (baseStyles, state) => ({
-                                ...baseStyles, backgroundColor: "#d1d5dc", borderRadius: 10,
+                                ...baseStyles, backgroundColor: "#e5e7eb", borderRadius: 10,
                                 border: state.isFocused ? "2px solid #fe9a00" : "2px solid #cccccc",
                                 "&:hover": {
                                     border: "2px solid #fe9a00",
@@ -643,7 +643,7 @@ function GamePage({fname, lname}: GameProps) {
                             option: (baseStyles, state) => ({
                                 ...baseStyles,
                                 color: "#364153",
-                                backgroundColor: state.isFocused ? "#d1d5dc" : undefined,
+                                backgroundColor: state.isFocused ? "#e5e7eb" : undefined,
                                 borderRadius: 10
                             })
                         }}
@@ -651,7 +651,7 @@ function GamePage({fname, lname}: GameProps) {
 
                     <div className="flex">
                         <p className="text-xl text-gray-700! p-2">$</p>
-                        <input name="transfer-funds" className="w-80 bg-gray-300 rounded-xl p-1 text-gray-700"
+                        <input name="transfer-funds" className="w-80 bg-gray-200 rounded-xl p-1 text-gray-700"
                                min=""
                                max={transferFrom.selectedAccount?.balance ?? 0}
                                disabled={transferFrom.selectedAccount == null}

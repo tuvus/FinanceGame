@@ -82,7 +82,7 @@ function StockCard({stock, investmentAccount, formatter, compactFormatter, rende
                         <h3 className="text-gray-700">How many shares would you like to buy?</h3>
                         <div className="flex">
                             <p className="text-xl text-gray-700! p-2">$</p>
-                            <input name="buy-shares" className="w-80 bg-gray-300 rounded-xl p-1 text-gray-700"
+                            <input name="buy-shares" className="w-80 bg-gray-200 rounded-xl p-1 text-gray-700"
                                    min={0}
                                    max={investmentAccount.a.balance / stock.a.balance}
                                    value={stocksToBuySell}
@@ -121,7 +121,7 @@ function StockCard({stock, investmentAccount, formatter, compactFormatter, rende
                         <h3 className="text-gray-700">How many Shares would you like to sell?</h3>
                         <div className="flex">
                             <p className="text-xl text-gray-700! p-2">$</p>
-                            <input name="sell-shares" className="w-80 bg-white rounded-xl p-1 text-gray-700"
+                            <input name="sell-shares" className="w-80 bg-gray-200 rounded-xl p-1 text-gray-700"
                                    min={0}
                                    max={investmentAccount.a.getStock(stock.a).amount}
                                    value={stocksToBuySell}
