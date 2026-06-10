@@ -26,9 +26,12 @@ function StockCard({stock, investmentAccount, formatter, compactFormatter, rende
                     <div className="flex items-baseline gap-2">
                         <p className="text-gray-700">5.2% Yearly Interest Rate</p>
                     </div>
-                    <p className="text-gray-700">
-                        Value: {formatter.format(investmentAccount.a.getStock(stock.a).amount * stock.a.balance)}
-                    </p>
+                    {investmentAccount.a.positions.has(stock.a) ?
+                        <p className="text-gray-700">
+                            Value: {formatter.format(investmentAccount.a.getStock(stock.a).amount * stock.a.balance)}
+                        </p> : <></>
+                    }
+
                 </> : <>
                     <div className="flex items-baseline gap-2">
                         <p className="text-gray-700">{formatter.format(stock.a.balance)}</p>
@@ -36,9 +39,11 @@ function StockCard({stock, investmentAccount, formatter, compactFormatter, rende
                             : <p className="text-red-800">{stock.a.diff}%</p> : <></>}
                         <p className="text-gray-700">per share</p>
                     </div>
-                    <p className="text-gray-700">
-                        Shares: {Math.round(investmentAccount.a.getStock(stock.a).amount * 100) / 100} ({formatter.format(investmentAccount.a.getStock(stock.a).amount * investmentAccount.a.getStock(stock.a).buyValue)})
-                    </p>
+                    {investmentAccount.a.positions.has(stock.a) ?
+                        <p className="text-gray-700">
+                            Shares: {Math.round(investmentAccount.a.getStock(stock.a).amount * 100) / 100} ({formatter.format(investmentAccount.a.getStock(stock.a).amount * investmentAccount.a.getStock(stock.a).buyValue)})
+                        </p> : <></>
+                    }
                 </>
             }
             {minimized ? <></> : <>

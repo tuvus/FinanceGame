@@ -84,7 +84,7 @@ function GamePage({fname, lname}: GameProps) {
         const newSavings = character.salary * (100 - character.pinvestments - character.pretirement - character.pleisure) / 100 - taxes - livingExpenses;
 
         // Go on trips!
-        character.satisfaction += 8 + character.satisfaction * character.pleisure / 100 / inflation;
+        character.satisfaction += (character.loans.length > 0 ? 5 : 8) + character.satisfaction * character.pleisure / 100 / inflation;
 
         // Income and interest
         savingsAccount.a.balance += newSavings;
@@ -145,7 +145,7 @@ function GamePage({fname, lname}: GameProps) {
                          character.salary = 53000 * random.float(.95, 1.3);
                          savingsAccount.a.balance = 12000 * random.float(.7, 1.3);
                          character.satisfaction = 42 * random.float(.9, 1.3);
-                         character.addLoan(new Loan("College", 6000 * random.float(.7, 1.3), date.d, savingsAccount.a, 1.067, true));
+                         character.addLoan(new Loan("College Debt", 6000 * random.float(.7, 1.3), date.d, savingsAccount.a, 1.067, true));
                          lifeEventManager.NextEvent();
                      }}>
                     <h3 className="text-gray-700 font-bold">Trade School</h3>
@@ -163,7 +163,7 @@ function GamePage({fname, lname}: GameProps) {
                                           character.salary = 57000 * random.float(.90, 1.3);
                                           savingsAccount.a.balance = 2000 * random.float(.7, 1.3);
                                           character.satisfaction = 44 * random.float(.9, 1.3);
-                                          character.addLoan(new Loan("College", 10000 * random.float(.7, 1.3), date.d, savingsAccount.a, 1.067, true));
+                                          character.addLoan(new Loan("College Debt", 10000 * random.float(.7, 1.3), date.d, savingsAccount.a, 1.067, true));
                                           lifeEventManager.NextEvent();
                                       }}>
                                      <h3 className="text-gray-700 font-bold">Community College</h3>
@@ -176,7 +176,7 @@ function GamePage({fname, lname}: GameProps) {
                                           character.salary = 80000 * random.float(.85, 1.3);
                                           savingsAccount.a.balance = 1000 * random.float(.7, 1.3);
                                           character.satisfaction = 50 * random.float(.9, 1.3);
-                                          character.addLoan(new Loan("College", 34000 * random.float(.7, 1.3), date.d, savingsAccount.a, 1.067, true));
+                                          character.addLoan(new Loan("College Debt", 34000 * random.float(.7, 1.3), date.d, savingsAccount.a, 1.067, true));
                                           lifeEventManager.NextEvent();
                                       }}>
                                      <h3 className="text-gray-700 font-bold">Public University</h3>
@@ -189,7 +189,7 @@ function GamePage({fname, lname}: GameProps) {
                                           character.salary = 83000 * random.float(.80, 1.2);
                                           savingsAccount.a.balance = 4000 * random.float(.7, 1.3);
                                           character.satisfaction = 48 * random.float(.9, 1.3);
-                                          character.addLoan(new Loan("College", 47000 * random.float(.7, 1.3), date.d, savingsAccount.a, 1.067, true));
+                                          character.addLoan(new Loan("College Debt", 47000 * random.float(.7, 1.3), date.d, savingsAccount.a, 1.067, true));
                                           lifeEventManager.NextEvent();
                                       }}>
                                      <h3 className="text-gray-700 font-bold">Private University</h3>
@@ -523,7 +523,7 @@ function GamePage({fname, lname}: GameProps) {
             <div id="debt-modal" className="flex hmodal justify-center"
                  onClick={() => document.getElementById("debt-modal")!.style.display = "none"}>
                 <div
-                    className="flex flex-col gap-2 ml-auto mr-auto mt-[20%] w-100 bg-amber-100 rounded-xl justify-center p-4"
+                    className="flex flex-col gap-2 ml-auto mr-auto mt-[15%] w-100 bg-amber-100 rounded-xl justify-center p-4"
                     onClick={e => e.stopPropagation()}>
                     <h3 className="text-gray-700">Pay Debt</h3>
                     <p className="text-gray-700 text-lg!">{transferFrom.selectedAccount?.name}</p>
@@ -571,7 +571,7 @@ function GamePage({fname, lname}: GameProps) {
             <div id="transfer-modal" className="flex hmodal justify-center"
                  onClick={() => document.getElementById("transfer-modal")!.style.display = "none"}>
                 <div
-                    className="flex flex-col gap-2 ml-auto mr-auto mt-[20%] w-100 bg-amber-100 rounded-xl justify-center p-4"
+                    className="flex flex-col gap-2 ml-auto mr-auto mt-[15%] w-100 bg-amber-100 rounded-xl justify-center p-4"
                     onClick={e => e.stopPropagation()}>
                     <h3 className="text-gray-700">Transfer Funds</h3>
                     <Select
@@ -634,7 +634,7 @@ function GamePage({fname, lname}: GameProps) {
                                 },
                                 boxShadow: "none"
                             }),
-                            placeholder: (baseStyles ) => ({
+                            placeholder: (baseStyles) => ({
                                 ...baseStyles, fontSize: 20
                             }),
                             singleValue: (baseStyles) => ({
