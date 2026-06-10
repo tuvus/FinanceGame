@@ -67,7 +67,7 @@ function GamePage({fname, lname}: GameProps) {
             if (lifeEventManager.lifeEvents.length == 0) {
                 lifeEventManager.AddEvent(
                     new LifeEvent("Another year passes", date.d,
-                        (<div><p>There were no special events this year.</p></div>))
+                        (<div><h3 className="m-4">There were no special events this year.</h3></div>))
                 );
             }
         }
@@ -426,7 +426,7 @@ function GamePage({fname, lname}: GameProps) {
                 <h2 className="mt-2 text-green-700!">
                     Total Debt: {formatter.format(character.totalLoans.balance)}
                 </h2> :
-                <h2 className="mt-2 text-red-800!">
+                <h2 className="mt-2 text-red-600!">
                     Total Debt: {formatter.format(character.totalLoans.balance)}
                 </h2>
             }
