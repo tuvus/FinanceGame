@@ -88,39 +88,53 @@ export class StockBond extends Account {
 }
 
 export class StockAccount extends Account {
-    positions: Map<StockBond, number>;
+    positions: Map<StockBond, { amount: number, buyValue: number }>;
 
     constructor(name: string, balance: number, date: Date) {
         super(name, balance, date, true);
-        this.positions = new Map<StockBond, number>();
+        this.positions = new Map<StockBond, { amount: number, buyValue: number }>();
     }
 
     addStock(stock: StockBond, amount: number) {
-        this.positions.set(stock, amount + (this.positions.get(stock) ?? 0));
+        this.positions.set(stock, {
+            amount: (amount + (this.positions.get(stock)?.amount ?? 0)),
+            buyValue: (this.positions.has(stock) ?
+                ((amount * stock.balance + this.positions.get(stock)!.amount * this.positions.get(stock)!.buyValue)
+                    / (amount + this.positions.get(stock)!.amount))
+                : stock.balance)
+        });
     }
 
     removeStock(stock: StockBond, amount: number) {
-        this.positions.set(stock, amount - (this.positions.get(stock) ?? 0));
-        if (this.positions.get(stock)! < 0.00001)
+        this.positions.set(stock, {
+            amount: (this.positions.get(stock)?.amount ?? 0) - amount,
+            buyValue: (this.positions.get(stock)?.buyValue ?? 0)
+        });
+        if (this.positions.get(stock)!.amount < 0.00001)
             this.positions.delete(stock);
     }
 
     getStock(stock: StockBond) {
-        return this.positions.get(stock) ?? 0;
+        return this.positions.get(stock) ?? {amount: 0, buyValue: 0};
     }
 
     getTotalValue() {
-        return this.balance + [...this.positions.entries()].map(e => e[0].balance * e[1])
+        return this.balance + [...this.positions.entries()].map(e => e[0].balance * e[1].amount)
             .reduce((sum, current) => sum + current, 0);
     }
 
     getStockValue() {
-        return [...this.positions.entries()].filter(a => !a[0].bond).map(e => e[0].balance * e[1])
+        return [...this.positions.entries()].filter(a => !a[0].bond).map(e => e[0].balance * e[1].amount)
+            .reduce((sum, current) => sum + current, 0);
+    }
+
+    getGains() {
+        return [...this.positions.entries()].filter(a => !a[0].bond).map(e => (e[0].balance - e[1].buyValue) * e[1].amount)
             .reduce((sum, current) => sum + current, 0);
     }
 
     getBondValue() {
-        return [...this.positions.entries()].filter(a => a[0].bond).map(e => e[0].balance * e[1])
+        return [...this.positions.entries()].filter(a => a[0].bond).map(e => e[0].balance * e[1].amount)
             .reduce((sum, current) => sum + current, 0);
     }
 }
