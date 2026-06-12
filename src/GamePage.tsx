@@ -27,14 +27,14 @@ function GamePage({fname, lname}: GameProps) {
         compactDisplay: "short"
     });
     const [date] = useState({d: new Date(random.int(1940, 2010), 0)});
-    const [savingsAccount] = useState({a: new Account("Savings Account", 0, new Date(date.d.getFullYear() - 1, 0), true)});
+    const [savingsAccount] = useState({a: new Account("Savings Account", 0, new Date(date.d.getFullYear(), 0), true)});
     const [page, setPage] = useState(999);
     const [gameState] = useState({s: new GameState()});
     const [character] = useState(new Character(fname, lname, date.d));
-    const [investmentAccount] = useState({a: new StockAccount("Investment Account", 0, new Date(date.d.getFullYear() - 1, 0))});
-    const [retirementAccount] = useState({a: new StockAccount("Retirement Account", 0, new Date(date.d.getFullYear() - 1, 0))});
-    const [indexFund] = useState({a: new StockBond("Index Fund", random.int(7000, 50000) / 100, new Date(date.d.getFullYear() - 1, 0), false)});
-    const [bond] = useState({a: new StockBond("Bond", 1, new Date(date.d.getFullYear() - 1, 0), true)});
+    const [investmentAccount] = useState({a: new StockAccount("Investment Account", 0, new Date(date.d.getFullYear(), 0))});
+    const [retirementAccount] = useState({a: new StockAccount("Retirement Account", 0, new Date(date.d.getFullYear(), 0))});
+    const [indexFund] = useState({a: new StockBond("Index Fund", random.int(7000, 50000) / 100, new Date(date.d.getFullYear(), 0), false)});
+    const [bond] = useState({a: new StockBond("Bond", 1, new Date(date.d.getFullYear(), 0), true)});
     const [rerender, setRerender] = useState(0);
     const render = () => {
         // eslint-disable-next-line react-hooks/purity
@@ -529,7 +529,7 @@ function GamePage({fname, lname}: GameProps) {
                     <p className="text-gray-700 text-lg!">{transferFrom.selectedAccount?.name}</p>
                     <p className="text-gray-700 text-lg!">Balance: {formatter.format(transferFrom.selectedAccount?.balance ?? 0)}</p>
                     <p className="text-gray-700 text-lg!">{transferTo.selectedAccount?.name}</p>
-                    <p className="text-red-800 text-lg!">Credit:
+                    <p className="text-red-800 text-lg!">Liabilities:
                         -{formatter.format(transferTo.selectedAccount?.balance ?? 0)}</p>
 
                     <div className="flex">
