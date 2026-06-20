@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/immutability */
 import './App.css'
 import random from "random";
-import {useEffect, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import {LineChart} from "./components/LineChart.tsx";
 import Select from 'react-select';
 import {Account, Character, GameState, Loan, StockAccount, StockBond} from "./Data.tsx";
@@ -9,6 +9,7 @@ import StockCard from "./components/StockCard.tsx";
 import {CalculateTaxes, GetDateString} from "./Utils.tsx";
 import {DonutChart} from "./components/DonutChart.tsx";
 import {LifeEvent, LifeEventManager} from "./EventManager.tsx";
+import {TutorialChain, TutorialEvent, TutorialManager} from "./TutorialManager.tsx";
 
 type GameProps = {
     fname: string; lname: string;
@@ -219,6 +220,24 @@ function GamePage({fname, lname}: GameProps) {
     ]));
     const activeEvent = lifeEventManager.GetActiveEvent(date.d);
 
+    const tutorialManager = useRef(new TutorialManager([
+        new TutorialChain("Year In Review Tutorial", () => gameState.s.page == 0, [
+            new TutorialEvent("Year in review page", null, (<p className="text-gray-700">
+                On this page, you will be looking at your money's performance from last year and the years before
+                inorder to determine how to allocate this year's income. Each account that you own will show up on this
+                page.
+            </p>), null, null, "Next"),
+            new TutorialEvent("Savings history", null, (<p className="text-gray-700">
+                Here is your savings account, currently you have a balance
+                of {formatter.format(savingsAccount.a.balance)}. Below the account you can see a graph of the accounts
+                previous balance.
+            </p>), "YIRAccountSavings Account", null, "Next"),
+            new TutorialEvent("Asset Positions", null, (<p className="text-gray-700">
+                Here is a pie chart displaying your portfolio and what positions your money is in.
+            </p>), "DonutChart", null, "Close"),
+        ])
+    ], render));
+
     useEffect(() => {
         character.accounts = [savingsAccount.a, investmentAccount.a, retirementAccount.a];
         document.addEventListener("keyup", (e) => {
@@ -279,7 +298,8 @@ function GamePage({fname, lname}: GameProps) {
             <h1>Year in review {date.d.getFullYear() - 1}</h1>
             <div className="grid grid-cols-2">
                 {character.accounts.map((account, i) => (
-                    <div key={i} className="flex flex-col items-center bg-amber-100 rounded-xl p-4 m-4 gap-1">
+                    <div key={i} id={"YIRAccount" + account.name}
+                         className="flex flex-col items-center bg-amber-100 rounded-xl p-4 m-4 gap-1">
                         <h3 className="text-gray-700 font-bold">{account.name}</h3>
                         <div className="flex items-baseline gap-2">
                             <p className="text-gray-700">{formatter.format(account.getTotalValue())}</p>
@@ -296,25 +316,31 @@ function GamePage({fname, lname}: GameProps) {
                                    categories={["balance"]}
                                    valueFormatter={(number: number) => compactFormatter.format(number)}/>
                     </div>))}
-                <DonutChart className="h-full w-full m-auto p-4"
-                            data={[
-                                {name: "Cash", amount: character.accounts.reduce((sum, curr) => sum + curr.balance, 0)},
-                                {
-                                    name: "Stocks",
-                                    amount: character.accounts.filter(a => a instanceof StockAccount).map(a => a as StockAccount)
-                                        .reduce((sum, curr) => sum + curr.getStockValue(), 0)
-                                }, {
-                                    name: "Bonds",
-                                    amount: character.accounts.filter(a => a instanceof StockAccount).map(a => a as StockAccount)
-                                        .reduce((sum, curr) => sum + curr.getBondValue(), 0)
-                                }, {
-                                    name: "Loans",
-                                    amount: character.totalLoans.getTotalValue()
-                                }
-                            ]}
-                            label={"Total Assets: " + formatter.format(character.accounts.reduce((sum, curr) => sum + curr.getTotalValue(), 0))}
-                            category="name" value="amount" showLabel={true}
-                            valueFormatter={(number: number) => formatter.format(number)}/>
+                <div id="DonutChart" className="flex flex-col items-center bg-amber-100 rounded-xl p-4 m-4 gap-1">
+                    <h3 className="text-gray-700 font-bold">Total Assets</h3>
+                    <DonutChart className="h-full w-full m-auto"
+                                data={[
+                                    {
+                                        name: "Cash",
+                                        amount: character.accounts.reduce((sum, curr) => sum + curr.balance, 0)
+                                    },
+                                    {
+                                        name: "Stocks",
+                                        amount: character.accounts.filter(a => a instanceof StockAccount).map(a => a as StockAccount)
+                                            .reduce((sum, curr) => sum + curr.getStockValue(), 0)
+                                    }, {
+                                        name: "Bonds",
+                                        amount: character.accounts.filter(a => a instanceof StockAccount).map(a => a as StockAccount)
+                                            .reduce((sum, curr) => sum + curr.getBondValue(), 0)
+                                    }, {
+                                        name: "Loans",
+                                        amount: character.totalLoans.getTotalValue()
+                                    }
+                                ]}
+                                label={formatter.format(character.accounts.reduce((sum, curr) => sum + curr.getTotalValue(), 0) - character.totalLoans.balance)}
+                                category="name" value="amount" showLabel={true}
+                                valueFormatter={(number: number) => formatter.format(number)}/>
+                </div>
             </div>
             <div className="flex gap-2 justify-center">
                 <button className="w-60 text-xl h-10 p-1 font-bold" onClick={() => nextPage()}><h3>Next: Paycheck</h3>
@@ -684,6 +710,8 @@ function GamePage({fname, lname}: GameProps) {
                     </div>
                 </div>
             </div>
+            {/* eslint-disable-next-line react-hooks/refs */}
+            {tutorialManager.current.getTutorialElement()}
             <div className="mb-20"></div>
             <div className="fixed bottom-1 left-1 z-9 h-16 right-1 justify-center p-2 rounded-2xl bg-amber-100">
                 <div className="grid grid-cols-4 content-center align-items-middle mx-auto h-full ml-4 mr-4">
