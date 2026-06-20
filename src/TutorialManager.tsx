@@ -119,11 +119,28 @@ export class TutorialManager {
         this.checkActiveTutorial();
         if (this.activeTutorial) {
             const currentEvent = this.activeTutorial.events[this.activeTutorial.currentEvent];
+            let position = "top-0 left-0 w-full h-full ";
+            let vPosition = "mt-[20%]";
+            if (currentEvent.highlightElementId != null) {
+                const bodyElement = document.body.getBoundingClientRect();
+                const targetElement = document.getElementById(currentEvent.highlightElementId)!.getBoundingClientRect();
+                if (targetElement.right <= bodyElement.width / 2) {
+                    position = "top-0 left-[50%] w-1/2 h-full";
+                } else if (targetElement.left >= bodyElement.width / 2) {
+                    position = "top-0 left-0 w-1/2 h-full";
+                } else if (targetElement.top >= bodyElement.height / 2) {
+                    position = "top-[10%] left-0 w-full h-1/2";
+                    vPosition = "";
+                } else if (targetElement.bottom <= bodyElement.height / 2) {
+                    position = "top-[60%] left-0 w-full h-1/2";
+                    vPosition = "";
+                }
+            }
             return (
                 <>
                     <div id="targetElementModal" className="flex modal z-10"></div>
-                    <div className="fixed top-0 left-0 z-12 w-full h-full pointer-events-none">
-                        <div className="flex flex-col  ml-auto mr-auto mb-auto mt-[20%] w-140 pointer-events-auto">
+                    <div className={"fixed z-12 pointer-events-none " + position}>
+                        <div className={"flex flex-col ml-auto mr-auto mb-auto w-140 pointer-events-auto " + vPosition}>
                             <div className="flex flex-col items-center bg-amber-100 rounded-xl p-4 m-4 gap-1">
                                 <h2 className="text-gray-700! font-bold!">{currentEvent.name}</h2>
                                 {currentEvent.panelElement}
