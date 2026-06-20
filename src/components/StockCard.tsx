@@ -123,7 +123,7 @@ function StockCard({stock, investmentAccount, formatter, compactFormatter, rende
                 <div className="flex modal justify-center">
                     <div
                         className="flex flex-col gap-2 ml-auto mr-auto mb-auto mt-[20%] w-100 bg-amber-100 rounded-xl justify-center p-4">
-                        <h3 className="text-gray-700">How many Shares would you like to sell?</h3>
+                        <h3 className="text-gray-700">How many shares would you like to sell?</h3>
                         <div className="flex">
                             <p className="text-xl text-gray-700! p-2">$</p>
                             <input name="sell-shares" className="w-80 bg-gray-200 rounded-xl p-1 text-gray-700"

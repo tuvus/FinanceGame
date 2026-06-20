@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/immutability */
 import './App.css'
 import random from "random";
-import {useEffect, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import {LineChart} from "./components/LineChart.tsx";
 import Select from 'react-select';
 import {Account, Character, GameState, Loan, StockAccount, StockBond} from "./Data.tsx";
@@ -9,6 +9,7 @@ import StockCard from "./components/StockCard.tsx";
 import {CalculateTaxes, GetDateString} from "./Utils.tsx";
 import {DonutChart} from "./components/DonutChart.tsx";
 import {LifeEvent, LifeEventManager} from "./EventManager.tsx";
+import {ElementHighlighter} from "./ElementHighlighter.tsx";
 
 type GameProps = {
     fname: string; lname: string;
@@ -44,6 +45,7 @@ function GamePage({fname, lname}: GameProps) {
     const [transferTo, setTransferTo] = useState<TransferFundsSelectState>({selectedAccount: null});
     const [fundsToTransfer, setFundsToTransfer] = useState(0);
     const [inflation, setInflation] = useState(1);
+    const elementHighlighter = useRef(new ElementHighlighter());
 
     const monthlyItemizedLivingExpenses = [
         {name: "Rent", amount: 1650},
@@ -221,6 +223,12 @@ function GamePage({fname, lname}: GameProps) {
 
     useEffect(() => {
         character.accounts = [savingsAccount.a, investmentAccount.a, retirementAccount.a];
+        document.addEventListener('mousemove', e => {
+            if (e.altKey) {
+                elementHighlighter.current.setTargetElement(document.elementFromPoint(e.clientX, e.clientY) as HTMLElement | null);
+                render();
+            }
+        }, {passive: true})
         document.addEventListener("keyup", (e) => {
             if (e.key == "Enter") {
                 if (document.getElementById("transfer-modal")!.style.display == "block") {
@@ -684,6 +692,8 @@ function GamePage({fname, lname}: GameProps) {
                     </div>
                 </div>
             </div>
+            {/* eslint-disable-next-line react-hooks/refs */}
+            {elementHighlighter.current.getTargetElementModal()}
             <div className="mb-20"></div>
             <div className="fixed bottom-1 left-1 z-9 h-16 right-1 justify-center p-2 rounded-2xl bg-amber-100">
                 <div className="grid grid-cols-4 content-center align-items-middle mx-auto h-full ml-4 mr-4">
