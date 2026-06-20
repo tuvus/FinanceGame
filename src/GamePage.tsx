@@ -9,7 +9,7 @@ import StockCard from "./components/StockCard.tsx";
 import {CalculateTaxes, GetDateString} from "./Utils.tsx";
 import {DonutChart} from "./components/DonutChart.tsx";
 import {LifeEvent, LifeEventManager} from "./EventManager.tsx";
-import {ElementHighlighter} from "./ElementHighlighter.tsx";
+import {TutorialManager} from "./TutorialManager.tsx";
 
 type GameProps = {
     fname: string; lname: string;
@@ -45,8 +45,6 @@ function GamePage({fname, lname}: GameProps) {
     const [transferTo, setTransferTo] = useState<TransferFundsSelectState>({selectedAccount: null});
     const [fundsToTransfer, setFundsToTransfer] = useState(0);
     const [inflation, setInflation] = useState(1);
-    const mousePos  = useRef({x:0, y:0});
-    const elementHighlighter = useRef(new ElementHighlighter());
 
     const monthlyItemizedLivingExpenses = [
         {name: "Rent", amount: 1650},
@@ -222,12 +220,10 @@ function GamePage({fname, lname}: GameProps) {
     ]));
     const activeEvent = lifeEventManager.GetActiveEvent(date.d);
 
+    const tutorialManager = useRef(new TutorialManager());
+
     useEffect(() => {
         character.accounts = [savingsAccount.a, investmentAccount.a, retirementAccount.a];
-        document.addEventListener('mousemove', e => {
-            mousePos.current.x = e.clientX;
-            mousePos.current.y = e.clientY;
-        }, {passive: true})
         document.addEventListener("keyup", (e) => {
             if (e.key == "Enter") {
                 if (document.getElementById("transfer-modal")!.style.display == "block") {
@@ -273,13 +269,6 @@ function GamePage({fname, lname}: GameProps) {
                     gameState.s.previousPage();
                     e.stopImmediatePropagation();
                 }
-            }
-
-
-            if (e.key == "s") {
-                console.log(mousePos.current)
-                elementHighlighter.current.setTargetElement(document.elementFromPoint(mousePos.current.x, mousePos.current.y) as HTMLElement | null);
-                render();
             }
         });
     }, [])
@@ -699,7 +688,7 @@ function GamePage({fname, lname}: GameProps) {
                 </div>
             </div>
             {/* eslint-disable-next-line react-hooks/refs */}
-            {elementHighlighter.current.getTargetElementModal()}
+            {tutorialManager.current.getTutorialElement()}
             <div className="mb-20"></div>
             <div className="fixed bottom-1 left-1 z-9 h-16 right-1 justify-center p-2 rounded-2xl bg-amber-100">
                 <div className="grid grid-cols-4 content-center align-items-middle mx-auto h-full ml-4 mr-4">
