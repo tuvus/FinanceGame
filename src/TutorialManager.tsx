@@ -1,26 +1,26 @@
 import type {ReactElement} from "react";
 
 class ElementHighlighter {
-    element: HTMLElement | null;
+    targetElement: HTMLElement | null;
     previousZ: string | null;
 
     constructor() {
-        this.element = null;
+        this.targetElement = null;
         this.previousZ = null;
     }
 
     setTargetElement(tElement: HTMLElement | null) {
         if (tElement == null || tElement?.id == "targetElementModal") {
-            if (this.previousZ != null && this.element != null) {
-                this.element.style["zIndex"] = this.previousZ.toString();
+            if (this.previousZ != null && this.targetElement != null) {
+                this.targetElement.style["zIndex"] = this.previousZ.toString();
             }
-            this.element = null;
+            this.targetElement = null;
             this.previousZ = null;
-        } else if (tElement != this.element) {
-            if (this.previousZ != null && this.element != null) {
-                this.element.style["zIndex"] = this.previousZ.toString();
+        } else if (tElement != this.targetElement) {
+            if (this.previousZ != null && this.targetElement != null) {
+                this.targetElement.style["zIndex"] = this.previousZ.toString();
             }
-            this.element = tElement;
+            this.targetElement = tElement;
             if (tElement.style.zIndex != null) {
                 this.previousZ = tElement.style["zIndex"];
             } else {
@@ -29,28 +29,19 @@ class ElementHighlighter {
             tElement.style["zIndex"] = "11";
         }
     }
-
-    getTargetElementModal() {
-        return (
-            (this.element ?? null) !== null ?
-                <div id="targetElementModal" className="flex modal z-10">
-
-                </div> : <></>
-        );
-    }
 }
 
 export class TutorialEvent {
     name: string;
-    eventCondition: () => boolean | null;
+    displayCondition: (() => boolean) | null;
     panelElement: ReactElement;
     highlightElementId: string | null;
-    satisfyCondition: () => boolean | null;
+    satisfyCondition: (() => boolean) | null;
     buttonText: string | null;
 
-    constructor(name: string, eventCondition: () => (boolean | null), panelElement: ReactElement, highlightElementId: string | null, satisfyCondition: () => (boolean | null), buttonText: string | null) {
+    constructor(name: string, eventCondition: (() => boolean) | null, panelElement: ReactElement, highlightElementId: string | null, satisfyCondition: (() => boolean) | null, buttonText: string | null) {
         this.name = name;
-        this.eventCondition = eventCondition;
+        this.displayCondition = eventCondition;
         this.panelElement = panelElement;
         this.highlightElementId = highlightElementId;
         this.satisfyCondition = satisfyCondition;
@@ -64,11 +55,11 @@ export class TutorialChain {
     events: TutorialEvent[];
     currentEvent: number;
 
-    constructor(name: string, tutorialCondition: () => boolean, events: TutorialEvent[], currentEvent: number) {
+    constructor(name: string, tutorialCondition: () => boolean, events: TutorialEvent[]) {
         this.name = name;
         this.tutorialCondition = tutorialCondition;
         this.events = events;
-        this.currentEvent = currentEvent;
+        this.currentEvent = 0;
     }
 
     getCurrentEvent() {
@@ -80,11 +71,13 @@ export class TutorialManager {
     highlighter: ElementHighlighter;
     tutorialChains: TutorialChain[];
     activeTutorial: TutorialChain | null;
+    render: () => void;
 
-    constructor() {
+    constructor(tutorialChains: TutorialChain[], render: () => void) {
         this.highlighter = new ElementHighlighter();
-        this.tutorialChains = [];
+        this.tutorialChains = tutorialChains;
         this.activeTutorial = null;
+        this.render = render;
     }
 
     checkActiveTutorial() {
@@ -101,7 +94,8 @@ export class TutorialManager {
         if (this.activeTutorial != null) {
             while (this.activeTutorial.currentEvent < this.activeTutorial.events.length) {
                 const currentEvent = this.activeTutorial.getCurrentEvent();
-                if (currentEvent.eventCondition() && !currentEvent.satisfyCondition()) {
+                if ((!currentEvent.displayCondition || currentEvent.displayCondition())
+                    && (!currentEvent.satisfyCondition || !currentEvent.satisfyCondition())) {
                     break;
                 } else {
                     this.activeTutorial.currentEvent++;
@@ -112,7 +106,9 @@ export class TutorialManager {
                 this.checkActiveTutorial();
                 return;
             } else if (this.activeTutorial.getCurrentEvent().highlightElementId != null) {
+                console.log(1)
                 this.highlighter.setTargetElement(document.getElementById(this.activeTutorial.getCurrentEvent().highlightElementId!));
+                console.log(this.highlighter.targetElement);
             } else {
                 this.highlighter.setTargetElement(null);
             }
@@ -125,12 +121,23 @@ export class TutorialManager {
             const currentEvent = this.activeTutorial.events[this.activeTutorial.currentEvent];
             return (
                 <>
-                    <h2>{currentEvent.name}</h2>
-                    <div className="flex flex-col items-center bg-amber-100 rounded-xl p-4 m-4 gap-1">
-                        {currentEvent.panelElement}
-                        {currentEvent.buttonText ? <div className="panelButton" onClick={() => this.activeTutorial!.currentEvent++}>{currentEvent.buttonText}</div> : <></>}
+                    <div id="targetElementModal" className="flex modal z-10"></div>
+                    <div className="fixed top-0 left-0 z-12 w-full h-full pointer-events-none">
+                        <div className="flex flex-col  ml-auto mr-auto mb-auto mt-[20%] w-140 pointer-events-auto">
+                            <div className="flex flex-col items-center bg-amber-100 rounded-xl p-4 m-4 gap-1">
+                                <h2 className="text-gray-700! font-bold!">{currentEvent.name}</h2>
+                                {currentEvent.panelElement}
+                                {currentEvent.buttonText ?
+                                    <button className="ml-5 text-xl font-bold w-50 h-10"
+                                            onClick={() => {
+                                                this.activeTutorial!.currentEvent++;
+                                                this.render();
+                                            }}>
+                                        {currentEvent.buttonText}
+                                    </button> : <></>}
+                            </div>
+                        </div>
                     </div>
-                    {this.highlighter.getTargetElementModal()}
                 </>
             );
         }
