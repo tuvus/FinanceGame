@@ -1,6 +1,6 @@
 export class ElementHighlighter {
     element: HTMLElement | null;
-    previousZ: number | null;
+    previousZ: string | null;
 
     constructor() {
         this.element = null;
@@ -8,19 +8,23 @@ export class ElementHighlighter {
     }
 
     setTargetElement(tElement: HTMLElement | null) {
-        if (tElement != this.element && tElement != null && tElement?.id != "targetElementModal") {
+        if (tElement == null || tElement?.id == "targetElementModal") {
             if (this.previousZ != null && this.element != null) {
                 this.element.style["zIndex"] = this.previousZ.toString();
             }
-            this.element = tElement
-            if (tElement != null) {
-                if (tElement.style.zIndex != null) {
-                    this.previousZ = parseInt(tElement.style["zIndex"]);
-                } else {
-                    this.previousZ = null;
-                }
-                tElement.style["zIndex"] = "11";
+            this.element = null;
+            this.previousZ = null;
+        } else if (tElement != this.element) {
+            if (this.previousZ != null && this.element != null) {
+                this.element.style["zIndex"] = this.previousZ.toString();
             }
+            this.element = tElement;
+            if (tElement.style.zIndex != null) {
+                this.previousZ = tElement.style["zIndex"];
+            } else {
+                this.previousZ = null;
+            }
+            tElement.style["zIndex"] = "11";
         }
     }
 

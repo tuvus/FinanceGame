@@ -45,6 +45,7 @@ function GamePage({fname, lname}: GameProps) {
     const [transferTo, setTransferTo] = useState<TransferFundsSelectState>({selectedAccount: null});
     const [fundsToTransfer, setFundsToTransfer] = useState(0);
     const [inflation, setInflation] = useState(1);
+    const mousePos  = useRef({x:0, y:0});
     const elementHighlighter = useRef(new ElementHighlighter());
 
     const monthlyItemizedLivingExpenses = [
@@ -224,10 +225,8 @@ function GamePage({fname, lname}: GameProps) {
     useEffect(() => {
         character.accounts = [savingsAccount.a, investmentAccount.a, retirementAccount.a];
         document.addEventListener('mousemove', e => {
-            if (e.altKey) {
-                elementHighlighter.current.setTargetElement(document.elementFromPoint(e.clientX, e.clientY) as HTMLElement | null);
-                render();
-            }
+            mousePos.current.x = e.clientX;
+            mousePos.current.y = e.clientY;
         }, {passive: true})
         document.addEventListener("keyup", (e) => {
             if (e.key == "Enter") {
@@ -274,6 +273,13 @@ function GamePage({fname, lname}: GameProps) {
                     gameState.s.previousPage();
                     e.stopImmediatePropagation();
                 }
+            }
+
+
+            if (e.key == "s") {
+                console.log(mousePos.current)
+                elementHighlighter.current.setTargetElement(document.elementFromPoint(mousePos.current.x, mousePos.current.y) as HTMLElement | null);
+                render();
             }
         });
     }, [])
