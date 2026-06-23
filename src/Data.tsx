@@ -10,16 +10,16 @@ export class Character {
     totalLoans: Account;
     satisfaction: number;
 
-    constructor(firstName: string, lastName: string, date: Date) {
+    constructor(firstName: string, lastName: string) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.salary = 0;
-        this.pinvestments = 2;
-        this.pretirement = 3;
-        this.pleisure = 5;
+        this.pinvestments = 0;
+        this.pretirement = 0;
+        this.pleisure = 10;
         this.accounts = [];
         this.loans = [];
-        this.totalLoans = new Account("Loans", 0, date, false);
+        this.totalLoans = new Account("Loans", 0 , false);
         this.satisfaction = 0;
     }
 
@@ -49,11 +49,11 @@ export class Account {
     history: { date: Date, dateString: string, balance: number }[];
     isOwnedAccount: boolean;
 
-    constructor(name: string, balance: number, date: Date, isOwnedAccount: boolean) {
+    constructor(name: string, balance: number, isOwnedAccount: boolean) {
         this.name = name;
         this.balance = balance;
         this.diff = undefined;
-        this.history = [{date: date, dateString: this.getDateString(date), balance: balance}];
+        this.history = [];
         this.isOwnedAccount = isOwnedAccount;
     }
 
@@ -70,7 +70,9 @@ export class Account {
             dateString: this.getDateString(date),
             balance: this.getTotalValue()
         }];
-        this.diff = Math.floor((this.history[this.history.length - 1].balance - this.history[this.history.length - 2].balance) / Math.abs(this.history[this.history.length - 2].balance) * 100);
+        if (this.history.length > 1)
+            this.diff = Math.floor((this.history[this.history.length - 1].balance - this.history[this.history.length - 2].balance) / Math.abs(this.history[this.history.length - 2].balance) * 100);
+        else this.diff = 0;
     }
 
     getTotalValue(): number {
@@ -81,8 +83,8 @@ export class Account {
 export class StockBond extends Account {
     bond: boolean;
 
-    constructor(name: string, balance: number, date: Date, bond: boolean) {
-        super(name, balance, date, false);
+    constructor(name: string, balance: number, bond: boolean) {
+        super(name, balance, false);
         this.bond = bond;
     }
 }
@@ -90,8 +92,8 @@ export class StockBond extends Account {
 export class StockAccount extends Account {
     positions: Map<StockBond, { amount: number, buyValue: number }>;
 
-    constructor(name: string, balance: number, date: Date) {
-        super(name, balance, date, true);
+    constructor(name: string, balance: number) {
+        super(name, balance, true);
         this.positions = new Map<StockBond, { amount: number, buyValue: number }>();
     }
 
@@ -146,8 +148,8 @@ export class Loan extends Account {
     setPayment: number;
     fixed: boolean;
 
-    constructor(name: string, balance: number, date: Date, linkedAccount: Account, interestRate: number, fixed: boolean) {
-        super(name, balance, date, false);
+    constructor(name: string, balance: number, linkedAccount: Account, interestRate: number, fixed: boolean) {
+        super(name, balance, false);
         this.linkedAccount = linkedAccount;
         this.interestRate = interestRate;
         this.minimumPayment = balance * (interestRate * 1.1 - 1);
@@ -174,6 +176,12 @@ export class Loan extends Account {
 
 export class GameState {
     page: number = 0;
+    date: Date;
+
+    constructor(date: Date) {
+        this.date = date;
+    }
+
     nextPage = (): void => {
     };
     previousPage = (): void => {

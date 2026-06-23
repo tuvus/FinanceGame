@@ -27,15 +27,14 @@ function GamePage({fname, lname}: GameProps) {
         notation: "compact",
         compactDisplay: "short"
     });
-    const [date] = useState({d: new Date(random.int(1940, 2010), 0)});
-    const [savingsAccount] = useState({a: new Account("Savings Account", 0, new Date(date.d.getFullYear(), 0), true)});
+    const [gameState] = useState({s: new GameState(new Date(random.int(1940, 2010), 0))});
+    const [savingsAccount] = useState({a: new Account("Savings Account", 0, true)});
     const [page, setPage] = useState(999);
-    const [gameState] = useState({s: new GameState()});
-    const [character] = useState(new Character(fname, lname, date.d));
-    const [investmentAccount] = useState({a: new StockAccount("Investment Account", 0, new Date(date.d.getFullYear(), 0))});
-    const [retirementAccount] = useState({a: new StockAccount("Retirement Account", 0, new Date(date.d.getFullYear(), 0))});
-    const [indexFund] = useState({a: new StockBond("Index Fund", random.int(7000, 50000) / 100, new Date(date.d.getFullYear(), 0), false)});
-    const [bond] = useState({a: new StockBond("Bond", 1, new Date(date.d.getFullYear(), 0), true)});
+    const [character] = useState(new Character(fname, lname));
+    const [investmentAccount] = useState({a: new StockAccount("Investment Account", 0)});
+    const [retirementAccount] = useState({a: new StockAccount("Retirement Account", 0)});
+    const [indexFund] = useState({a: new StockBond("Index Fund", random.int(7000, 50000) / 100, false)});
+    const [bond] = useState({a: new StockBond("Bond", 1, true)});
     const [rerender, setRerender] = useState(0);
     const render = () => {
         // eslint-disable-next-line react-hooks/purity
@@ -67,7 +66,7 @@ function GamePage({fname, lname}: GameProps) {
         if (page + 1 == pages.length - 1) {
             if (lifeEventManager.lifeEvents.length == 0) {
                 lifeEventManager.AddEvent(
-                    new LifeEvent("Another year passes", date.d,
+                    new LifeEvent("Another year passes", gameState.s.date,
                         (<div><h3 className="m-4">There were no special events this year.</h3></div>))
                 );
             }
@@ -92,7 +91,7 @@ function GamePage({fname, lname}: GameProps) {
         if (savingsAccount.a.balance < 0) {
             const loan = character.loans.find(l => l.name == "Credit Card Debt");
             if (loan == undefined) {
-                character.addLoan(new Loan("Credit Card Debt", -savingsAccount.a.balance, date.d, savingsAccount.a, 1.27, false));
+                character.addLoan(new Loan("Credit Card Debt", -savingsAccount.a.balance, savingsAccount.a, 1.27, false));
             } else {
                 loan.balance += -savingsAccount.a.balance;
             }
@@ -109,11 +108,14 @@ function GamePage({fname, lname}: GameProps) {
         bond.a.balance *= 1.052;
 
         // History log
-        indexFund.a.endYear(date.d);
-        bond.a.endYear(date.d);
-        character.endYear(date.d, newInflation);
+        indexFund.a.endYear(gameState.s.date);
+        bond.a.endYear(gameState.s.date);
+        character.endYear(gameState.s.date, newInflation);
+        gameState.s.date.setFullYear(gameState.s.date.getFullYear() + 1);
+    }
 
-        date.d.setFullYear(date.d.getFullYear() + 1);
+    const nextYear = () => {
+        endYear();
         setPage(0);
     }
 
@@ -126,14 +128,19 @@ function GamePage({fname, lname}: GameProps) {
     const ploans = character.loans.reduce((sum, l) => sum + l.getPayment(), 0) / character.salary * 100;
 
 
-    const [lifeEventManager] = useState(new LifeEventManager(date.d, endYear, render, [
-        new LifeEvent("Education", date.d, <>
+    const [lifeEventManager] = useState(new LifeEventManager(gameState.s.date, nextYear, render, [
+        new LifeEvent("Education", gameState.s.date, <>
             <h2>Choose your education path</h2>
             <div className="flex justify-center gap-8 mt-6">
                 <div className="eventButton panelButton"
                      onClick={() => {
-                         character.salary = 48000 * random.float(.95, 1.1);
+                         character.salary = 42000 * random.float(.95, 1.1);
                          savingsAccount.a.balance = 30000 * random.float(.7, 1.3);
+                         endYear();
+                         endYear();
+                         endYear();
+                         endYear();
+                         character.salary = 48000 * random.float(.95, 1.1);
                          character.satisfaction = 40 * random.float(.9, 1.3);
                          lifeEventManager.NextEvent();
                      }}>
@@ -146,7 +153,7 @@ function GamePage({fname, lname}: GameProps) {
                          character.salary = 53000 * random.float(.95, 1.3);
                          savingsAccount.a.balance = 12000 * random.float(.7, 1.3);
                          character.satisfaction = 42 * random.float(.9, 1.3);
-                         character.addLoan(new Loan("College Debt", 6000 * random.float(.7, 1.3), date.d, savingsAccount.a, 1.067, true));
+                         character.addLoan(new Loan("College Debt", 6000 * random.float(.7, 1.3), savingsAccount.a, 1.067, true));
                          lifeEventManager.NextEvent();
                      }}>
                     <h3 className="text-gray-700 font-bold">Trade School</h3>
@@ -157,14 +164,14 @@ function GamePage({fname, lname}: GameProps) {
                 </div>
                 <div className="eventButton panelButton"
                      onClick={() => {
-                         lifeEventManager.ReplaceEvent(new LifeEvent("Choosing a College", date.d, <>
+                         lifeEventManager.ReplaceEvent(new LifeEvent("Choosing a College", gameState.s.date, <>
                              <div className="flex justify-center gap-8">
                                  <div className="eventButton panelButton"
                                       onClick={() => {
                                           character.salary = 57000 * random.float(.90, 1.3);
                                           savingsAccount.a.balance = 2000 * random.float(.7, 1.3);
                                           character.satisfaction = 44 * random.float(.9, 1.3);
-                                          character.addLoan(new Loan("College Debt", 10000 * random.float(.7, 1.3), date.d, savingsAccount.a, 1.067, true));
+                                          character.addLoan(new Loan("College Debt", 10000 * random.float(.7, 1.3), savingsAccount.a, 1.067, true));
                                           lifeEventManager.NextEvent();
                                       }}>
                                      <h3 className="text-gray-700 font-bold">Community College</h3>
@@ -177,7 +184,7 @@ function GamePage({fname, lname}: GameProps) {
                                           character.salary = 80000 * random.float(.85, 1.3);
                                           savingsAccount.a.balance = 1000 * random.float(.7, 1.3);
                                           character.satisfaction = 50 * random.float(.9, 1.3);
-                                          character.addLoan(new Loan("College Debt", 34000 * random.float(.7, 1.3), date.d, savingsAccount.a, 1.067, true));
+                                          character.addLoan(new Loan("College Debt", 34000 * random.float(.7, 1.3), savingsAccount.a, 1.067, true));
                                           lifeEventManager.NextEvent();
                                       }}>
                                      <h3 className="text-gray-700 font-bold">Public University</h3>
@@ -190,7 +197,7 @@ function GamePage({fname, lname}: GameProps) {
                                           character.salary = 83000 * random.float(.80, 1.2);
                                           savingsAccount.a.balance = 4000 * random.float(.7, 1.3);
                                           character.satisfaction = 48 * random.float(.9, 1.3);
-                                          character.addLoan(new Loan("College Debt", 47000 * random.float(.7, 1.3), date.d, savingsAccount.a, 1.067, true));
+                                          character.addLoan(new Loan("College Debt", 47000 * random.float(.7, 1.3), savingsAccount.a, 1.067, true));
                                           lifeEventManager.NextEvent();
                                       }}>
                                      <h3 className="text-gray-700 font-bold">Private University</h3>
@@ -207,18 +214,18 @@ function GamePage({fname, lname}: GameProps) {
                 </div>
             </div>
         </>, true),
-        new LifeEvent("Moving Out", date.d, <>
+        new LifeEvent("Moving Out", gameState.s.date, <>
             <h2>Its time to start your journey!</h2>
             <button className="w-50 text-xl h-10 p-1 font-bold mt-2" onClick={() => {
                 lifeEventManager.RemoveFirstEvent()
-                date.d.setFullYear(date.d.getFullYear() + 1);
+                gameState.s.date.setFullYear(gameState.s.date.getFullYear() + 1);
                 setPage(0);
             }}><h3>Start!</h3></button>
         </>, true),
-        new LifeEvent("Event Tutorial", new Date(date.d.getFullYear() + 1, 5),
+        new LifeEvent("Event Tutorial", new Date(gameState.s.date.getFullYear() + 1, 5),
             (<div><p>During the year you will encounter events that may have a financial impact.</p></div>)),
     ]));
-    const activeEvent = lifeEventManager.GetActiveEvent(date.d);
+    const activeEvent = lifeEventManager.GetActiveEvent(gameState.s.date);
 
     const tutorialManager = useRef(new TutorialManager([
         new TutorialChain("Year In Review Tutorial", () => gameState.s.page == 0, [
@@ -266,7 +273,7 @@ function GamePage({fname, lname}: GameProps) {
                 if (gameState.s.page < pages.length - 1) {
                     gameState.s.nextPage();
                     e.stopImmediatePropagation();
-                } else if (lifeEventManager.GetActiveEvent(date.d) != null && !lifeEventManager.GetActiveEvent(date.d)!.customContinue) {
+                } else if (lifeEventManager.GetActiveEvent(gameState.s.date) != null && !lifeEventManager.GetActiveEvent(gameState.s.date)!.customContinue) {
                     lifeEventManager.NextEvent();
                     e.stopImmediatePropagation();
                 }
@@ -295,7 +302,7 @@ function GamePage({fname, lname}: GameProps) {
 
     const pages = [
         <div className="flex flex-col gap-2 items-center">
-            <h1>Year in review {date.d.getFullYear() - 1}</h1>
+            <h1>Year in review {gameState.s.date.getFullYear() - 1}</h1>
             <div className="grid grid-cols-2">
                 {character.accounts.map((account, i) => (
                     <div key={i} id={"YIRAccount" + account.name}
@@ -730,7 +737,7 @@ function GamePage({fname, lname}: GameProps) {
                                 Money
                             </button>]
                         : [<div key="1"></div>, <div key="2"></div>])}
-                    <h2 className="justify-self-end text-gray-700!">{GetDateString(date.d)}</h2>
+                    <h2 className="justify-self-end text-gray-700!">{GetDateString(gameState.s.date)}</h2>
                 </div>
             </div>
         </div>

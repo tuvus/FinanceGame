@@ -19,12 +19,12 @@ export class LifeEvent {
 export class LifeEventManager {
     lifeEvents: LifeEvent[];
     date: Date;
-    endYear: () => void;
+    nextYear: () => void;
     render: () => void;
 
-    constructor(date: Date, endYear: () => void, render: () => void, startingEvents: LifeEvent[]) {
+    constructor(date: Date, nextYear: () => void, render: () => void, startingEvents: LifeEvent[]) {
         this.date = date;
-        this.endYear = endYear;
+        this.nextYear = nextYear;
         this.render = render;
         this.lifeEvents = startingEvents;
     }
@@ -45,7 +45,7 @@ export class LifeEventManager {
         this.lifeEvents = this.lifeEvents.splice(1);
 
         if (this.GetActiveEvent(date) == null) {
-            this.endYear();
+            this.nextYear();
             return;
         }
 
