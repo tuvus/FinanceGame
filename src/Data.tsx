@@ -64,7 +64,7 @@ export class Account {
 
     getDateString(date: Date) {
         if (date.getMonth() == 0) {
-            return "1/" + date.getFullYear();
+            return date.getFullYear().toString();
         }
         return date.getMonth().toString();
     }

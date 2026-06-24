@@ -324,12 +324,11 @@ function GamePage({fname, lname}: GameProps) {
         new LifeEvent("Moving Out", gameState.s.date, <>
             <h2>Its time to start your journey!</h2>
             <button className="w-50 text-xl h-10 p-1 font-bold mt-2" onClick={() => {
-                lifeEventManager.RemoveFirstEvent()
-                gameState.s.date.setFullYear(gameState.s.date.getFullYear() + 1);
+                lifeEventManager.RemoveFirstEvent();
                 setPage(0);
             }}><h3>Start!</h3></button>
         </>, true),
-        new LifeEvent("Event Tutorial", new Date(gameState.s.date.getFullYear() + 6, 5),
+        new LifeEvent("Event Tutorial", new Date(gameState.s.date.getFullYear() + 5, 5),
             (<div><p>During the year you will encounter events that may have a financial impact.</p></div>)),
     ]));
     const activeEvent = lifeEventManager.GetActiveEvent(gameState.s.date);
@@ -849,7 +848,7 @@ function GamePage({fname, lname}: GameProps) {
             <div className="mb-20"></div>
             <div className="fixed bottom-1 left-1 z-9 h-16 right-1 justify-center p-2 rounded-2xl bg-amber-100">
                 <div className="grid grid-cols-4 content-center align-items-middle mx-auto h-full ml-4 mr-4">
-                    <h2 className="justify-self-start text-gray-700! align-self-middle">{fname} {lname} ({character.age})</h2>
+                    <h2 className="text-gray-700! align-self-middle text-start w-100">{fname} {lname} ({character.age})</h2>
                     {(page < pages.length ? [
                             <h2 className="text-gray-700! justify-self-end mt-2"
                                 key="1">{formatter.format(savingsAccount.a.balance)}</h2>,
