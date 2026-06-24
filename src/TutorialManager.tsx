@@ -106,13 +106,16 @@ export class TutorialManager {
                 this.checkActiveTutorial();
                 return;
             } else if (this.activeTutorial.getCurrentEvent().highlightElementId != null) {
-                console.log(1)
                 this.highlighter.setTargetElement(document.getElementById(this.activeTutorial.getCurrentEvent().highlightElementId!));
-                console.log(this.highlighter.targetElement);
             } else {
                 this.highlighter.setTargetElement(null);
             }
         }
+    }
+
+    nextEvent() {
+        this.activeTutorial!.currentEvent++;
+        this.render();
     }
 
     getTutorialElement() {
@@ -146,10 +149,7 @@ export class TutorialManager {
                                 {currentEvent.panelElement}
                                 {currentEvent.buttonText ?
                                     <button className="ml-5 text-xl font-bold w-50 h-10"
-                                            onClick={() => {
-                                                this.activeTutorial!.currentEvent++;
-                                                this.render();
-                                            }}>
+                                            onClick={() => this.nextEvent()}>
                                         {currentEvent.buttonText}
                                     </button> : <></>}
                             </div>

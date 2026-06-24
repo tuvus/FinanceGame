@@ -359,25 +359,21 @@ function GamePage({fname, lname}: GameProps) {
                 if (document.getElementById("transfer-modal")!.style.display == "block") {
                     document.getElementById("transfer-confirm")!.click();
                     e.stopImmediatePropagation();
-                    return;
-                }
-                if (document.getElementById("debt-modal")!.style.display == "block") {
+                } else if (document.getElementById("debt-modal")!.style.display == "block") {
                     document.getElementById("debt-confirm")!.click();
                     e.stopImmediatePropagation();
-                    return;
                 }
             } else if (e.key == "n") {
                 if (document.getElementById("transfer-modal")!.style.display == "block") {
                     document.getElementById("transfer-confirm")!.click();
                     e.stopImmediatePropagation();
-                    return;
-                }
-                if (document.getElementById("debt-modal")!.style.display == "block") {
+                } else if (document.getElementById("debt-modal")!.style.display == "block") {
                     document.getElementById("debt-confirm")!.click();
                     e.stopImmediatePropagation();
-                    return;
-                }
-                if (gameState.s.page < pages.length - 1) {
+                } else if (tutorialManager.current.activeTutorial != null){
+                    tutorialManager.current.nextEvent();
+                    e.stopImmediatePropagation();
+                } else if (gameState.s.page < pages.length - 1) {
                     gameState.s.nextPage();
                     e.stopImmediatePropagation();
                 } else if (lifeEventManager.GetActiveEvent(gameState.s.date) != null && !lifeEventManager.GetActiveEvent(gameState.s.date)!.customContinue) {
