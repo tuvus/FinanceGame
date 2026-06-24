@@ -81,7 +81,7 @@ function GamePage({fname, lname}: GameProps) {
     const endYear = () => {
         const livingExpenses = character.monthlyLivingExpenses.map(e => e.amount).reduce((sum, curr) => sum + curr, 0) * inflation * 12;
         const taxes = CalculateTaxes(Math.max(0, character.salary * (1 - character.pretirement / 100) - 15750));
-        const newSavings = character.salary * (100 - character.pinvestments - character.pretirement - character.pleisure) / 100 - taxes - livingExpenses;
+        const newSavings = character.salary * (100 - character.pinvestments - character.pretirement - character.pleisure) / 100 - taxes - livingExpenses - character.loans.reduce((sum, l) => sum + l.getPayment(), 0);
 
         // Go on trips!
         character.satisfaction += (character.loans.length > 0 ? 5 : 8) + character.satisfaction * character.pleisure / 100 / inflation;
@@ -124,8 +124,9 @@ function GamePage({fname, lname}: GameProps) {
     const monthlyLivingExpenses = character.monthlyLivingExpenses.map(e => e.amount)
         .reduce((sum, curr) => sum + curr, 0) * inflation;
     const livingExpenses = monthlyLivingExpenses * 12;
+    const minLoanPayments = character.loans.reduce((sum, l) => sum + l.getPayment(), 0);
 
-    const newSavings = character.salary * (100 - character.pinvestments - character.pretirement - character.pleisure) / 100 - taxes - livingExpenses;
+    const newSavings = character.salary * (100 - character.pinvestments - character.pretirement - character.pleisure) / 100 - taxes - livingExpenses - minLoanPayments;
     const ploans = character.loans.reduce((sum, l) => sum + l.getPayment(), 0) / character.salary * 100;
 
 
@@ -500,7 +501,7 @@ function GamePage({fname, lname}: GameProps) {
                         <p className="text-red-800" key="111">Loans</p>,
                         <p className="text-red-800" key="222">{Math.round(ploans)}%</p>,
                         <p className="text-red-800"
-                           key="333">{formatter.format(character.loans.reduce((sum, l) => sum + l.getPayment(), 0))}</p>
+                           key="333">{formatter.format(minLoanPayments)}</p>
                     ] : []}
 
                     <p className="text-gray-700">Investments</p>
@@ -627,6 +628,25 @@ function GamePage({fname, lname}: GameProps) {
                 </button>
                 <button className="w-50 text-xl h-10 p-1 font-bold" onClick={() => nextPage()}><h3>Start the year</h3>
                 </button>
+            </div>
+        </div>,
+        <div className="flex flex-col gap-2 items-center">
+            <h1>Summary</h1>
+            <div className="flex flex-col gap-2 w-1/2 rounded-2xl bg-amber-100 items-center pt-2 pb-2">
+                <div className="grid grid-cols-2 gap-2 w-full">
+                    <p className="text-green-700">Take home income</p>
+                    <p className="text-green-700">{formatter.format(character.salary - taxes)}</p>
+                    <p className="text-red-800">Expenses</p>
+                    <p className="text-red-800">{formatter.format(livingExpenses + minLoanPayments)}</p>
+                    <p className="text-red-800">Loans</p>
+                    <p className="text-red-800">{formatter.format(character.totalLoans.balance)}</p>
+                    <p className="text-green-700">Investments</p>
+                    <p className="text-green-700">{formatter.format(investmentAccount.a.balance)}</p>
+                    <p className="text-green-700">Retirement</p>
+                    <p className="text-green-700">{formatter.format(retirementAccount.a.balance)}</p>
+                    <p className="text-green-700">Predicted Balance</p>
+                    <p className="text-green-700">{formatter.format(savingsAccount.a.balance + newSavings)}</p>
+                </div>
             </div>
         </div>,
         <div>
