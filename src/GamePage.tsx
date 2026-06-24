@@ -64,7 +64,7 @@ function GamePage({fname, lname}: GameProps) {
 
     const nextPage = () => {
         if (page + 1 == pages.length - 1) {
-            if (lifeEventManager.lifeEvents.length == 0) {
+            if (!lifeEventManager.GetActiveEvent(gameState.s.date)) {
                 lifeEventManager.AddEvent(
                     new LifeEvent("Another year passes", gameState.s.date,
                         (<div><h3 className="m-4">There were no special events this year.</h3></div>))
@@ -121,7 +121,8 @@ function GamePage({fname, lname}: GameProps) {
 
     const taxes = CalculateTaxes(Math.max(0, character.salary * (1 - character.pretirement / 100) - 15750));
 
-    const monthlyLivingExpenses = character.monthlyLivingExpenses.map(e => e.amount).reduce((sum, curr) => sum + curr, 0) * inflation;
+    const monthlyLivingExpenses = character.monthlyLivingExpenses.map(e => e.amount)
+        .reduce((sum, curr) => sum + curr, 0) * inflation;
     const livingExpenses = monthlyLivingExpenses * 12;
 
     const newSavings = character.salary * (100 - character.pinvestments - character.pretirement - character.pleisure) / 100 - taxes - livingExpenses;
@@ -186,8 +187,7 @@ function GamePage({fname, lname}: GameProps) {
                      }}>
                     <h3 className="text-gray-700 font-bold">Trade School</h3>
                     <p className="text-gray-700">Trade school is around a one year program that emphasizes going into
-                        the
-                        workforce early. The practical experience from a trade school certificate allows entry
+                        the workforce early. The practical experience from a trade school certificate allows entry
                         into more specialized work areas.</p>
                 </div>
                 <div className="eventButton panelButton"
@@ -329,7 +329,7 @@ function GamePage({fname, lname}: GameProps) {
                 setPage(0);
             }}><h3>Start!</h3></button>
         </>, true),
-        new LifeEvent("Event Tutorial", new Date(gameState.s.date.getFullYear() + 1, 5),
+        new LifeEvent("Event Tutorial", new Date(gameState.s.date.getFullYear() + 6, 5),
             (<div><p>During the year you will encounter events that may have a financial impact.</p></div>)),
     ]));
     const activeEvent = lifeEventManager.GetActiveEvent(gameState.s.date);
@@ -370,7 +370,7 @@ function GamePage({fname, lname}: GameProps) {
                 } else if (document.getElementById("debt-modal")!.style.display == "block") {
                     document.getElementById("debt-confirm")!.click();
                     e.stopImmediatePropagation();
-                } else if (tutorialManager.current.activeTutorial != null){
+                } else if (tutorialManager.current.activeTutorial != null) {
                     tutorialManager.current.nextEvent();
                     e.stopImmediatePropagation();
                 } else if (gameState.s.page < pages.length - 1) {
