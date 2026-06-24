@@ -27,8 +27,8 @@ export class Character {
 
     endYear(date: Date, inflation: number) {
         this.salary *= inflation;
-        this.accounts.forEach((account) => account.endYear(date));
         this.loans.forEach(l => l.endLoanYear(date, inflation));
+        this.accounts.forEach((account) => account.endYear(date));
         this.refreshLoans();
         this.totalLoans.endYear(date);
     }
