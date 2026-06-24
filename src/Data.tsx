@@ -9,18 +9,20 @@ export class Character {
     loans: Loan[];
     totalLoans: Account;
     satisfaction: number;
+    monthlyLivingExpenses: { name: string, amount: number }[];
 
-    constructor(firstName: string, lastName: string) {
+    constructor(firstName: string, lastName: string, monthlyLivingExpenses: { name: string, amount: number }[]) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.salary = 0;
         this.pinvestments = 0;
         this.pretirement = 0;
-        this.pleisure = 10;
+        this.pleisure = 0;
         this.accounts = [];
         this.loans = [];
-        this.totalLoans = new Account("Loans", 0 , false);
+        this.totalLoans = new Account("Loans", 0, false);
         this.satisfaction = 0;
+        this.monthlyLivingExpenses = monthlyLivingExpenses;
     }
 
     endYear(date: Date, inflation: number) {
