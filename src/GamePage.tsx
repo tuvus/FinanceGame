@@ -31,17 +31,16 @@ function GamePage({fname, lname}: GameProps) {
     const [savingsAccount] = useState({a: new Account("Savings Account", 0, true)});
     const [page, setPage] = useState(999);
     const [character] = useState(new Character(fname, lname, [
-            {name: "Rent", amount: 1650},
-            {name: "Utilities", amount: 410},
-            {name: "Internet", amount: 40},
-            {name: "Phone Data", amount: 60},
-            {name: "Groceries", amount: 150},
-            {name: "Car Gas", amount: 110},
-            {name: "Car Maintenance", amount: 70},
-            {name: "Car Insurance", amount: 236},
-            {name: "Health Insurance", amount: 400},
-        ]
-    ));
+        {name: "Rent", amount: 1650},
+        {name: "Utilities", amount: 410},
+        {name: "Internet", amount: 40},
+        {name: "Phone Data", amount: 60},
+        {name: "Groceries", amount: 150},
+        {name: "Car Gas", amount: 110},
+        {name: "Car Maintenance", amount: 70},
+        {name: "Car Insurance", amount: 236},
+        {name: "Health Insurance", amount: 400},
+    ], 17));
     const [investmentAccount] = useState({a: new StockAccount("Investment Account", 0)});
     const [retirementAccount] = useState({a: new StockAccount("Retirement Account", 0)});
     const [indexFund] = useState({a: new StockBond("Index Fund", random.int(7000, 50000) / 100, false)});
@@ -575,7 +574,7 @@ function GamePage({fname, lname}: GameProps) {
                     <LineChart className="h-60 w-120" data={loan.history}
                                index="dateString"
                                showLegend={false}
-                               minValue={Math.min(...loan.history.map(h => h.balance))}
+                               minValue={0}
                                maxValue={Math.max(...loan.history.map(h => h.balance))}
                                aria-hidden="true"
                                categories={["balance"]}
@@ -850,9 +849,9 @@ function GamePage({fname, lname}: GameProps) {
             <div className="mb-20"></div>
             <div className="fixed bottom-1 left-1 z-9 h-16 right-1 justify-center p-2 rounded-2xl bg-amber-100">
                 <div className="grid grid-cols-4 content-center align-items-middle mx-auto h-full ml-4 mr-4">
-                    <h2 className="justify-self-start text-gray-700! align-self-middle">{fname} {lname}</h2>
+                    <h2 className="justify-self-start text-gray-700! align-self-middle">{fname} {lname} ({character.age})</h2>
                     {(page < pages.length ? [
-                            <h2 className="text-yellow-600! justify-self-end mt-2"
+                            <h2 className="text-gray-700! justify-self-end mt-2"
                                 key="1">{formatter.format(savingsAccount.a.balance)}</h2>,
                             <button className="w-50 ml-4 text-xl font-bold h-10 justify-self-left" key="2"
                                     onClick={() => {

@@ -10,8 +10,9 @@ export class Character {
     totalLoans: Account;
     satisfaction: number;
     monthlyLivingExpenses: { name: string, amount: number }[];
+    age: number;
 
-    constructor(firstName: string, lastName: string, monthlyLivingExpenses: { name: string, amount: number }[]) {
+    constructor(firstName: string, lastName: string, monthlyLivingExpenses: { name: string, amount: number }[], age: number) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.salary = 0;
@@ -23,6 +24,7 @@ export class Character {
         this.totalLoans = new Account("Loans", 0, false);
         this.satisfaction = 0;
         this.monthlyLivingExpenses = monthlyLivingExpenses;
+        this.age = age;
     }
 
     endYear(date: Date, inflation: number) {
@@ -31,6 +33,7 @@ export class Character {
         this.accounts.forEach((account) => account.endYear(date));
         this.refreshLoans();
         this.totalLoans.endYear(date);
+        this.age++;
     }
 
     addLoan(loan: Loan) {
