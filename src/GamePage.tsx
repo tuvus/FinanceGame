@@ -169,8 +169,9 @@ function GamePage({fname, lname}: GameProps) {
                              {name: "Health Insurance", amount: 200},
                          ];
 
+                         character.addLoan(new Loan("Trade School Debt", 10000 * random.float(.9, 1.1), savingsAccount.a, 1.067, true));
                          savingsAccount.a.balance += 10000;
-                         character.addLoan(new Loan("Trade School Debt", 20000 * random.float(.9, 1.1), savingsAccount.a, 1.067, true));
+                         character.loans[0].balance += 10000;
                          endYear();
                          character.loans[0].balance += 10000 * random.float(.9, 1.1);
                          endYear();
@@ -209,8 +210,9 @@ function GamePage({fname, lname}: GameProps) {
                                               {name: "Health Insurance", amount: 200},
                                           ];
 
+                                          character.addLoan(new Loan("College Debt", 4000 * random.float(.9, 1.1), savingsAccount.a, 1.067, true));
                                           savingsAccount.a.balance += 10000;
-                                          character.addLoan(new Loan("College Debt", 14000 * random.float(.9, 1.1), savingsAccount.a, 1.067, true));
+                                          character.loans[0].balance += 10000;
                                           endYear();
                                           character.loans[0].balance += 4000 * random.float(.9, 1.1);
                                           endYear();
@@ -244,13 +246,15 @@ function GamePage({fname, lname}: GameProps) {
                                               {name: "Health Insurance", amount: 200},
                                           ];
 
+                                          character.addLoan(new Loan("College Debt", 20000 * random.float(.9, 1.1), savingsAccount.a, 1.067, true));
                                           savingsAccount.a.balance += 30000;
-                                          character.addLoan(new Loan("College Debt", 50000 * random.float(.9, 1.1), savingsAccount.a, 1.067, true));
+                                          character.loans[0].balance += 30000;
                                           endYear();
                                           character.loans[0].balance += 20000 * random.float(.9, 1.1);
                                           endYear();
+                                          character.loans[0].balance += 20000 * random.float(.9, 1.1);
                                           savingsAccount.a.balance += 25000;
-                                          character.loans[0].balance += 45000 * random.float(.9, 1.1);
+                                          character.loans[0].balance += 25000;
                                           endYear();
                                           character.loans[0].balance += 20000 * random.float(.9, 1.1);
                                           endYear();
@@ -281,16 +285,21 @@ function GamePage({fname, lname}: GameProps) {
                                               {name: "Health Insurance", amount: 200},
                                           ];
 
-                                          savingsAccount.a.balance += 30000;
-                                          character.addLoan(new Loan("College Debt", 80000 * random.float(.9, 1.1), savingsAccount.a, 1.067, true));
+                                          character.addLoan(new Loan("College Debt", 50000 * random.float(.9, 1.1), savingsAccount.a, 1.067, true));
+                                          savingsAccount.a.balance += 20000;
+                                          character.loans[0].balance += 20000;
                                           endYear();
-                                          // character.loans[0].balance += 50000 * random.float(.9, 1.1);
+                                          character.loans[0].balance += 50000 * random.float(.9, 1.1);
+                                          savingsAccount.a.balance += 20000;
+                                          character.loans[0].balance += 20000;
                                           endYear();
-                                          savingsAccount.a.balance += 15000;
-                                          character.loans[0].balance += 65000 * random.float(.9, 1.1);
+                                          character.loans[0].balance += 50000 * random.float(.9, 1.1);
+                                          savingsAccount.a.balance += 20000;
+                                          character.loans[0].balance += 20000;
                                           endYear();
-                                          savingsAccount.a.balance += 15000;
-                                          character.loans[0].balance += 65000 * random.float(.9, 1.1);
+                                          character.loans[0].balance += 50000 * random.float(.9, 1.1);
+                                          savingsAccount.a.balance += 20000;
+                                          character.loans[0].balance += 20000;
                                           endYear();
                                           character.monthlyLivingExpenses = previousExpenses;
                                           character.salary = 83000 * random.float(.85, 1.3);
