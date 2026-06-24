@@ -461,9 +461,9 @@ function GamePage({fname, lname}: GameProps) {
             <h1>Allocation</h1>
             <div className="flex flex-col gap-2 w-1/2 rounded-2xl bg-amber-100 items-center pt-2 pb-2">
                 <div className="grid grid-cols-3 w-full">
-                    <p className="text-green-700">Paycheck</p>
+                    <p className="text-green-700 font-bold">Paycheck</p>
                     <p></p>
-                    <p className="text-green-700">{formatter.format(character.salary)}</p>
+                    <p className="text-green-700 font-bold">{formatter.format(character.salary)}</p>
                     <hr></hr>
                     <hr></hr>
                     <hr></hr>
@@ -533,9 +533,9 @@ function GamePage({fname, lname}: GameProps) {
                     <hr/>
                     <hr/>
 
-                    <p className="text-yellow-600">Savings</p>
-                    <p className="text-yellow-600">{Math.round(newSavings / character.salary * 100)}%</p>
-                    <p className="text-yellow-600">{formatter.format(newSavings)}</p>
+                    <p className="text-yellow-600 font-bold">Savings</p>
+                    <p className="text-yellow-600 font-bold">{Math.round(newSavings / character.salary * 100)}%</p>
+                    <p className="text-yellow-600 font-bold">{formatter.format(newSavings)}</p>
                 </div>
 
                 <div className="flex gap-2">
