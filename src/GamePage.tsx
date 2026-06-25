@@ -355,44 +355,44 @@ function GamePage({fname, lname}: GameProps) {
             new TutorialEvent("Allocations Page", null, (<p className="text-gray-700">
                 Congratulations on getting your first job!
                 This page shows you where your paycheck this year will go, and gives you the ability to <a
-                href="https://www.investopedia.com/terms/a/assetallocation.asp" target="_blank">allocate</a> the
-                rest of the money.
+                href="https://www.investopedia.com/terms/a/assetallocation.asp" target="_blank">allocate</a> the money.
             </p>), null, null, "Next"),
             new TutorialEvent("Paycheck", null, (<p className="text-gray-700">
-                This is your current salary at the job you work at. This is before income taxes, and together with all
-                your income is called <a
+                This your salary at your current job. This is your <a
                 href="https://www.investopedia.com/terms/g/grossincome.asp#toc-what-is-gross-income" target="_blank">gross
-                income</a>. Sadly, this isn't the amount of money you get to take home.
+                income</a>, which does not include taxes or any other expenses. Sadly, this isn't the amount of money
+                you get to take home.
             </p>), "Paycheck", null, "Next"),
             new TutorialEvent("Income Tax", null, (<p className="text-gray-700">
                 This is how much you owe in <a href="https://www.investopedia.com/terms/i/incometax.asp"
                                                target="_blank">income taxes</a>.
             </p>), "IncomeTaxes", null, "Next"),
             new TutorialEvent("Living Expenses", null, (<p className="text-gray-700">
-                This is a list of <a href="https://www.investopedia.com/terms/c/cost-of-living.asp" target="_blank">living
-                expenses</a> and how much of your salary they take. Like taxes, they are required expenses and therefore
-                cannot be changed.
+                Next, you will find a list of <a href="https://www.investopedia.com/terms/c/cost-of-living.asp"
+                                                 target="_blank">living expenses</a> based on your lifestyle. Your
+                habits and way of living determine these costs. Some people are more frugal, and some people live more
+                lavish, but as long as you are living within your means you shouldn't sacrifice your lifestyle to save
+                more money.
             </p>), "ItemizedLivingExpenses", null, "Next"),
             new TutorialEvent("Loans", () => character.loans.length > 0, (<p className="text-gray-700">
-                From going to school, you have acquired debt in the form of <a
+                You have acquired debt in the form of <a
                 href="https://www.investopedia.com/terms/l/loan.asp#toc-what-is-a-loan" target="_blank">loans</a> to pay
-                for schooling. You have to pay at least a certain amount every year towards loans called minimum
-                payments. These minimum payments get shown as a required payment like living expenses and taxes.
+                for schooling. Loans have a minimum payment, which you have to pay monthly. For simplicity, these
+                payments are aggregated into yearly installments.
             </p>), "Loans", null, "Next"),
             new TutorialEvent("Leisure", null, (<p className="text-gray-700">
-                The leisure category is for money you want to allocate to things like shopping and trips. You can press
+                The leisure category is for money allocated to things like shopping and trips. You can press
                 the up and down arrows to change the percentage of your paycheck that is allocated towards this
                 category.
             </p>), "Leisure", null, "Next"),
             new TutorialEvent("Savings", null, (<p className="text-gray-700">
                 This is the leftover money from your salary, which will go into your <a
-                href="https://www.investopedia.com/terms/s/savings.asp" target="_blank">savings account</a>. It is also
-                possible for this to go negative, in that case you would be taking money from your savings account
-                towards your allocations.
+                href="https://www.investopedia.com/terms/s/savings.asp" target="_blank">savings account</a>. You may
+                also withdraw money from your savings account towards your other allocations.
             </p>), "Savings", null, "Next"),
             new TutorialEvent("Predicted Balance", null, (<p className="text-gray-700">
-                This is the calculated amount of money you will have in your savings account after the allocations are
-                added or removed.
+                This is the predicted balance that you will have at the start of next year. It is calculated from your
+                current balance plus your savings from your paycheck.
             </p>), "PredictedBalance", null, "Close"),
         ]),
     ], render));
