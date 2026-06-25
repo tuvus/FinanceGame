@@ -337,38 +337,47 @@ function GamePage({fname, lname}: GameProps) {
         new TutorialChain("Year In Review Tutorial", () => gameState.s.page == 0, [
             new TutorialEvent("Year in review page", null, (<p className="text-gray-700">
                 On this page, you will be looking at your money's performance from last year and the years before
-                inorder to determine how to allocate this year's income. Each account that you own will show up on this
-                page.
+                inorder to determine how to <a
+                href="https://www.investopedia.com/terms/a/assetallocation.asp" target="_blank">allocate</a> this year's
+                income. Each account that you own will show up on this page.
             </p>), null, null, "Next"),
             new TutorialEvent("Savings history", null, (<p className="text-gray-700">
                 Here is your savings account, currently you have a balance
-                of {formatter.format(savingsAccount.a.balance)}. Below the account you can see a graph of the accounts
+                of {formatter.format(savingsAccount.a.balance)}. Below the account you can see a graph of the account's
                 previous balance.
             </p>), "YIRAccountSavings Account", null, "Next"),
             new TutorialEvent("Asset Positions", null, (<p className="text-gray-700">
-                Here is a pie chart displaying your portfolio and what positions your money is in.
+                Here is a pie chart displaying your <a href="https://www.investopedia.com/terms/p/portfolio.asp"
+                                                       target="_blank">portfolio</a>, or where your money is.
             </p>), "DonutChart", null, "Close"),
         ]),
         new TutorialChain("Allocations Tutorial", () => gameState.s.page == 1, [
             new TutorialEvent("Allocations Page", null, (<p className="text-gray-700">
                 Congratulations on getting your first job!
-                This page shows you where your paycheck this year will go, and gives you the ability to allocate the
+                This page shows you where your paycheck this year will go, and gives you the ability to <a
+                href="https://www.investopedia.com/terms/a/assetallocation.asp" target="_blank">allocate</a> the
                 rest of the money.
             </p>), null, null, "Next"),
-            new TutorialEvent("Paycheck Salary", null, (<p className="text-gray-700">
-                This is your current salary. Sadly you can't keep all of it.
+            new TutorialEvent("Paycheck", null, (<p className="text-gray-700">
+                This is your current salary at the job you work at. This is before income taxes, and together with all
+                your income is called <a
+                href="https://www.investopedia.com/terms/g/grossincome.asp#toc-what-is-gross-income" target="_blank">gross
+                income</a>. Sadly, this isn't the amount of money you get to take home.
             </p>), "Paycheck", null, "Next"),
             new TutorialEvent("Income Tax", null, (<p className="text-gray-700">
-                This is how much you owe in taxes.
+                This is how much you owe in <a href="https://www.investopedia.com/terms/i/incometax.asp"
+                                               target="_blank">income taxes</a>.
             </p>), "IncomeTaxes", null, "Next"),
             new TutorialEvent("Living Expenses", null, (<p className="text-gray-700">
-                This is a list of living expenses and how much of your salary they take. Like taxes, they are required
-                expenses and therefore cannot be changed.
+                This is a list of <a href="https://www.investopedia.com/terms/c/cost-of-living.asp" target="_blank">living
+                expenses</a> and how much of your salary they take. Like taxes, they are required expenses and therefore
+                cannot be changed.
             </p>), "ItemizedLivingExpenses", null, "Next"),
             new TutorialEvent("Loans", () => character.loans.length > 0, (<p className="text-gray-700">
-                From going to school, you have acquired debt in the form of loans to pay for schooling. You have to pay
-                at least a certain amount every year towards loans called minimum payments. These minimum payments get
-                shown as a required payment like living expenses and taxes.
+                From going to school, you have acquired debt in the form of <a
+                href="https://www.investopedia.com/terms/l/loan.asp#toc-what-is-a-loan" target="_blank">loans</a> to pay
+                for schooling. You have to pay at least a certain amount every year towards loans called minimum
+                payments. These minimum payments get shown as a required payment like living expenses and taxes.
             </p>), "Loans", null, "Next"),
             new TutorialEvent("Leisure", null, (<p className="text-gray-700">
                 The leisure category is for money you want to allocate to things like shopping and trips. You can press
@@ -376,9 +385,10 @@ function GamePage({fname, lname}: GameProps) {
                 category.
             </p>), "Leisure", null, "Next"),
             new TutorialEvent("Savings", null, (<p className="text-gray-700">
-                This is the leftover money from your salary, which will go into your savings account. It is also
-                possible for this to go negative, in that case you would be taking money from your
-                savings account towards your allocations.
+                This is the leftover money from your salary, which will go into your <a
+                href="https://www.investopedia.com/terms/s/savings.asp" target="_blank">savings account</a>. It is also
+                possible for this to go negative, in that case you would be taking money from your savings account
+                towards your allocations.
             </p>), "Savings", null, "Next"),
             new TutorialEvent("Predicted Balance", null, (<p className="text-gray-700">
                 This is the calculated amount of money you will have in your savings account after the allocations are
