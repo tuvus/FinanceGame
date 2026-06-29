@@ -13,8 +13,14 @@ export class Character {
     satisfaction: number;
     monthlyLivingExpenses: { name: string, amount: number }[];
     age: number;
+    savingsAccount: Account;
+    investmentAccount: StockAccount;
+    retirementAccount: StockAccount;
 
-    constructor(firstName: string, lastName: string, monthlyLivingExpenses: { name: string, amount: number }[], age: number) {
+    constructor(firstName: string, lastName: string, monthlyLivingExpenses: {
+        name: string,
+        amount: number
+    }[], age: number) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.salary = 0;
@@ -27,6 +33,9 @@ export class Character {
         this.satisfaction = 0;
         this.monthlyLivingExpenses = monthlyLivingExpenses;
         this.age = age;
+        this.savingsAccount = new Account("Savings Account", 0, true);
+        this.investmentAccount = new StockAccount("Investment Account", 0);
+        this.retirementAccount = new StockAccount("Retirement Account", 0);
     }
 
     endYear(date: Date, inflation: number) {
@@ -41,6 +50,15 @@ export class Character {
     addLoan(loan: Loan) {
         this.loans = [...this.loans, loan];
         this.totalLoans.balance += loan.balance;
+    }
+
+    addCreditDebt(amount: number) {
+        const loan = this.loans.find((l) => l.name == "Credit Card Debt");
+        if (loan) {
+            loan.balance += amount;
+        } else {
+            this.addLoan(new Loan("Credit Card Debt", amount, this.savingsAccount, 1.27, false));
+        }
     }
 
     refreshLoans() {

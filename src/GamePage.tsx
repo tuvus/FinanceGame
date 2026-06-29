@@ -28,7 +28,6 @@ function GamePage({fname, lname}: GameProps) {
         notation: "compact",
         compactDisplay: "short"
     });
-    const [savingsAccount] = useState({a: new Account("Savings Account", 0, true)});
     const [page, setPage] = useState(999);
     const [character] = useState(new Character(fname, lname, [
         {name: "Rent", amount: 1650},
@@ -42,8 +41,6 @@ function GamePage({fname, lname}: GameProps) {
         {name: "Health Insurance", amount: 400},
     ], 17));
     const [gameState] = useState({s: new GameState(new Date(random.int(1940, 2010), 0), character, formatter, compactFormatter)});
-    const [investmentAccount] = useState({a: new StockAccount("Investment Account", 0)});
-    const [retirementAccount] = useState({a: new StockAccount("Retirement Account", 0)});
     const [indexFund] = useState({a: new StockBond("Index Fund", random.int(7000, 50000) / 100, false)});
     const [bond] = useState({a: new StockBond("Bond", 1, true)});
     const [rerender, setRerender] = useState(0);
@@ -87,18 +84,13 @@ function GamePage({fname, lname}: GameProps) {
         character.satisfaction += (character.loans.length > 0 ? 5 : 8) + character.satisfaction * character.pleisure / 100 / inflation;
 
         // Income and interest
-        savingsAccount.a.balance += newSavings;
-        if (savingsAccount.a.balance < 0) {
-            const loan = character.loans.find(l => l.name == "Credit Card Debt");
-            if (loan == undefined) {
-                character.addLoan(new Loan("Credit Card Debt", -savingsAccount.a.balance, savingsAccount.a, 1.27, false));
-            } else {
-                loan.balance += -savingsAccount.a.balance;
-            }
-            savingsAccount.a.balance = 0;
+        character.savingsAccount.balance += newSavings;
+        if (character.savingsAccount.balance < 0) {
+            character.addCreditDebt(-character.savingsAccount.balance)
+            character.savingsAccount.balance = 0;
         }
-        investmentAccount.a.balance += character.salary * character.pinvestments / 100
-        retirementAccount.a.balance += character.salary * character.pretirement / 100
+        character.investmentAccount.balance += character.salary * character.pinvestments / 100
+        character.retirementAccount.balance += character.salary * character.pretirement / 100
         indexFund.a.balance *= random.float(.85, 1.2);
 
         // Inflation
@@ -138,7 +130,7 @@ function GamePage({fname, lname}: GameProps) {
                      onClick={() => {
                          const previousExpenses = character.monthlyLivingExpenses;
                          character.monthlyLivingExpenses = [];
-                         savingsAccount.a.balance = 30000 * random.float(.7, 1.3);
+                         character.savingsAccount.balance = 30000 * random.float(.7, 1.3);
                          endYear();
                          character.salary = 42000 * random.float(.95, 1.1);
                          character.monthlyLivingExpenses = previousExpenses;
@@ -159,7 +151,7 @@ function GamePage({fname, lname}: GameProps) {
                      onClick={() => {
                          const previousExpenses = character.monthlyLivingExpenses;
                          character.monthlyLivingExpenses = [];
-                         savingsAccount.a.balance = 30000 * random.float(.7, 1.3);
+                         character.savingsAccount.balance = 30000 * random.float(.7, 1.3);
                          endYear();
                          character.monthlyLivingExpenses = [
                              {name: "Rent", amount: 500},
@@ -171,8 +163,8 @@ function GamePage({fname, lname}: GameProps) {
                              {name: "Health Insurance", amount: 200},
                          ];
 
-                         character.addLoan(new Loan("Trade School Debt", 10000 * random.float(.9, 1.1), savingsAccount.a, 1.067, true));
-                         savingsAccount.a.balance += 10000;
+                         character.addLoan(new Loan("Trade School Debt", 10000 * random.float(.9, 1.1), character.savingsAccount, 1.067, true));
+                         character.savingsAccount.balance += 10000;
                          character.loans[0].balance += 10000;
                          endYear();
                          character.loans[0].balance += 10000 * random.float(.9, 1.1);
@@ -199,7 +191,7 @@ function GamePage({fname, lname}: GameProps) {
                                       onClick={() => {
                                           const previousExpenses = character.monthlyLivingExpenses;
                                           character.monthlyLivingExpenses = [];
-                                          savingsAccount.a.balance = 30000 * random.float(.7, 1.3);
+                                          character.savingsAccount.balance = 30000 * random.float(.7, 1.3);
                                           endYear();
                                           character.monthlyLivingExpenses = [
                                               {name: "Rent", amount: 500},
@@ -211,8 +203,8 @@ function GamePage({fname, lname}: GameProps) {
                                               {name: "Health Insurance", amount: 200},
                                           ];
 
-                                          character.addLoan(new Loan("College Debt", 4000 * random.float(.9, 1.1), savingsAccount.a, 1.067, true));
-                                          savingsAccount.a.balance += 10000;
+                                          character.addLoan(new Loan("College Debt", 4000 * random.float(.9, 1.1), character.savingsAccount, 1.067, true));
+                                          character.savingsAccount.balance += 10000;
                                           character.loans[0].balance += 10000;
                                           endYear();
                                           character.loans[0].balance += 4000 * random.float(.9, 1.1);
@@ -233,7 +225,7 @@ function GamePage({fname, lname}: GameProps) {
                                  </div>
                                  <div className="eventButton panelButton"
                                       onClick={() => {
-                                          savingsAccount.a.balance = 30000 * random.float(.7, 1.3);
+                                          character.savingsAccount.balance = 30000 * random.float(.7, 1.3);
                                           const previousExpenses = character.monthlyLivingExpenses;
                                           character.monthlyLivingExpenses = [];
                                           endYear();
@@ -247,14 +239,14 @@ function GamePage({fname, lname}: GameProps) {
                                               {name: "Health Insurance", amount: 200},
                                           ];
 
-                                          character.addLoan(new Loan("College Debt", 20000 * random.float(.9, 1.1), savingsAccount.a, 1.067, true));
-                                          savingsAccount.a.balance += 30000;
+                                          character.addLoan(new Loan("College Debt", 20000 * random.float(.9, 1.1), character.savingsAccount, 1.067, true));
+                                          character.savingsAccount.balance += 30000;
                                           character.loans[0].balance += 30000;
                                           endYear();
                                           character.loans[0].balance += 20000 * random.float(.9, 1.1);
                                           endYear();
                                           character.loans[0].balance += 20000 * random.float(.9, 1.1);
-                                          savingsAccount.a.balance += 25000;
+                                          character.savingsAccount.balance += 25000;
                                           character.loans[0].balance += 25000;
                                           endYear();
                                           character.loans[0].balance += 20000 * random.float(.9, 1.1);
@@ -272,7 +264,7 @@ function GamePage({fname, lname}: GameProps) {
                                  </div>
                                  <div className="eventButton panelButton"
                                       onClick={() => {
-                                          savingsAccount.a.balance = 30000 * random.float(.7, 1.3);
+                                          character.savingsAccount.balance = 30000 * random.float(.7, 1.3);
                                           const previousExpenses = character.monthlyLivingExpenses;
                                           character.monthlyLivingExpenses = [];
                                           endYear();
@@ -286,20 +278,20 @@ function GamePage({fname, lname}: GameProps) {
                                               {name: "Health Insurance", amount: 200},
                                           ];
 
-                                          character.addLoan(new Loan("College Debt", 50000 * random.float(.9, 1.1), savingsAccount.a, 1.067, true));
-                                          savingsAccount.a.balance += 20000;
+                                          character.addLoan(new Loan("College Debt", 50000 * random.float(.9, 1.1), character.savingsAccount, 1.067, true));
+                                          character.savingsAccount.balance += 20000;
                                           character.loans[0].balance += 20000;
                                           endYear();
                                           character.loans[0].balance += 50000 * random.float(.9, 1.1);
-                                          savingsAccount.a.balance += 20000;
+                                          character.savingsAccount.balance += 20000;
                                           character.loans[0].balance += 20000;
                                           endYear();
                                           character.loans[0].balance += 50000 * random.float(.9, 1.1);
-                                          savingsAccount.a.balance += 20000;
+                                          character.savingsAccount.balance += 20000;
                                           character.loans[0].balance += 20000;
                                           endYear();
                                           character.loans[0].balance += 50000 * random.float(.9, 1.1);
-                                          savingsAccount.a.balance += 20000;
+                                          character.savingsAccount.balance += 20000;
                                           character.loans[0].balance += 20000;
                                           endYear();
                                           character.monthlyLivingExpenses = previousExpenses;
@@ -314,7 +306,7 @@ function GamePage({fname, lname}: GameProps) {
                                          are often more prestigious.</p>
                                  </div>
                              </div>
-                         </>,  true));
+                         </>, true));
                      }}>
                     <h3 className="text-gray-700 font-bold">College</h3>
                     <p className="text-gray-700">Obtaining an associates or bachelors degree allows entry into
@@ -324,15 +316,11 @@ function GamePage({fname, lname}: GameProps) {
         </>, true),
         new LifeEvent("Moving Out", gameState.s.date, <>
             <h2>Its time to start your journey!</h2>
-            <button className="w-50 text-xl h-10 p-1 font-bold mt-2" onClick={() => {
-                lifeEventManager.RemoveFirstEvent();
-                setPage(0);
-            }}><h3>Start!</h3></button>
-        </>, null, true),
+        </>),
+        new LifeEvent("Day Trading", gameState.s.date,
+            <DayTrading gameState={gameState.s}/>, true),
         new LifeEvent("Event Tutorial", new Date(gameState.s.date.getFullYear() + 5, 1),
             (<div><p>During the year you will encounter events that may have a financial impact.</p></div>)),
-        new LifeEvent("Day Trading", new Date(gameState.s.date.getFullYear() + 5, 8),
-            <DayTrading gameState={gameState.s}/>, true),
     ]));
     const activeEvent = lifeEventManager.GetActiveEvent(gameState.s.date);
 
@@ -345,7 +333,8 @@ function GamePage({fname, lname}: GameProps) {
             </p>), null, null, "Next"),
             new TutorialEvent("Savings history", null, (<p className="text-gray-700">
                 Here is your savings account, currently you have a balance
-                of {formatter.format(savingsAccount.a.balance)}. Below the account you can see a graph of the accounts
+                of {formatter.format(character.savingsAccount.balance)}. Below the account you can see a graph of the
+                accounts
                 previous balance.
             </p>), "YIRAccountSavings Account", null, "Next"),
             new TutorialEvent("Asset Positions", null, (<p className="text-gray-700">
@@ -355,7 +344,7 @@ function GamePage({fname, lname}: GameProps) {
     ], render));
 
     useEffect(() => {
-        character.accounts = [savingsAccount.a, investmentAccount.a, retirementAccount.a];
+        character.accounts = [character.savingsAccount, character.investmentAccount, character.retirementAccount];
         document.addEventListener("keyup", (e) => {
             if (e.key == "Enter") {
                 if (document.getElementById("transfer-modal")!.style.display == "block") {
@@ -543,7 +532,7 @@ function GamePage({fname, lname}: GameProps) {
 
                 <div className="flex gap-2">
                     <h3 className={newSavings > 0 ? "text-green-700" : "text-red-800"}>
-                        Predicted Balance: {formatter.format(savingsAccount.a.balance + newSavings)}</h3>
+                        Predicted Balance: {formatter.format(character.savingsAccount.balance + newSavings)}</h3>
                 </div>
             </div>
             <div className="flex gap-2 justify-center">
@@ -585,7 +574,7 @@ function GamePage({fname, lname}: GameProps) {
                     <button className="w-60 text-xl h-10 font-bold" onClick={(e) => {
                         e.stopPropagation()
                         setFundsToTransfer(0);
-                        setTransferFrom({selectedAccount: savingsAccount.a});
+                        setTransferFrom({selectedAccount: character.savingsAccount});
                         setTransferTo({selectedAccount: loan});
                         document.getElementById("debt-modal")!.style.display = "block";
                         document.getElementById("transfer-modal")!.style.display = "none";
@@ -603,11 +592,11 @@ function GamePage({fname, lname}: GameProps) {
         <div className="flex flex-col gap-2 items-center">
             <h1>Investment Portfolio</h1>
             <h2 className="mt-2 text-yellow-600! font-bold">
-                Uninvested: {formatter.format(investmentAccount.a.balance)}
+                Uninvested: {formatter.format(character.investmentAccount.balance)}
             </h2>
-            <StockCard stock={indexFund} investmentAccount={investmentAccount} formatter={formatter}
+            <StockCard stock={indexFund.a} investmentAccount={character.investmentAccount} formatter={formatter}
                        compactFormatter={compactFormatter} render={render}/>
-            <StockCard stock={bond} investmentAccount={investmentAccount} formatter={formatter}
+            <StockCard stock={bond.a} investmentAccount={character.investmentAccount} formatter={formatter}
                        compactFormatter={compactFormatter} render={render}/>
             <div className="flex gap-2 justify-center">
                 <button className="w-24 text-xl h-10 p-1 font-bold" onClick={() => previousPage()}><h3>Back</h3>
@@ -619,11 +608,11 @@ function GamePage({fname, lname}: GameProps) {
         <div className="flex flex-col gap-2 items-center">
             <h1>Retirement Portfolio</h1>
             <h2 className="mt-2 text-yellow-600!">
-                Uninvested: {formatter.format(retirementAccount.a.balance)}
+                Uninvested: {formatter.format(character.retirementAccount.balance)}
             </h2>
-            <StockCard stock={indexFund} investmentAccount={retirementAccount} formatter={formatter}
+            <StockCard stock={indexFund.a} investmentAccount={character.retirementAccount} formatter={formatter}
                        compactFormatter={compactFormatter} render={render}/>
-            <StockCard stock={bond} investmentAccount={retirementAccount} formatter={formatter}
+            <StockCard stock={bond.a} investmentAccount={character.retirementAccount} formatter={formatter}
                        compactFormatter={compactFormatter} render={render}/>
             <div className="flex gap-2 justify-center">
                 <button className="w-24 text-xl h-10 p-1 font-bold" onClick={() => previousPage()}><h3>Back</h3>
@@ -643,11 +632,11 @@ function GamePage({fname, lname}: GameProps) {
                     <p className="text-red-800">Loans</p>
                     <p className="text-red-800">{formatter.format(character.totalLoans.balance)}</p>
                     <p className="text-gray-700">Investments</p>
-                    <p className="text-gray-700">{formatter.format(investmentAccount.a.balance)}</p>
+                    <p className="text-gray-700">{formatter.format(character.investmentAccount.balance)}</p>
                     <p className="text-gray-700">Retirement</p>
-                    <p className="text-gray-700">{formatter.format(retirementAccount.a.balance)}</p>
+                    <p className="text-gray-700">{formatter.format(character.retirementAccount.balance)}</p>
                     <p className="text-green-700">Predicted Balance</p>
-                    <p className="text-green-700">{formatter.format(savingsAccount.a.balance + newSavings)}</p>
+                    <p className="text-green-700">{formatter.format(character.savingsAccount.balance + newSavings)}</p>
                 </div>
             </div>
             <div className="flex gap-2 justify-center">
@@ -855,7 +844,7 @@ function GamePage({fname, lname}: GameProps) {
                     <h2 className="text-gray-700! align-self-middle text-start w-100">{fname} {lname} ({character.age})</h2>
                     {(page < pages.length ? [
                             <h2 className="text-gray-700! justify-self-end mt-2"
-                                key="1">{formatter.format(savingsAccount.a.balance)}</h2>,
+                                key="1">{formatter.format(character.savingsAccount.balance)}</h2>,
                             <button className="w-50 ml-4 text-xl font-bold h-10 justify-self-left" key="2"
                                     onClick={() => {
                                         setFundsToTransfer(NaN);
