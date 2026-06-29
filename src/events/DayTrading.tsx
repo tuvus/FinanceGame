@@ -6,26 +6,29 @@ import random from "random";
 
 function DayTradingGame({gameState}: LifeEventElementProps) {
     const [page, setPage] = useState(0);
-    const [time, setTime] = useState(8);
-    const [history, setHistory] = useState([{time: time + ":00", value: random.float(10, 420)}]);
+    const [hours, setHours] = useState(8);
+    const [minutes, setMinutes] = useState(0);
+    const [history, setHistory] = useState([{time: hours + ":00", value: random.float(10, 420)}]);
     const [investmentAmount, setInvestmentAmount] = useState(500)
 
     useEffect(() => {
         const interval = setInterval(() => {
             if (page == 2) {
-                if (time == 24) {
-                    setPage((ppage) => ppage + 1);
+                if (hours == 24) {
                     return;
                 }
+                const nextMinutes = (minutes + 10) % 60;
+                const nextHours = minutes + 10 == 60 ? hours + 1 : hours;
                 setHistory([...history, {
-                    time: (time + 1) + ":00",
-                    value: (history[history.length - 1].value * random.float(.9, 1.12))
+                    time: nextHours + ":" + (nextMinutes == 0 ? "00" : nextMinutes),
+                    value: (history[history.length - 1].value * random.float(.97, 1.031))
                 }]);
-                setTime((ptime) => ptime + 1);
+                setMinutes(nextMinutes);
+                setHours(nextHours);
             }
-        }, 1000);
+        }, 100);
         return () => clearTimeout(interval);
-    }, [page, time, history]);
+    }, [page, minutes, hours, history]);
 
     if (page == 0) {
         return (<div className="flex flex-col w-full items-center">
@@ -49,7 +52,8 @@ function DayTradingGame({gameState}: LifeEventElementProps) {
     } else if (page == 1) {
         return (<div className="flex flex-col w-full items-center">
                 <div className="flex flex-col gap-2 w-1/2 rounded-2xl bg-amber-100 items-center p-2">
-                    <p className="text-gray-700">"Great! Now, let me tell you a little secret that traditional investors don't
+                    <p className="text-gray-700">"Great! Now, let me tell you a little secret that traditional investors
+                        don't
                         know. While stocks do go up over time there is a much greater potential for gains. If we buy
                         stocks at the dip and sell them at a spike then we will greatly outpace the other investors.
                         Buy low, sell quick!"
@@ -92,15 +96,26 @@ function DayTradingGame({gameState}: LifeEventElementProps) {
                            aria-hidden="true"
                            categories={["value"]}
                            valueFormatter={(number: number) => gameState.compactFormatter.format(number)}/>
+                {hours == 24 ?
+                    <button className="w-50 text-xl h-10 p-1 font-bold mt-2" onClick={() => {
+                        setPage(page + 1);
+                    }}>Done</button>
+                    : <></>
+                }
             </div>
         </div>)
     } else {
-        return (<div>
-            Great Job! You probably lost money!
-            <button className="w-50 text-xl h-10 p-1 font-bold mt-2"
-                    onClick={() => gameState.lifeEventManager!.NextEvent()}>Awww
-            </button>
-        </div>)
+        return (<div className="flex flex-col w-full items-center">
+                <div className="flex flex-col gap-2 w-1/2 rounded-2xl bg-amber-100 items-center p-2">
+                    <p className="text-gray-700">
+                        Great Job! You probably lost money!
+                    </p>
+                    <button className="w-50 text-xl h-10 p-1 font-bold mt-2"
+                            onClick={() => gameState.lifeEventManager!.NextEvent()}>Awww
+                    </button>
+                </div>
+            </div>
+        )
     }
 }
 
