@@ -10,6 +10,7 @@ import {CalculateTaxes, GetDateString} from "./Utils.tsx";
 import {DonutChart} from "./components/DonutChart.tsx";
 import {LifeEvent, LifeEventManager} from "./EventManager.tsx";
 import {TutorialChain, TutorialEvent, TutorialManager} from "./TutorialManager.tsx";
+import DayTrading from "./events/DayTrading.tsx";
 
 type GameProps = {
     fname: string; lname: string;
@@ -27,7 +28,6 @@ function GamePage({fname, lname}: GameProps) {
         notation: "compact",
         compactDisplay: "short"
     });
-    const [gameState] = useState({s: new GameState(new Date(random.int(1940, 2010), 0))});
     const [savingsAccount] = useState({a: new Account("Savings Account", 0, true)});
     const [page, setPage] = useState(999);
     const [character] = useState(new Character(fname, lname, [
@@ -41,6 +41,7 @@ function GamePage({fname, lname}: GameProps) {
         {name: "Car Insurance", amount: 236},
         {name: "Health Insurance", amount: 400},
     ], 17));
+    const [gameState] = useState({s: new GameState(new Date(random.int(1940, 2010), 0), character, formatter, compactFormatter)});
     const [investmentAccount] = useState({a: new StockAccount("Investment Account", 0)});
     const [retirementAccount] = useState({a: new StockAccount("Retirement Account", 0)});
     const [indexFund] = useState({a: new StockBond("Index Fund", random.int(7000, 50000) / 100, false)});
@@ -313,7 +314,7 @@ function GamePage({fname, lname}: GameProps) {
                                          are often more prestigious.</p>
                                  </div>
                              </div>
-                         </>, true));
+                         </>,  true));
                      }}>
                     <h3 className="text-gray-700 font-bold">College</h3>
                     <p className="text-gray-700">Obtaining an associates or bachelors degree allows entry into
@@ -327,9 +328,11 @@ function GamePage({fname, lname}: GameProps) {
                 lifeEventManager.RemoveFirstEvent();
                 setPage(0);
             }}><h3>Start!</h3></button>
-        </>, true),
-        new LifeEvent("Event Tutorial", new Date(gameState.s.date.getFullYear() + 5, 5),
+        </>, null, true),
+        new LifeEvent("Event Tutorial", new Date(gameState.s.date.getFullYear() + 5, 1),
             (<div><p>During the year you will encounter events that may have a financial impact.</p></div>)),
+        new LifeEvent("Day Trading", new Date(gameState.s.date.getFullYear() + 5, 8),
+            <DayTrading gameState={gameState.s}/>, true),
     ]));
     const activeEvent = lifeEventManager.GetActiveEvent(gameState.s.date);
 
@@ -401,6 +404,7 @@ function GamePage({fname, lname}: GameProps) {
     gameState.s.page = page;
     gameState.s.nextPage = nextPage;
     gameState.s.previousPage = previousPage;
+    gameState.s.lifeEventManager = lifeEventManager;
 
     const pages = [
         <div className="flex flex-col gap-2 items-center">

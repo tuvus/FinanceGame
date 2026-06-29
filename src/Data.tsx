@@ -1,3 +1,5 @@
+import type {LifeEventManager} from "./EventManager.tsx";
+
 export class Character {
     firstName: string;
     lastName: string;
@@ -182,9 +184,17 @@ export class Loan extends Account {
 export class GameState {
     page: number = 0;
     date: Date;
+    character: Character;
+    formatter: Intl.NumberFormat;
+    compactFormatter: Intl.NumberFormat;
+    lifeEventManager: LifeEventManager | null;
 
-    constructor(date: Date) {
+    constructor(date: Date, character: Character, formatter: Intl.NumberFormat, compactFormatter: Intl.NumberFormat) {
         this.date = date;
+        this.character = character;
+        this.formatter = formatter;
+        this.compactFormatter = compactFormatter;
+        this.lifeEventManager = null;
     }
 
     nextPage = (): void => {
