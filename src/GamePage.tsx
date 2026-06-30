@@ -332,19 +332,64 @@ function GamePage({fname, lname}: GameProps) {
         new TutorialChain("Year In Review Tutorial", () => gameState.s.page == 0, [
             new TutorialEvent("Year in review page", null, (<p className="text-gray-700">
                 On this page, you will be looking at your money's performance from last year and the years before
-                inorder to determine how to allocate this year's income. Each account that you own will show up on this
-                page.
+                inorder to determine how to <a
+                href="https://www.investopedia.com/terms/a/assetallocation.asp" target="_blank">allocate</a> this year's
+                income. Each account that you own will show up on this page.
             </p>), null, null, "Next"),
             new TutorialEvent("Savings history", null, (<p className="text-gray-700">
                 Here is your savings account, currently you have a balance
                 of {formatter.format(character.savingsAccount.balance)}. Below the account you can see a graph of the
-                accounts
-                previous balance.
+                account's previous balance.
             </p>), "YIRAccountSavings Account", null, "Next"),
             new TutorialEvent("Asset Positions", null, (<p className="text-gray-700">
-                Here is a pie chart displaying your portfolio and what positions your money is in.
+                Here is a pie chart displaying your <a href="https://www.investopedia.com/terms/p/portfolio.asp"
+                                                       target="_blank">portfolio</a>, or where your money is.
             </p>), "DonutChart", null, "Close"),
-        ])
+        ]),
+        new TutorialChain("Allocations Tutorial", () => gameState.s.page == 1, [
+            new TutorialEvent("Allocations Page", null, (<p className="text-gray-700">
+                Congratulations on getting your first job!
+                This page shows you where your paycheck this year will go, and gives you the ability to <a
+                href="https://www.investopedia.com/terms/a/assetallocation.asp" target="_blank">allocate</a> the money.
+            </p>), null, null, "Next"),
+            new TutorialEvent("Paycheck", null, (<p className="text-gray-700">
+                This your salary at your current job. This is your <a
+                href="https://www.investopedia.com/terms/g/grossincome.asp#toc-what-is-gross-income" target="_blank">gross
+                income</a>, which does not include taxes or any other expenses. Sadly, this isn't the amount of money
+                you get to take home.
+            </p>), "Paycheck", null, "Next"),
+            new TutorialEvent("Income Tax", null, (<p className="text-gray-700">
+                This is how much you owe in <a href="https://www.investopedia.com/terms/i/incometax.asp"
+                                               target="_blank">income taxes</a>.
+            </p>), "IncomeTaxes", null, "Next"),
+            new TutorialEvent("Living Expenses", null, (<p className="text-gray-700">
+                Next, you will find a list of <a href="https://www.investopedia.com/terms/c/cost-of-living.asp"
+                                                 target="_blank">living expenses</a> based on your lifestyle. Your
+                habits and way of living determine these costs. Some people are more frugal, and some people live more
+                lavish, but as long as you are living within your means you shouldn't sacrifice your lifestyle to save
+                more money.
+            </p>), "ItemizedLivingExpenses", null, "Next"),
+            new TutorialEvent("Loans", () => character.loans.length > 0, (<p className="text-gray-700">
+                You have acquired debt in the form of <a
+                href="https://www.investopedia.com/terms/l/loan.asp#toc-what-is-a-loan" target="_blank">loans</a> to pay
+                for schooling. Loans have a minimum payment, which you have to pay monthly. For simplicity, these
+                payments are aggregated into yearly installments.
+            </p>), "Loans", null, "Next"),
+            new TutorialEvent("Leisure", null, (<p className="text-gray-700">
+                The leisure category is for money allocated to things like shopping and trips. You can press
+                the up and down arrows to change the percentage of your paycheck that is allocated towards this
+                category.
+            </p>), "Leisure", null, "Next"),
+            new TutorialEvent("Savings", null, (<p className="text-gray-700">
+                This is the leftover money from your salary, which will go into your <a
+                href="https://www.investopedia.com/terms/s/savings.asp" target="_blank">savings account</a>. You may
+                also withdraw money from your savings account towards your other allocations.
+            </p>), "Savings", null, "Next"),
+            new TutorialEvent("Predicted Balance", null, (<p className="text-gray-700">
+                This is the predicted balance that you will have at the start of next year. It is calculated from your
+                current balance plus your savings from your paycheck.
+            </p>), "PredictedBalance", null, "Close"),
+        ]),
     ], render));
 
     useEffect(() => {
@@ -457,7 +502,7 @@ function GamePage({fname, lname}: GameProps) {
             <h1>Allocation</h1>
             <div className="flex flex-col gap-2 w-1/2 rounded-2xl bg-amber-100 items-center pt-2 pb-2">
                 <div className="grid grid-cols-3 w-full">
-                    <p className="text-green-700 font-bold">Paycheck</p>
+                    <p className="text-green-700 font-bold" id="Paycheck">Paycheck</p>
                     <p></p>
                     <p className="text-green-700 font-bold">{formatter.format(character.salary)}</p>
                     <hr></hr>
@@ -479,13 +524,13 @@ function GamePage({fname, lname}: GameProps) {
                     <p className="text-gray-700">{formatter.format(character.salary * character.pretirement / 100)}</p>
 
 
-                    <p className="text-red-800">Taxes</p>
+                    <p className="text-red-800" id="IncomeTaxes">Taxes</p>
                     <p className="text-red-800">{Math.round(taxes / character.salary * 100)}%</p>
                     <p className="text-red-800">{formatter.format(taxes)}</p>
 
                     {character.monthlyLivingExpenses.map(({name, amount}, i) => {
                         return ([
-                            <p className="text-red-800" key={i + "1"}>{name}</p>,
+                            <p className="text-red-800" key={i + "1"} id="ItemizedLivingExpenses">{name}</p>,
                             <p className="text-red-800"
                                key={i + "2"}>{Math.round(amount * 12 * inflation / character.salary * 100)}%</p>,
                             <p className="text-red-800" key={i + "3"}>{formatter.format(amount * inflation * 12)}</p>
@@ -493,7 +538,7 @@ function GamePage({fname, lname}: GameProps) {
                     })}
 
                     {character.loans.length > 0 ? [
-                        <p className="text-red-800" key="111">Loans</p>,
+                        <p className="text-red-800" key="111" id="Loans">Loans</p>,
                         <p className="text-red-800" key="222">{Math.round(ploans)}%</p>,
                         <p className="text-red-800"
                            key="333">{formatter.format(minLoanPayments)}</p>
@@ -512,7 +557,7 @@ function GamePage({fname, lname}: GameProps) {
                         </input>%</p>
                     <p className="text-gray-700">{formatter.format(character.salary * character.pinvestments / 100)}</p>
 
-                    <p className="text-gray-700">Leisure</p>
+                    <p className="text-gray-700" id="Leisure">Leisure</p>
                     <p className="text-gray-700">
                         <input name="character.pleisure" className="w-12 text-end"
                                min="0"
@@ -529,13 +574,13 @@ function GamePage({fname, lname}: GameProps) {
                     <hr/>
                     <hr/>
 
-                    <p className="text-yellow-600 font-bold">Savings</p>
+                    <p className="text-yellow-600 font-bold" id="Savings">Savings</p>
                     <p className="text-yellow-600 font-bold">{Math.round(newSavings / character.salary * 100)}%</p>
                     <p className="text-yellow-600 font-bold">{formatter.format(newSavings)}</p>
                 </div>
 
                 <div className="flex gap-2">
-                    <h3 className={newSavings > 0 ? "text-green-700" : "text-red-800"}>
+                    <h3 className={newSavings > 0 ? "text-green-700" : "text-red-800"} id="PredictedBalance">
                         Predicted Balance: {formatter.format(character.savingsAccount.balance + newSavings)}</h3>
                 </div>
             </div>
