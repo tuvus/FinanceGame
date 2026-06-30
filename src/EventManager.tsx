@@ -1,12 +1,15 @@
 import type {ReactElement} from "react";
+import {type GameState} from "./Data.tsx";
 
+export type LifeEventElementProps = {
+    gameState: GameState;
+}
 
 export class LifeEvent {
     name: string;
     date: Date;
     element: ReactElement;
     customContinue: boolean;
-    lifeEventManager: LifeEventManager | null = null;
 
     constructor(name: string, date: Date, element: ReactElement, customContinue: boolean = false) {
         this.name = name;
@@ -30,7 +33,6 @@ export class LifeEventManager {
     }
 
     AddEvent(lifeEvent: LifeEvent) {
-        lifeEvent.lifeEventManager = this;
         this.lifeEvents = [...this.lifeEvents, lifeEvent];
         this.lifeEvents.sort((a, b) => b.date.getTime() - a.date.getTime());
     }
