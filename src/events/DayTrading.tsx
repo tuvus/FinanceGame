@@ -14,10 +14,20 @@ function DayTradingGame({gameState}: LifeEventElementProps) {
     const [currentAmount, setCurrentAmount] = useState(500);
     const [buyIndex, setBuyIndex] = useState<number | null>(null);
     const taxes = currentAmount > investmentAmount ? CalculateTaxes(gameState.character.taxableIncome + currentAmount - investmentAmount) - CalculateTaxes(gameState.character.taxableIncome) : 0;
-
+    const [companyName, setCompanyName] = useState("DefaultCompany")
+    const [companies] = useState(() => {
+        const companyNames = ["Environ", "Invtn Gmbh", "Standard Electric", "General Oil", "UnReal Estate", "Extra-Electronics Inc", "Insider Insurance", "Big Data Corp", "Hellman-Dough"]
+        let value: string[] = [];
+        for (let i = 0; i < 3; i++) {
+            const ci = random.int(0, companyNames.length - 1);
+            value = [...value, companyNames[ci]];
+            companyNames.splice(ci, 1);
+        }
+        return value;
+    })
     useEffect(() => {
         const interval = setInterval(() => {
-            if (page == 2) {
+            if (page == 3) {
                 if (hours == 24) {
                     return;
                 }
@@ -38,11 +48,9 @@ function DayTradingGame({gameState}: LifeEventElementProps) {
         return (<div className="flex flex-col w-full items-center">
             <div className="flex flex-col gap-2 w-1/2 rounded-2xl bg-amber-100 items-center p-2">
                 <p className="text-gray-700"> A friend of yours invites you to an interesting proposition. "You know
-                    regular
-                    investing? Well, its a
-                    little old fashioned and takes a while for that money to grow. There are many big corporations
-                    making money off of day trading and now it is more accessible to us! Do you want to give it a go and
-                    make some quick bucks?"</p>
+                    regular investing? Well, its a little old fashioned and takes a while for that money to grow. There
+                    are many big corporations making money off of day trading and now it is more accessible to us! Do
+                    you want to give it a go and make some quick bucks?"</p>
                 <div className="flex gap-2 justify-center">
                     <button className="w-50 text-xl h-10 p-1 font-bold mt-2"
                             onClick={() => gameState.lifeEventManager!.NextEvent()}>
@@ -57,22 +65,22 @@ function DayTradingGame({gameState}: LifeEventElementProps) {
         return (<div className="flex flex-col w-full items-center">
                 <div className="flex flex-col gap-2 w-1/2 rounded-2xl bg-amber-100 items-center p-2">
                     <p className="text-gray-700">"Great! Now, let me tell you a little secret that traditional investors
-                        don't
-                        know. While stocks do go up over time there is a much greater potential for gains. If we buy
-                        stocks at the dip and sell them at a spike then we will greatly outpace the other investors.
+                        don't know. While stocks go up over time there is a much greater potential for gains. If we
+                        buy stocks at the dip and sell them at a spike then we will greatly outpace the other investors.
                         Buy low, sell quick!"
                     </p>
                     <h3 className="mt-4 text-gray-700">How much would you like to invest?</h3>
                     <p className="text-yellow-600">Available: {gameState.formatter.format(gameState.character.savingsAccount.balance + gameState.character.investmentAccount.balance)}</p>
-                    <input className="w-80 bg-gray-200 rounded-xl p-1 text-gray-700 mt-2"
-                           min={1}
-                           value={investmentAmount}
-                           onChange={(e) => {
-                               setInvestmentAmount(e.target.valueAsNumber);
-                               setCurrentAmount(e.target.valueAsNumber);
-                           }}
-                           type="number">
-                    </input>
+                    <p className="text-gray-700">$
+                        <input className="w-80 bg-gray-200 rounded-xl p-1 text-gray-700 mt-2"
+                               min={1}
+                               value={investmentAmount}
+                               onChange={(e) => {
+                                   setInvestmentAmount(e.target.valueAsNumber);
+                                   setCurrentAmount(e.target.valueAsNumber);
+                               }}
+                               type="number">
+                        </input></p>
                     <div className="flex gap-2 justify-center">
                         <button className="w-50 text-xl h-10 p-1 font-bold mt-2"
                                 onClick={() => gameState.lifeEventManager!.NextEvent()}>Cancel
@@ -95,6 +103,25 @@ function DayTradingGame({gameState}: LifeEventElementProps) {
     } else if (page == 2) {
         return (<div className="flex flex-col w-full items-center">
             <div className="flex flex-col gap-2 w-1/2 rounded-2xl bg-amber-100 items-center p-2">
+                <p className="text-gray-700">
+                    "Now you need to select a company. What do you think is going to do hot?"
+                </p>
+                {companies.map((c) =>
+                    <div key={c} className="eventButton panelButton bg-gray-200!" onClick={() => {
+                        setCompanyName(c);
+                        setPage(page + 1);
+                    }}>
+                        <p className="text-gray-700">
+                            {c}
+                        </p>
+                    </div>
+                )}
+            </div>
+        </div>);
+    } else if (page == 3) {
+        return (<div className="flex flex-col w-full items-center">
+            <div className="flex flex-col gap-2 w-1/2 rounded-2xl bg-amber-100 items-center p-2">
+                <h2 className="text-gray-700! font-bold!">{companyName}</h2>
                 <LineChart className="h-60 w-120" data={history}
                            index="time"
                            showLegend={false}
@@ -129,9 +156,12 @@ function DayTradingGame({gameState}: LifeEventElementProps) {
         return (<div className="flex flex-col w-full items-center">
                 <div className="flex flex-col gap-2 w-1/2 rounded-2xl bg-amber-100 items-center p-2">
                     {currentAmount > investmentAmount ?
-                        <p className="text-gray-700">
-                            You're a winner! The gains are taxed as income.
-                        </p>
+                        <>
+                            <h2 className="text-gray-700!">You're a winner!</h2>
+                            <p className="text-gray-700">
+                                Any gains are taxed as income.
+                            </p>
+                        </>
                         : (currentAmount < investmentAmount ?
                                 <p className="text-gray-700">
                                     Awww, looks like you lost some money! Try again next time!
@@ -146,7 +176,7 @@ function DayTradingGame({gameState}: LifeEventElementProps) {
                     {currentAmount > investmentAmount ?
                         <>
                             <p className="text-green-700">Gains: {gameState.formatter.format(currentAmount - investmentAmount)} +{Math.floor((currentAmount - investmentAmount) * 100 / investmentAmount)}%</p>
-                            <p className="text-red-800">Taxes: {gameState.formatter.format(taxes)}</p>
+                            <p className="text-red-800">Taxes: -{gameState.formatter.format(taxes)}</p>
                         </>
                         : (currentAmount < investmentAmount ?
                                 <p className="text-red-800">Losses: {gameState.formatter.format(currentAmount - investmentAmount)} {Math.floor((currentAmount - investmentAmount) * 100 / investmentAmount)}%</p> :
@@ -158,7 +188,8 @@ function DayTradingGame({gameState}: LifeEventElementProps) {
                     <button className="w-50 text-xl h-10 p-1 font-bold mt-2"
                             onClick={() => {
                                 gameState.character.investmentAccount.balance += currentAmount - taxes;
-                                gameState.lifeEventManager!.NextEvent();}}>
+                                gameState.lifeEventManager!.NextEvent();
+                            }}>
                         {currentAmount > investmentAmount ? "Nice!" : "Awww"}
                     </button>
                 </div>
