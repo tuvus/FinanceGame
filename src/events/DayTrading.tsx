@@ -18,7 +18,7 @@ function DayTradingGame({gameState}: LifeEventElementProps) {
             const nextHours = hminute+ 10 == 60 ? hhour + 1 : hhour;
             h = [...h, {
                 time: nextHours + ":" + (nextMinutes == 0 ? "00" : nextMinutes),
-                value: (h[h.length - 1].value * random.float(.99, 1.011))
+                value: (h[h.length - 1].value * random.float(.99, 1.0101))
             }];
             hhour = nextHours;
             hminute = nextMinutes;
@@ -52,7 +52,7 @@ function DayTradingGame({gameState}: LifeEventElementProps) {
                 const nextHours = minutes + 10 == 60 ? hours + 1 : hours;
                 setHistory([...history, {
                     time: nextHours + ":" + (nextMinutes == 0 ? "00" : nextMinutes),
-                    value: (history[history.length - 1].value * random.float(.99, 1.011))
+                    value: (history[history.length - 1].value * random.float(.99, 1.0101))
                 }]);
                 setMinutes(nextMinutes);
                 setHours(nextHours);
