@@ -61,6 +61,10 @@ function GamePage({fname, lname}: GameProps) {
 
     const nextPage = () => {
         if (page + 1 == pages.length - 1) {
+            if (random.float() > .8) {
+                lifeEventManager.AddEvent(new LifeEvent("Day Trading", new Date(gameState.s.date.getFullYear(), random.int(0, 11)),
+                    <DayTrading gameState={gameState.s}/>, true));
+            }
             if (!lifeEventManager.GetActiveEvent(gameState.s.date)) {
                 lifeEventManager.AddEvent(
                     new LifeEvent("Another year passes", gameState.s.date,
@@ -319,8 +323,6 @@ function GamePage({fname, lname}: GameProps) {
         new LifeEvent("Moving Out", gameState.s.date, <>
             <h2>Its time to start your journey!</h2>
         </>),
-        new LifeEvent("Day Trading", gameState.s.date,
-            <DayTrading gameState={gameState.s}/>, true),
         new LifeEvent("Event Tutorial", new Date(gameState.s.date.getFullYear() + 6, 1),
             (<div><p>During the year you will encounter events that may have a financial impact.</p></div>)),
     ]));
@@ -694,7 +696,7 @@ function GamePage({fname, lname}: GameProps) {
                                max={Math.min(transferFrom.selectedAccount?.balance ?? 0, transferTo.selectedAccount?.balance ?? 0)}
                                value={fundsToTransfer}
                                onChange={e =>
-                                   setFundsToTransfer(Math.min(transferFrom.selectedAccount?.balance ?? 0, Math.min(transferTo.selectedAccount?.balance ?? 0,e.target.valueAsNumber)))}
+                                   setFundsToTransfer(Math.min(transferFrom.selectedAccount?.balance ?? 0, Math.min(transferTo.selectedAccount?.balance ?? 0, e.target.valueAsNumber)))}
                                type="number">
                         </input>
                     </div>

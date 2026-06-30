@@ -86,8 +86,8 @@ function DayTradingGame({gameState}: LifeEventElementProps) {
                         buy stocks at the dip and sell them at a spike then we will greatly outpace the other investors.
                         Buy low, sell quick!"
                     </p>
-                    <h3 className="mt-4 text-gray-700">How much would you like to invest?</h3>
-                    <p className="text-yellow-600">Available: {gameState.formatter.format(gameState.character.savingsAccount.balance + gameState.character.investmentAccount.balance)}</p>
+                    <h3 className="mt-4 text-gray-700">How much would you like to invest from your investment account?</h3>
+                    <p className="text-yellow-600">Available: {gameState.formatter.format(gameState.character.investmentAccount.balance)}</p>
                     <p className="text-gray-700">$
                         <input className="w-80 bg-gray-200 rounded-xl p-1 text-gray-700 mt-2"
                                min={1}
@@ -105,10 +105,8 @@ function DayTradingGame({gameState}: LifeEventElementProps) {
                         <button className="w-50 text-xl h-10 p-1 font-bold mt-2" onClick={() => {
                             const fromInvestment = Math.min(gameState.character.investmentAccount.balance, investmentAmount);
                             gameState.character.investmentAccount.balance -= fromInvestment;
-                            const fromSavings = Math.min(gameState.character.savingsAccount.balance, investmentAmount - fromInvestment);
-                            gameState.character.savingsAccount.balance -= fromSavings;
-                            if (investmentAmount - fromInvestment - fromSavings > 0.001) {
-                                gameState.character.addCreditDebt(investmentAmount - fromInvestment - fromSavings);
+                            if (investmentAmount - fromInvestment > 0.001) {
+                                gameState.character.addCreditDebt(investmentAmount - fromInvestment);
                             }
                             setPage(page + 1);
                         }}>Confirm
@@ -137,9 +135,9 @@ function DayTradingGame({gameState}: LifeEventElementProps) {
         </div>);
     } else if (page == 3) {
         return (<div className="flex flex-col w-full items-center">
-            <div className="flex flex-col gap-2 w-1/2 rounded-2xl bg-amber-100 items-center p-2">
+            <div className="flex flex-col gap-2 rounded-2xl bg-amber-100 items-center p-2">
                 <h2 className="text-gray-700! font-bold!">{companyName}</h2>
-                <LineChart className="h-60 w-120" data={history}
+                <LineChart className="h-100 w-200 mb-2" data={history}
                            index="time"
                            showLegend={false}
                            minValue={Math.min(...history.map(h => h.value))}
@@ -147,9 +145,9 @@ function DayTradingGame({gameState}: LifeEventElementProps) {
                            aria-hidden="true"
                            categories={["value"]}
                            valueFormatter={(number: number) => gameState.compactFormatter.format(number)}/>
-                <p className={buyIndex ? "text-yellow-600" : "text-gray-700"}>{buyIndex ? gameState.formatter.format(
+                <h3 className={buyIndex ? "text-yellow-600" : "text-gray-700"}>{buyIndex ? gameState.formatter.format(
                     currentAmount / history[buyIndex].value * history[history.length - 1].value
-                ) : gameState.formatter.format(currentAmount)}</p>
+                ) : gameState.formatter.format(currentAmount)}</h3>
                 {hours == 24 ?
                     <button className="w-50 text-xl h-10 p-1 font-bold mt-2" onClick={() => {
                         if (buyIndex != null) {
