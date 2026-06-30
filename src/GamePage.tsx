@@ -116,6 +116,8 @@ function GamePage({fname, lname}: GameProps) {
     const nextYear = () => {
         endYear();
         setPage(0);
+        gameState.s.gameYear++;
+        console.log(gameState.s.gameYear)
     }
 
     const taxes = CalculateTaxes(Math.max(0, character.salary * (1 - character.pretirement / 100) - 15750));
@@ -326,6 +328,7 @@ function GamePage({fname, lname}: GameProps) {
             <button className="w-50 text-xl h-10 p-1 font-bold mt-2" onClick={() => {
                 lifeEventManager.RemoveFirstEvent();
                 setPage(0);
+                gameState.s.gameYear++;
             }}><h3>Start!</h3></button>
         </>, true),
         new LifeEvent("Event Tutorial", new Date(gameState.s.date.getFullYear() + 5, 5),
@@ -337,9 +340,8 @@ function GamePage({fname, lname}: GameProps) {
         new TutorialChain("Year In Review Tutorial", () => gameState.s.page == 0, [
             new TutorialEvent("Year in review page", null, (<p className="text-gray-700">
                 On this page, you will be looking at your money's performance from last year and the years before
-                inorder to determine how to <a
-                href="https://www.investopedia.com/terms/a/assetallocation.asp" target="_blank">allocate</a> this year's
-                income. Each account that you own will show up on this page.
+                inorder to determine how to allocate this year's income. Each account that you own will show up on this
+                page.
             </p>), null, null, "Next"),
             new TutorialEvent("Savings history", null, (<p className="text-gray-700">
                 Here is your savings account, currently you have a balance
@@ -351,10 +353,10 @@ function GamePage({fname, lname}: GameProps) {
                                                        target="_blank">portfolio</a>, or where your money is.
             </p>), "DonutChart", null, "Close"),
         ]),
-        new TutorialChain("Allocations Tutorial", () => gameState.s.page == 1, [
-            new TutorialEvent("Allocations Page", null, (<p className="text-gray-700">
-                Congratulations on getting your first job!
-                This page shows you where your paycheck this year will go, and gives you the ability to <a
+        new TutorialChain("Allocation Tutorial", () => gameState.s.page == 1, [
+            new TutorialEvent("Allocation Page", null, (<p className="text-gray-700">
+                Congratulations on getting your first job! This page shows you where your paycheck this year will go,
+                and gives you the ability to <a
                 href="https://www.investopedia.com/terms/a/assetallocation.asp" target="_blank">allocate</a> the money.
             </p>), null, null, "Next"),
             new TutorialEvent("Paycheck", null, (<p className="text-gray-700">
@@ -394,6 +396,49 @@ function GamePage({fname, lname}: GameProps) {
                 This is the predicted balance that you will have at the start of next year. It is calculated from your
                 current balance plus your savings from your paycheck.
             </p>), "PredictedBalance", null, "Close"),
+        ]),
+        new TutorialChain("Investment Tutorial Year In Review", () => gameState.s.page == 0 && gameState.s.gameYear == 3, [
+            new TutorialEvent("Investment Accounts", null, (<p className="text-gray-700">
+                It is time to learn about investing.
+            </p>), null, null, "Next"),
+            new TutorialEvent("Investment Accounts", null, (<p className="text-gray-700">
+                You now have a new investment account where you will be able to
+                invest your money!
+            </p>), "YIRAccountInvestment Account", null, "Next"),
+            new TutorialEvent("Transferring Money", null, (<p className="text-gray-700">
+                You can click on the transfer money button to transfer money between different accounts at anytime in
+                the year.
+            </p>), "BottomBar", null, "Next"),
+        ]),
+        new TutorialChain("Investment Tutorial Allocation", () => gameState.s.page == 1 && gameState.s.gameYear == 3, [
+            new TutorialEvent("Allocating To Investments", null, (<p className="text-gray-700">
+                The investment account now shows up in the allocation page. You can change the amount to be allocated
+                towards the investment account by using the arrows.
+            </p>), null, null, "Next"),
+        ]),
+        new TutorialChain("Investment Portfolio", () => gameState.s.page == 3 && gameState.s.gameYear == 3, [
+            new TutorialEvent("Investing", null, (<p className="text-gray-700">
+                Here is the page where you will be able to invest your money into stocks and bonds. You can click on the
+                different types of investments to expand them. This will display a graph of the investment's performance
+                history and a buy button.
+            </p>), null, null, "Next"),
+            new TutorialEvent("Investing", null, (<p className="text-gray-700">
+                This is the amount of money you have allocated towards investing, but have not yet invested. You will
+                most likely want to invest all of it before ending the year, but you don't have to.
+            </p>), "Uninvested", null, "Next"),
+            new TutorialEvent("Index Fund", null, (<p className="text-gray-700">
+                The <a href="https://www.investopedia.com/terms/i/indexfund.asp#toc-what-are-index-funds"
+                       target="_blank">index fund</a> is a type of stock that invests in multiple stocks to mirror the
+                stock market index. Due to including lots of stocks or bonds they are more diverse and don't rely as
+                much on one stock doing well, reducing risk. The current share price and the percentage change from last
+                year are displayed at the top.
+            </p>), "IndexFund", null, "Next"),
+            new TutorialEvent("Bond", null, (<p className="text-gray-700">
+                <a href="https://www.investopedia.com/terms/b/bond.asp" target="_blank">Bonds</a> are a form of
+                investment that is considered safer than stocks, but generally won't give as much return as stocks
+                would. They have fixed income and have a set end date. The current yearly interest rate is displayed at
+                the top.
+            </p>), "Bond", null, "Next"),
         ]),
     ], render));
 
@@ -644,13 +689,13 @@ function GamePage({fname, lname}: GameProps) {
         </div>,
         <div className="flex flex-col gap-2 items-center">
             <h1>Investment Portfolio</h1>
-            <h2 className="mt-2 text-yellow-600! font-bold">
+            <h2 className="mt-2 text-yellow-600! font-bold" id="Uninvested">
                 Uninvested: {formatter.format(investmentAccount.a.balance)}
             </h2>
-            <StockCard stock={indexFund} investmentAccount={investmentAccount} formatter={formatter}
-                       compactFormatter={compactFormatter} render={render}/>
-            <StockCard stock={bond} investmentAccount={investmentAccount} formatter={formatter}
-                       compactFormatter={compactFormatter} render={render}/>
+            <div id="IndexFund"><StockCard stock={indexFund} investmentAccount={investmentAccount} formatter={formatter}
+                                           compactFormatter={compactFormatter} render={render}/></div>
+            <div id="Bond"><StockCard stock={bond} investmentAccount={investmentAccount} formatter={formatter}
+                                      compactFormatter={compactFormatter} render={render}/></div>
             <div className="flex gap-2 justify-center">
                 <button className="w-24 text-xl h-10 p-1 font-bold" onClick={() => previousPage()}><h3>Back</h3>
                 </button>
@@ -892,7 +937,8 @@ function GamePage({fname, lname}: GameProps) {
             {/* eslint-disable-next-line react-hooks/refs */}
             {tutorialManager.current.getTutorialElement()}
             <div className="mb-20"></div>
-            <div className="fixed bottom-1 left-1 z-9 h-16 right-1 justify-center p-2 rounded-2xl bg-amber-100">
+            <div id="BottomBar"
+                 className="fixed bottom-1 left-1 z-9 h-16 right-1 justify-center p-2 rounded-2xl bg-amber-100">
                 <div className="grid grid-cols-4 content-center align-items-middle mx-auto h-full ml-4 mr-4">
                     <h2 className="text-gray-700! align-self-middle text-start w-100">{fname} {lname} ({character.age})</h2>
                     {(page < pages.length ? [

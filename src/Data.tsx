@@ -182,6 +182,7 @@ export class Loan extends Account {
 export class GameState {
     page: number = 0;
     date: Date;
+    gameYear: number = 0;
 
     constructor(date: Date) {
         this.date = date;
