@@ -25,6 +25,8 @@ function DayTradingGame({gameState}: LifeEventElementProps) {
         }
         return value;
     })
+    const startEndValue = investmentAmount * history[history.length - 1].value / history[0].value;
+    const startEndTaxes = startEndValue > investmentAmount ? CalculateTaxes(gameState.character.taxableIncome + startEndValue - investmentAmount) - CalculateTaxes(gameState.character.taxableIncome) : 0;
     useEffect(() => {
         const interval = setInterval(() => {
             if (page == 3) {
@@ -185,6 +187,11 @@ function DayTradingGame({gameState}: LifeEventElementProps) {
                     <p className="text-gray-700">
                         Ending Balance: {gameState.formatter.format(currentAmount - taxes)}
                     </p>
+                    {startEndValue > investmentAmount ?
+                        <p className="text-gray-700 pt-2">Would you have invested at the start of the period and sold at
+                            the end you would have had an ending balance
+                            of {gameState.formatter.format(startEndValue - startEndTaxes)} (Tax included)</p>
+                        : <></>}
                     <button className="w-50 text-xl h-10 p-1 font-bold mt-2"
                             onClick={() => {
                                 gameState.character.investmentAccount.balance += currentAmount - taxes;
