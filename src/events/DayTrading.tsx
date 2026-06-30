@@ -9,7 +9,22 @@ function DayTradingGame({gameState}: LifeEventElementProps) {
     const [page, setPage] = useState(0);
     const [hours, setHours] = useState(8);
     const [minutes, setMinutes] = useState(0);
-    const [history, setHistory] = useState([{time: hours + ":00", value: random.float(10, 420)}]);
+    const [history, setHistory] = useState(() => {
+        let h = [{time: "6:00", value: random.float(10, 420)}]
+        let hminute = 0;
+        let hhour = 6;
+        for (let i = 0; i < 2 * 6; i++) {
+            const nextMinutes = (hminute+ 10) % 60;
+            const nextHours = hminute+ 10 == 60 ? hhour + 1 : hhour;
+            h = [...h, {
+                time: nextHours + ":" + (nextMinutes == 0 ? "00" : nextMinutes),
+                value: (h[h.length - 1].value * random.float(.99, 1.011))
+            }];
+            hhour = nextHours;
+            hminute = nextMinutes;
+        }
+        return h;
+    });
     const [investmentAmount, setInvestmentAmount] = useState(500);
     const [currentAmount, setCurrentAmount] = useState(500);
     const [buyIndex, setBuyIndex] = useState<number | null>(null);
@@ -25,7 +40,7 @@ function DayTradingGame({gameState}: LifeEventElementProps) {
         }
         return value;
     })
-    const startEndValue = investmentAmount * history[history.length - 1].value / history[0].value;
+    const startEndValue = investmentAmount * history[history.length - 1].value / history[12].value;
     const startEndTaxes = startEndValue > investmentAmount ? CalculateTaxes(gameState.character.taxableIncome + startEndValue - investmentAmount) - CalculateTaxes(gameState.character.taxableIncome) : 0;
     useEffect(() => {
         const interval = setInterval(() => {
@@ -37,7 +52,7 @@ function DayTradingGame({gameState}: LifeEventElementProps) {
                 const nextHours = minutes + 10 == 60 ? hours + 1 : hours;
                 setHistory([...history, {
                     time: nextHours + ":" + (nextMinutes == 0 ? "00" : nextMinutes),
-                    value: (history[history.length - 1].value * random.float(.98, 1.022))
+                    value: (history[history.length - 1].value * random.float(.99, 1.011))
                 }]);
                 setMinutes(nextMinutes);
                 setHours(nextHours);
@@ -106,7 +121,7 @@ function DayTradingGame({gameState}: LifeEventElementProps) {
         return (<div className="flex flex-col w-full items-center">
             <div className="flex flex-col gap-2 w-1/2 rounded-2xl bg-amber-100 items-center p-2">
                 <p className="text-gray-700">
-                    "Now you need to select a company. What do you think is going to do hot?"
+                    "Now you need to select a company. Which do you think is going to do hot?"
                 </p>
                 {companies.map((c) =>
                     <div key={c} className="eventButton panelButton bg-gray-200!" onClick={() => {
@@ -188,9 +203,8 @@ function DayTradingGame({gameState}: LifeEventElementProps) {
                         Ending Balance: {gameState.formatter.format(currentAmount - taxes)}
                     </p>
                     {startEndValue > investmentAmount ?
-                        <p className="text-gray-700 pt-2">Would you have invested at the start of the period and sold at
-                            the end you would have had an ending balance
-                            of {gameState.formatter.format(startEndValue - startEndTaxes)} (Tax included)</p>
+                        <p className="text-gray-700 pt-2">A long-term investment over this period would have
+                            yielded {gameState.formatter.format(startEndValue - startEndTaxes)} (Tax included)</p>
                         : <></>}
                     <button className="w-50 text-xl h-10 p-1 font-bold mt-2"
                             onClick={() => {

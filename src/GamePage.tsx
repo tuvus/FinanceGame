@@ -321,7 +321,7 @@ function GamePage({fname, lname}: GameProps) {
         </>),
         new LifeEvent("Day Trading", gameState.s.date,
             <DayTrading gameState={gameState.s}/>, true),
-        new LifeEvent("Event Tutorial", new Date(gameState.s.date.getFullYear() + 5, 1),
+        new LifeEvent("Event Tutorial", new Date(gameState.s.date.getFullYear() + 6, 1),
             (<div><p>During the year you will encounter events that may have a financial impact.</p></div>)),
     ]));
     const activeEvent = lifeEventManager.GetActiveEvent(gameState.s.date);
