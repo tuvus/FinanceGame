@@ -693,7 +693,8 @@ function GamePage({fname, lname}: GameProps) {
                                min=""
                                max={Math.min(transferFrom.selectedAccount?.balance ?? 0, transferTo.selectedAccount?.balance ?? 0)}
                                value={fundsToTransfer}
-                               onChange={e => setFundsToTransfer(e.target.valueAsNumber)}
+                               onChange={e =>
+                                   setFundsToTransfer(Math.min(transferFrom.selectedAccount?.balance ?? 0, Math.min(transferTo.selectedAccount?.balance ?? 0,e.target.valueAsNumber)))}
                                type="number">
                         </input>
                     </div>
@@ -810,7 +811,7 @@ function GamePage({fname, lname}: GameProps) {
                                max={transferFrom.selectedAccount?.balance ?? 0}
                                disabled={transferFrom.selectedAccount == null}
                                value={fundsToTransfer}
-                               onChange={e => setFundsToTransfer(e.target.valueAsNumber)}
+                               onChange={e => setFundsToTransfer(Math.min(transferFrom.selectedAccount?.balance ?? 0, e.target.valueAsNumber))}
                                type="number">
                         </input>
                     </div>

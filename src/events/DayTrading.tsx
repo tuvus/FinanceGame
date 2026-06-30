@@ -25,7 +25,7 @@ function DayTradingGame({gameState}: LifeEventElementProps) {
                 const nextHours = minutes + 10 == 60 ? hours + 1 : hours;
                 setHistory([...history, {
                     time: nextHours + ":" + (nextMinutes == 0 ? "00" : nextMinutes),
-                    value: (history[history.length - 1].value * random.float(.97, 1.031))
+                    value: (history[history.length - 1].value * random.float(.98, 1.022))
                 }]);
                 setMinutes(nextMinutes);
                 setHours(nextHours);
@@ -130,7 +130,7 @@ function DayTradingGame({gameState}: LifeEventElementProps) {
                 <div className="flex flex-col gap-2 w-1/2 rounded-2xl bg-amber-100 items-center p-2">
                     {currentAmount > investmentAmount ?
                         <p className="text-gray-700">
-                            You a winner! The gains are taxed as income.
+                            You're a winner! The gains are taxed as income.
                         </p>
                         : (currentAmount < investmentAmount ?
                                 <p className="text-gray-700">
