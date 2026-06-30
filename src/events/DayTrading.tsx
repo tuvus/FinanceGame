@@ -3,13 +3,17 @@ import {type LifeEventElementProps} from "../EventManager.tsx";
 import {useEffect, useState} from "react";
 import {LineChart} from "../components/LineChart.tsx";
 import random from "random";
+import {CalculateTaxes} from "../Utils.tsx";
 
 function DayTradingGame({gameState}: LifeEventElementProps) {
     const [page, setPage] = useState(0);
     const [hours, setHours] = useState(8);
     const [minutes, setMinutes] = useState(0);
     const [history, setHistory] = useState([{time: hours + ":00", value: random.float(10, 420)}]);
-    const [investmentAmount, setInvestmentAmount] = useState(500)
+    const [investmentAmount, setInvestmentAmount] = useState(500);
+    const [currentAmount, setCurrentAmount] = useState(500);
+    const [buyIndex, setBuyIndex] = useState<number | null>(null);
+    const taxes = currentAmount > investmentAmount ? CalculateTaxes(gameState.character.taxableIncome + currentAmount - investmentAmount) - CalculateTaxes(gameState.character.taxableIncome) : 0;
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -26,7 +30,7 @@ function DayTradingGame({gameState}: LifeEventElementProps) {
                 setMinutes(nextMinutes);
                 setHours(nextHours);
             }
-        }, 100);
+        }, 500);
         return () => clearTimeout(interval);
     }, [page, minutes, hours, history]);
 
@@ -61,9 +65,12 @@ function DayTradingGame({gameState}: LifeEventElementProps) {
                     <h3 className="mt-4 text-gray-700">How much would you like to invest?</h3>
                     <p className="text-yellow-600">Available: {gameState.formatter.format(gameState.character.savingsAccount.balance + gameState.character.investmentAccount.balance)}</p>
                     <input className="w-80 bg-gray-200 rounded-xl p-1 text-gray-700 mt-2"
-                           min={500}
+                           min={1}
                            value={investmentAmount}
-                           onChange={(e) => setInvestmentAmount(e.target.valueAsNumber)}
+                           onChange={(e) => {
+                               setInvestmentAmount(e.target.valueAsNumber);
+                               setCurrentAmount(e.target.valueAsNumber);
+                           }}
                            type="number">
                     </input>
                     <div className="flex gap-2 justify-center">
@@ -96,22 +103,63 @@ function DayTradingGame({gameState}: LifeEventElementProps) {
                            aria-hidden="true"
                            categories={["value"]}
                            valueFormatter={(number: number) => gameState.compactFormatter.format(number)}/>
+                <p className={buyIndex ? "text-yellow-600" : "text-gray-700"}>{buyIndex ? gameState.formatter.format(
+                    currentAmount / history[buyIndex].value * history[history.length - 1].value
+                ) : gameState.formatter.format(currentAmount)}</p>
                 {hours == 24 ?
                     <button className="w-50 text-xl h-10 p-1 font-bold mt-2" onClick={() => {
+                        if (buyIndex != null) {
+                            setCurrentAmount(currentAmount / history[buyIndex].value * history[history.length - 1].value);
+                            setBuyIndex(null);
+                        }
                         setPage(page + 1);
                     }}>Done</button>
-                    : <></>
+                    : (buyIndex ?
+                        <button className="w-50 text-xl h-10 p-1 font-bold mt-2" onClick={() => {
+                            setCurrentAmount(currentAmount / history[buyIndex].value * history[history.length - 1].value);
+                            setBuyIndex(null);
+                        }}>Sell</button>
+                        : <button className="w-50 text-xl h-10 p-1 font-bold mt-2" onClick={() => {
+                            setBuyIndex(history.length - 1);
+                        }}>Buy</button>)
                 }
             </div>
         </div>)
     } else {
         return (<div className="flex flex-col w-full items-center">
                 <div className="flex flex-col gap-2 w-1/2 rounded-2xl bg-amber-100 items-center p-2">
+                    {currentAmount > investmentAmount ?
+                        <p className="text-gray-700">
+                            You a winner! The gains are taxed as income.
+                        </p>
+                        : (currentAmount < investmentAmount ?
+                                <p className="text-gray-700">
+                                    Awww, looks like you lost some money! Try again next time!
+                                </p> :
+                                <p className="text-gray-700">
+                                    You didn't do any trades! That won't make you money!
+                                </p>
+                        )}
                     <p className="text-gray-700">
-                        Great Job! You probably lost money!
+                        Starting Balance: {gameState.formatter.format(investmentAmount)}
+                    </p>
+                    {currentAmount > investmentAmount ?
+                        <>
+                            <p className="text-green-700">Gains: {gameState.formatter.format(currentAmount - investmentAmount)} +{Math.floor((currentAmount - investmentAmount) * 100 / investmentAmount)}%</p>
+                            <p className="text-red-800">Taxes: {gameState.formatter.format(taxes)}</p>
+                        </>
+                        : (currentAmount < investmentAmount ?
+                                <p className="text-red-800">Losses: {gameState.formatter.format(currentAmount - investmentAmount)} {Math.floor((currentAmount - investmentAmount) * 100 / investmentAmount)}%</p> :
+                                <p className="text-gray-700">Difference: {gameState.formatter.format(currentAmount - investmentAmount)}</p>
+                        )}
+                    <p className="text-gray-700">
+                        Ending Balance: {gameState.formatter.format(currentAmount - taxes)}
                     </p>
                     <button className="w-50 text-xl h-10 p-1 font-bold mt-2"
-                            onClick={() => gameState.lifeEventManager!.NextEvent()}>Awww
+                            onClick={() => {
+                                gameState.character.investmentAccount.balance += currentAmount - taxes;
+                                gameState.lifeEventManager!.NextEvent();}}>
+                        {currentAmount > investmentAmount ? "Nice!" : "Awww"}
                     </button>
                 </div>
             </div>

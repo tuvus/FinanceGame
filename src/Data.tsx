@@ -16,6 +16,7 @@ export class Character {
     savingsAccount: Account;
     investmentAccount: StockAccount;
     retirementAccount: StockAccount;
+    taxableIncome: number;
 
     constructor(firstName: string, lastName: string, monthlyLivingExpenses: {
         name: string,
@@ -36,6 +37,7 @@ export class Character {
         this.savingsAccount = new Account("Savings Account", 0, true);
         this.investmentAccount = new StockAccount("Investment Account", 0);
         this.retirementAccount = new StockAccount("Retirement Account", 0);
+        this.taxableIncome = 0;
     }
 
     endYear(date: Date, inflation: number) {

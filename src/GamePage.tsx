@@ -77,7 +77,9 @@ function GamePage({fname, lname}: GameProps) {
 
     const endYear = () => {
         const livingExpenses = character.monthlyLivingExpenses.map(e => e.amount).reduce((sum, curr) => sum + curr, 0) * inflation * 12;
-        const taxes = CalculateTaxes(Math.max(0, character.salary * (1 - character.pretirement / 100) - 15750));
+        const taxableIncome = Math.max(0, character.salary * (1 - character.pretirement / 100) - 15750);
+        character.taxableIncome = taxableIncome;
+        const taxes = CalculateTaxes(taxableIncome);
         const newSavings = character.salary * (100 - character.pinvestments - character.pretirement - character.pleisure) / 100 - taxes - livingExpenses - character.loans.reduce((sum, l) => sum + l.getPayment(), 0);
 
         // Go on trips!
