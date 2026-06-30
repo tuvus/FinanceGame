@@ -5,8 +5,8 @@ import {LineChart} from "./LineChart.tsx";
 import {useState} from "react";
 
 type StockProps = {
-    stock: { a: StockBond },
-    investmentAccount: { a: StockAccount },
+    stock: StockBond,
+    investmentAccount: StockAccount,
     formatter: Intl.NumberFormat,
     compactFormatter: Intl.NumberFormat,
     render: () => void,
@@ -20,60 +20,60 @@ function StockCard({stock, investmentAccount, formatter, compactFormatter, rende
     return (<>
         <div className="flex flex-col items-center w-124 bg-amber-100 rounded-xl p-4 m-4 gap-1 cursor-pointer"
              onClick={() => setMinimized(!minimized)}>
-            <h3 className="text-gray-700 font-bold">{stock.a.name}</h3>
-            {stock.a.bond ?
+            <h3 className="text-gray-700 font-bold">{stock.name}</h3>
+            {stock.bond ?
                 <>
                     <div className="flex items-baseline gap-2">
                         <p className="text-gray-700">5.2% Yearly Interest Rate</p>
                     </div>
-                    {investmentAccount.a.positions.has(stock.a) ?
+                    {investmentAccount.positions.has(stock) ?
                         <p className="text-gray-700">
-                            Value: {formatter.format(investmentAccount.a.getStock(stock.a).amount * stock.a.balance)}
+                            Value: {formatter.format(investmentAccount.getStock(stock).amount * stock.balance)}
                         </p> : <></>
                     }
 
                 </> : <>
                     <div className="flex items-baseline gap-2">
-                        <p className="text-gray-700">{formatter.format(stock.a.balance)}</p>
-                        {stock.a.diff ? stock.a.diff >= 0 ? (<p className="text-green-700">+{stock.a.diff}%</p>)
-                            : <p className="text-red-800">{stock.a.diff}%</p> : <></>}
+                        <p className="text-gray-700">{formatter.format(stock.balance)}</p>
+                        {stock.diff ? stock.diff >= 0 ? (<p className="text-green-700">+{stock.diff}%</p>)
+                            : <p className="text-red-800">{stock.diff}%</p> : <></>}
                         <p className="text-gray-700">per share</p>
                     </div>
-                    {investmentAccount.a.positions.has(stock.a) ?
+                    {investmentAccount.positions.has(stock) ?
                         <p className="text-gray-700">
-                            Shares: {Math.round(investmentAccount.a.getStock(stock.a).amount * 100) / 100} ({formatter.format(investmentAccount.a.getStock(stock.a).amount * investmentAccount.a.getStock(stock.a).buyValue)})
+                            Shares: {Math.round(investmentAccount.getStock(stock).amount * 100) / 100} ({formatter.format(investmentAccount.getStock(stock).amount * investmentAccount.getStock(stock).buyValue)})
                         </p> : <></>
                     }
                 </>
             }
             {minimized ? <></> : <>
-                {investmentAccount.a.positions.has(stock.a) ?
-                    (investmentAccount.a.getStock(stock.a).buyValue <= stock.a.balance ?
+                {investmentAccount.positions.has(stock) ?
+                    (investmentAccount.getStock(stock).buyValue <= stock.balance ?
                         <p className="text-gray-700">Total Gain/Loss <span
-                            className="text-green-700">{formatter.format(investmentAccount.a.getStock(stock.a).amount * (stock.a.balance - investmentAccount.a.getStock(stock.a).buyValue))} (+{Math.round(stock.a.balance * 100 / investmentAccount.a.getStock(stock.a).buyValue) - 100}%)</span>
+                            className="text-green-700">{formatter.format(investmentAccount.getStock(stock).amount * (stock.balance - investmentAccount.getStock(stock).buyValue))} (+{Math.round(stock.balance * 100 / investmentAccount.getStock(stock).buyValue) - 100}%)</span>
                         </p> :
                         <p className="text-gray-700">Total Gain/Loss <span
-                            className="text-red-800">{formatter.format(investmentAccount.a.getStock(stock.a).amount * (stock.a.balance - investmentAccount.a.getStock(stock.a).buyValue))} ({Math.round(stock.a.balance * 100 / investmentAccount.a.getStock(stock.a).buyValue) - 100}%)</span>
+                            className="text-red-800">{formatter.format(investmentAccount.getStock(stock).amount * (stock.balance - investmentAccount.getStock(stock).buyValue))} ({Math.round(stock.balance * 100 / investmentAccount.getStock(stock).buyValue) - 100}%)</span>
                         </p>)
                     : <></>}
                 <div className="flex gap-2">
                     <button className="w-40 text-xl h-10 font-bold" onClick={(e) => {
                         e.stopPropagation()
-                        setStocksToBuySell(Math.floor(investmentAccount.a.balance * 100 / stock.a.balance) / 100);
+                        setStocksToBuySell(Math.floor(investmentAccount.balance * 100 / stock.balance) / 100);
                         setBuySellState(true);
                     }}><h3>Buy</h3></button>
-                    {investmentAccount.a.getStock(stock.a).amount > 0 ?
+                    {investmentAccount.getStock(stock).amount > 0 ?
                         <button className="w-40 text-xl h-10 font-bold" onClick={(e) => {
                             e.stopPropagation()
-                            setStocksToBuySell(Math.floor(investmentAccount.a.getStock(stock.a).amount * 100) / 100);
+                            setStocksToBuySell(Math.floor(investmentAccount.getStock(stock).amount * 100) / 100);
                             setBuySellState(false);
                         }}><h3>Sell</h3></button> : <></>}
                 </div>
-                <LineChart className="h-60 w-120" data={stock.a.history}
+                <LineChart className="h-60 w-120" data={stock.history}
                            index="dateString"
                            showLegend={false}
-                           minValue={Math.min(...stock.a.history.map(h => h.balance))}
-                           maxValue={Math.max(...stock.a.history.map(h => h.balance))}
+                           minValue={Math.min(...stock.history.map(h => h.balance))}
+                           maxValue={Math.max(...stock.history.map(h => h.balance))}
                            aria-hidden="true"
                            categories={["balance"]}
                            valueFormatter={(number: number) => compactFormatter.format(number)}/>
@@ -89,10 +89,10 @@ function StockCard({stock, investmentAccount, formatter, compactFormatter, rende
                             <p className="text-xl text-gray-700! p-2">$</p>
                             <input name="buy-shares" className="w-80 bg-gray-200 rounded-xl p-1 text-gray-700"
                                    min={0}
-                                   max={investmentAccount.a.balance / stock.a.balance}
+                                   max={investmentAccount.balance / stock.balance}
                                    value={stocksToBuySell}
                                    onChange={(e) =>
-                                       setStocksToBuySell(Math.min(investmentAccount.a.balance / stock.a.balance, e.target.valueAsNumber))}
+                                       setStocksToBuySell(Math.min(investmentAccount.balance / stock.balance, e.target.valueAsNumber))}
                                    type="number">
                             </input>
                         </div>
@@ -110,8 +110,8 @@ function StockCard({stock, investmentAccount, formatter, compactFormatter, rende
                                 onClick={(e) => {
                                     e.stopPropagation()
                                     if (stocksToBuySell.valueOf() <= 0 || isNaN(stocksToBuySell)) return;
-                                    investmentAccount.a.addStock(stock.a, stocksToBuySell);
-                                    investmentAccount.a.balance -= stocksToBuySell * stock.a.balance;
+                                    investmentAccount.addStock(stock, stocksToBuySell);
+                                    investmentAccount.balance -= stocksToBuySell * stock.balance;
                                     render();
                                     setBuySellState(null);
                                 }}
@@ -128,9 +128,9 @@ function StockCard({stock, investmentAccount, formatter, compactFormatter, rende
                             <p className="text-xl text-gray-700! p-2">$</p>
                             <input name="sell-shares" className="w-80 bg-gray-200 rounded-xl p-1 text-gray-700"
                                    min={0}
-                                   max={investmentAccount.a.getStock(stock.a).amount}
+                                   max={investmentAccount.getStock(stock).amount}
                                    value={stocksToBuySell}
-                                   onChange={(e) => setStocksToBuySell(Math.min(investmentAccount.a.getStock(stock.a).amount, e.target.valueAsNumber))}
+                                   onChange={(e) => setStocksToBuySell(Math.min(investmentAccount.getStock(stock).amount, e.target.valueAsNumber))}
                                    type="number">
                             </input>
                         </div>
@@ -144,8 +144,8 @@ function StockCard({stock, investmentAccount, formatter, compactFormatter, rende
                                 disabled={stocksToBuySell == 0}
                                 onClick={() => {
                                     if (stocksToBuySell.valueOf() <= 0 || isNaN(stocksToBuySell)) return;
-                                    investmentAccount.a.removeStock(stock.a, stocksToBuySell);
-                                    investmentAccount.a.balance += stocksToBuySell * stock.a.balance;
+                                    investmentAccount.removeStock(stock, stocksToBuySell);
+                                    investmentAccount.balance += stocksToBuySell * stock.balance;
                                     render();
                                     setBuySellState(null);
                                 }}
