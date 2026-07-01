@@ -8,7 +8,7 @@ import {Account, Character, GameState, Loan, StockAccount, StockBond} from "./Da
 import StockCard from "./components/StockCard.tsx";
 import {CalculateTaxes, GetDateString} from "./Utils.tsx";
 import {DonutChart} from "./components/DonutChart.tsx";
-import {LifeEvent, LifeEventManager} from "./EventManager.tsx";
+import {LifeEvent, LifeEventManager, LifeEventSchedule, LifeEventScheduler} from "./EventManager.tsx";
 import {TutorialChain, TutorialEvent, TutorialManager} from "./TutorialManager.tsx";
 import DayTrading from "./events/DayTrading.tsx";
 
@@ -61,10 +61,7 @@ function GamePage({fname, lname}: GameProps) {
 
     const nextPage = () => {
         if (page + 1 == pages.length - 1) {
-            if (random.float() > .8) {
-                lifeEventManager.AddEvent(new LifeEvent("Day Trading", new Date(gameState.s.date.getFullYear(), random.int(0, 11)),
-                    <DayTrading gameState={gameState.s}/>, true));
-            }
+            gameState.s.lifeEventScheduler!.generateEvents();
             if (!lifeEventManager.GetActiveEvent(gameState.s.date)) {
                 lifeEventManager.AddEvent(
                     new LifeEvent("Another year passes", gameState.s.date,
@@ -95,8 +92,8 @@ function GamePage({fname, lname}: GameProps) {
             character.addCreditDebt(-character.savingsAccount.balance)
             character.savingsAccount.balance = 0;
         }
-        character.investmentAccount.balance += character.salary * character.pinvestments / 100
-        character.retirementAccount.balance += character.salary * character.pretirement / 100
+        character.investmentAccount.balance += character.salary * character.pinvestments / 100;
+        character.retirementAccount.balance += character.salary * character.pretirement / 100;
         indexFund.a.balance *= random.float(.85, 1.2);
 
         // Inflation
@@ -116,7 +113,11 @@ function GamePage({fname, lname}: GameProps) {
         endYear();
         setPage(0);
         gameState.s.gameYear++;
-        console.log(gameState.s.gameYear)
+        if (gameState.s.gameYear == 3) {
+            gameState.s.investmentsUnlocked = true;
+        } else if (gameState.s.gameYear == 8) {
+            gameState.s.retirementUnlocked = true;
+        }
     }
 
     const taxes = CalculateTaxes(Math.max(0, character.salary * (1 - character.pretirement / 100) - 15750));
@@ -438,6 +439,11 @@ function GamePage({fname, lname}: GameProps) {
 
     useEffect(() => {
         character.accounts = [character.savingsAccount, character.investmentAccount, character.retirementAccount];
+        gameState.s.lifeEventScheduler = new LifeEventScheduler(lifeEventManager, gameState.s, [
+            new LifeEventSchedule(new LifeEvent("Day Trading", new Date(gameState.s.date.getFullYear(), random.int(0, 11)),
+                <DayTrading gameState={gameState.s}/>, true), 99, 2, .2, () => gameState.s.investmentsUnlocked),
+        ]);
+
         document.addEventListener("keyup", (e) => {
             if (e.key == "Enter") {
                 if (document.getElementById("transfer-modal")!.style.display == "block") {
@@ -468,14 +474,12 @@ function GamePage({fname, lname}: GameProps) {
                 if (document.getElementById("transfer-modal")!.style.display == "block") {
                     document.getElementById("transfer-cancel")!.click();
                     e.stopImmediatePropagation();
-                    return;
-                }
-                if (document.getElementById("debt-modal")!.style.display == "block") {
+                } else if (document.getElementById("debt-modal")!.style.display == "block") {
                     document.getElementById("debt-cancel")!.click();
                     e.stopImmediatePropagation();
-                    return;
-                }
-                if (gameState.s.page < pages.length - 1) {
+                } else if (tutorialManager.current.activeTutorial != null) {
+                    // Don't change pages
+                } else if (gameState.s.page < pages.length - 1) {
                     gameState.s.previousPage();
                     e.stopImmediatePropagation();
                 }
@@ -687,10 +691,12 @@ function GamePage({fname, lname}: GameProps) {
             <h2 className="mt-2 text-yellow-600! font-bold" id="Uninvested">
                 Uninvested: {formatter.format(character.investmentAccount.balance)}
             </h2>
-            <div id="IndexFund"><StockCard stock={indexFund.a} investmentAccount={character.investmentAccount} formatter={formatter}
-                       compactFormatter={compactFormatter} render={render}/></div>
-            <div id="Bond"><StockCard stock={bond.a} investmentAccount={character.investmentAccount} formatter={formatter}
-                       compactFormatter={compactFormatter} render={render}/></div>
+            <div id="IndexFund"><StockCard stock={indexFund.a} investmentAccount={character.investmentAccount}
+                                           formatter={formatter}
+                                           compactFormatter={compactFormatter} render={render}/></div>
+            <div id="Bond"><StockCard stock={bond.a} investmentAccount={character.investmentAccount}
+                                      formatter={formatter}
+                                      compactFormatter={compactFormatter} render={render}/></div>
             <div className="flex gap-2 justify-center">
                 <button className="w-24 text-xl h-10 p-1 font-bold" onClick={() => previousPage()}><h3>Back</h3>
                 </button>

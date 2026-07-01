@@ -1,4 +1,4 @@
-import type {LifeEventManager} from "./EventManager.tsx";
+import {type LifeEventManager, LifeEventScheduler} from "./EventManager.tsx";
 
 export class Character {
     firstName: string;
@@ -204,11 +204,15 @@ export class Loan extends Account {
 export class GameState {
     page: number = 0;
     date: Date;
+    // The number of years the player has played, 0 is when choosing college, 1 is the first year they allocate for and so on
     gameYear: number = 0;
     character: Character;
     formatter: Intl.NumberFormat;
     compactFormatter: Intl.NumberFormat;
     lifeEventManager: LifeEventManager | null;
+    lifeEventScheduler: LifeEventScheduler | null;
+    investmentsUnlocked: boolean = false;
+    retirementUnlocked: boolean = false;
 
     constructor(date: Date, character: Character, formatter: Intl.NumberFormat, compactFormatter: Intl.NumberFormat) {
         this.date = date;
@@ -216,6 +220,7 @@ export class GameState {
         this.formatter = formatter;
         this.compactFormatter = compactFormatter;
         this.lifeEventManager = null;
+        this.lifeEventScheduler = null
     }
 
     nextPage = (): void => {
