@@ -6,7 +6,7 @@ import random from "random";
 function PromotionEvent({gameState}: LifeEventElementProps) {
     const [increase] = useState(random.float(1.03, 1.12));
     return (<div>
-        <p>Your Manager has offered you a promotion for your hard work!</p>
+        <p>Your manager has offered you a promotion for your hard work!</p>
         <p>Old Salary: {gameState.formatter.format(gameState.character.salary)}</p>
         <p className="text-green-700">
             New Salary: {gameState.formatter.format(gameState.character.salary * increase)} +{Math.floor((increase - 1) * 100)}%
