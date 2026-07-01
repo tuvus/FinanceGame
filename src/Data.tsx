@@ -1,4 +1,4 @@
-import type {LifeEventManager} from "./EventManager.tsx";
+import {type LifeEventManager, LifeEventScheduler} from "./EventManager.tsx";
 
 export class Character {
     firstName: string;
@@ -60,6 +60,14 @@ export class Character {
             loan.balance += amount;
         } else {
             this.addLoan(new Loan("Credit Card Debt", amount, this.savingsAccount, 1.27, false));
+        }
+    }
+
+    payMoney(amount: number) {
+        this.savingsAccount.balance -= amount;
+        if (this.savingsAccount.balance < 0) {
+            this.addCreditDebt(-this.savingsAccount.balance);
+            this.savingsAccount.balance = 0;
         }
     }
 
@@ -204,18 +212,26 @@ export class Loan extends Account {
 export class GameState {
     page: number = 0;
     date: Date;
+    // The number of years the player has played, 0 is when choosing college, 1 is the first year they allocate for and so on
     gameYear: number = 0;
+    inflation: number = 1;
     character: Character;
     formatter: Intl.NumberFormat;
     compactFormatter: Intl.NumberFormat;
     lifeEventManager: LifeEventManager | null;
+    lifeEventScheduler: LifeEventScheduler | null;
+    investmentsUnlocked: boolean = false;
+    retirementUnlocked: boolean = false;
+    tutorial: boolean;
 
-    constructor(date: Date, character: Character, formatter: Intl.NumberFormat, compactFormatter: Intl.NumberFormat) {
+    constructor(date: Date, character: Character, formatter: Intl.NumberFormat, compactFormatter: Intl.NumberFormat, tutorial: boolean) {
         this.date = date;
         this.character = character;
         this.formatter = formatter;
         this.compactFormatter = compactFormatter;
+        this.tutorial = tutorial;
         this.lifeEventManager = null;
+        this.lifeEventScheduler = null
     }
 
     nextPage = (): void => {

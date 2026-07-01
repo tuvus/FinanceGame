@@ -1,5 +1,6 @@
 import type {ReactElement} from "react";
 import {type GameState} from "./Data.tsx";
+import random from "random";
 
 export type LifeEventElementProps = {
     gameState: GameState;
@@ -16,6 +17,10 @@ export class LifeEvent {
         this.date = date;
         this.element = element;
         this.customContinue = customContinue;
+    }
+
+    CopyWithDate(date: Date) {
+        return new LifeEvent(this.name, date, this.element, this.customContinue);
     }
 }
 
@@ -71,5 +76,51 @@ export class LifeEventManager {
 
     PrintEvents() {
         console.log(this.lifeEvents.map(le => le.name).join(", "));
+    }
+}
+
+export class LifeEventSchedule {
+    event: LifeEvent;
+    maxOccurrences: number;
+    minTimeBetweenOccurrence: number;
+    lastOccurrence: number;
+    probability: number;
+    condition: (() => boolean) | null;
+
+    constructor(event: LifeEvent, maxOccurrences: number, minTimeBetweenOccurrence: number, probability: number, condition: (() => boolean) | null) {
+        this.event = event;
+        this.maxOccurrences = maxOccurrences;
+        this.minTimeBetweenOccurrence = minTimeBetweenOccurrence;
+        this.probability = probability;
+        this.condition = condition;
+        this.lastOccurrence = -9999;
+    }
+}
+
+export class LifeEventScheduler {
+    lifeEventManager: LifeEventManager;
+    gameState: GameState;
+    eventSchedules: LifeEventSchedule[];
+
+    constructor(lifeEventManager: LifeEventManager, gameState: GameState, eventSchedules: LifeEventSchedule[]) {
+        this.lifeEventManager = lifeEventManager;
+        this.gameState = gameState;
+        this.eventSchedules = eventSchedules;
+    }
+
+    generateEvents() {
+        const eventsToDo = this.eventSchedules
+            .filter((e) => (!e.condition || e.condition())
+                && e.maxOccurrences > 0
+                && this.gameState.gameYear >= e.lastOccurrence + e.minTimeBetweenOccurrence)
+            .map(e => ({e, p: random.float()}))
+            .filter(e => e.p <= e.e.probability)
+            .toSorted().slice(0, 5);
+        eventsToDo.forEach(e => {
+            this.lifeEventManager.AddEvent(e.e.event.CopyWithDate(new Date(this.gameState.date.getFullYear(), random.int(0, 11), random.int(1, 28))));
+            e.e.lastOccurrence = this.gameState.gameYear;
+            e.e.maxOccurrences--;
+        })
+
     }
 }

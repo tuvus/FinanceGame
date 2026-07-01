@@ -13,16 +13,18 @@ function App() {
         random.boolean() ? maleNames[random.int(0, maleNames.length)] : femaleNames[random.int(0, femaleNames.length)]);
     const [lastName, setLastName] = useState(
         lastNames[random.int(0, lastNames.length)]);
+    const [tutorial, setTutorial] = useState(true);
 
     const [page, setPage] = useState("start");
-    const startGame = (fName: string, lName: string) => {
+    const startGame = (fName: string, lName: string, tutorial: boolean) => {
         setFirstname(fName);
         setLastName(lName);
+        setTutorial(tutorial);
         setPage("game");
     };
 
     const getPageElement = () => {
-        if (page == "game") return <GamePage fname={firstName} lname={lastName}/>;
+        if (page == "game") return <GamePage fname={firstName} lname={lastName} tutorial={tutorial}/>;
         return <SetupPage fname={firstName} lname={lastName} startGame={startGame}/>;
     }
 
