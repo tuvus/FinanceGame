@@ -135,7 +135,7 @@ export class TutorialManager {
                     position = "top-[10%] left-0 w-full h-1/2";
                     vPosition = "";
                 } else if (targetElement.bottom <= bodyElement.height / 2) {
-                    position = "top-[60%] left-0 w-full h-1/2";
+                    position = "top-[55%] left-0 w-full h-1/2";
                     vPosition = "";
                 }
             }
