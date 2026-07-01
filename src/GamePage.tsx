@@ -11,6 +11,7 @@ import {DonutChart} from "./components/DonutChart.tsx";
 import {LifeEvent, LifeEventManager, LifeEventSchedule, LifeEventScheduler} from "./EventManager.tsx";
 import {TutorialChain, TutorialEvent, TutorialManager} from "./TutorialManager.tsx";
 import DayTrading from "./events/DayTrading.tsx";
+import PromotionEvent from "./events/Promotion.tsx";
 
 type GameProps = {
     fname: string; lname: string;
@@ -51,17 +52,16 @@ function GamePage({fname, lname}: GameProps) {
     const [transferFrom, setTransferFrom] = useState<TransferFundsSelectState>({selectedAccount: null});
     const [transferTo, setTransferTo] = useState<TransferFundsSelectState>({selectedAccount: null});
     const [fundsToTransfer, setFundsToTransfer] = useState(0);
-    const [inflation, setInflation] = useState(1);
 
     const endYear = () => {
-        const livingExpenses = character.monthlyLivingExpenses.map(e => e.amount).reduce((sum, curr) => sum + curr, 0) * inflation * 12;
+        const livingExpenses = character.monthlyLivingExpenses.map(e => e.amount).reduce((sum, curr) => sum + curr, 0) * gameState.s.inflation * 12;
         const taxableIncome = Math.max(0, character.salary * (1 - character.pretirement / 100) - 15750);
         character.taxableIncome = taxableIncome;
         const taxes = CalculateTaxes(taxableIncome);
         const newSavings = character.salary * (100 - character.pinvestments - character.pretirement - character.pleisure) / 100 - taxes - livingExpenses - character.loans.reduce((sum, l) => sum + l.getPayment(), 0);
 
         // Go on trips!
-        character.satisfaction += (character.loans.length > 0 ? 5 : 8) + character.satisfaction * character.pleisure / 100 / inflation;
+        character.satisfaction += (character.loans.length > 0 ? 5 : 8) + character.satisfaction * character.pleisure / 100 / gameState.s.inflation;
 
         // Income and interest
         character.savingsAccount.balance += newSavings;
@@ -75,7 +75,7 @@ function GamePage({fname, lname}: GameProps) {
 
         // Inflation
         const newInflation = random.float(1.01, 1.04);
-        setInflation(inflation * newInflation);
+        gameState.s.inflation *= newInflation;
         indexFund.a.balance *= newInflation;
         bond.a.balance *= 1.052;
 
@@ -100,7 +100,7 @@ function GamePage({fname, lname}: GameProps) {
     const taxes = CalculateTaxes(Math.max(0, character.salary * (1 - character.pretirement / 100) - 15750));
 
     const monthlyLivingExpenses = character.monthlyLivingExpenses.map(e => e.amount)
-        .reduce((sum, curr) => sum + curr, 0) * inflation;
+        .reduce((sum, curr) => sum + curr, 0) * gameState.s.inflation;
     const livingExpenses = monthlyLivingExpenses * 12;
     const minLoanPayments = character.loans.reduce((sum, l) => sum + l.getPayment(), 0);
 
@@ -417,9 +417,9 @@ function GamePage({fname, lname}: GameProps) {
     useEffect(() => {
         character.accounts = [character.savingsAccount, character.investmentAccount, character.retirementAccount];
         gameState.s.lifeEventScheduler = new LifeEventScheduler(lifeEventManager, gameState.s, [
-            new LifeEventSchedule(new LifeEvent("Day Trading", new Date(gameState.s.date.getFullYear(), random.int(0, 11)),
+            new LifeEventSchedule(new LifeEvent("Day Trading", new Date(),
                 <DayTrading gameState={gameState.s}/>, true), 99, 4, .1, () => gameState.s.investmentsUnlocked),
-            new LifeEventSchedule(new LifeEvent("Broken Laptop", new Date(gameState.s.date.getFullYear(), random.int(0, 11)),
+            new LifeEventSchedule(new LifeEvent("Broken Laptop", new Date(),
                 <div className="flex flex-col w-full items-center mt-6 gap-4">
                     <p className="w-3/4">Oops... You spilled coffee on your laptop and now it won't start. You need your
                         laptop for
@@ -429,7 +429,7 @@ function GamePage({fname, lname}: GameProps) {
                             const r = random.float();
                             if (r < .3) {
                                 character.satisfaction -= 2;
-                                character.payMoney(150 * inflation);
+                                character.payMoney(150 * gameState.s.inflation);
                                 lifeEventManager.ReplaceEvent(new LifeEvent("Laptop Fixed", lifeEventManager.date,
                                     <div className="flex flex-col w-full items-center mt-6 gap-4">
                                         <p className="w-3/4">You sent your laptop into the repair shop and they were
@@ -438,7 +438,7 @@ function GamePage({fname, lname}: GameProps) {
                                     </div>));
                             } else {
                                 character.satisfaction -= 10;
-                                character.payMoney(750 * inflation);
+                                character.payMoney(750 * gameState.s.inflation);
                                 lifeEventManager.ReplaceEvent(new LifeEvent("Laptop Unrepairable", lifeEventManager.date,
                                     <div className="flex flex-col w-full items-center mt-6 gap-4">
                                         <p className="w-3/4">You sent your laptop into the repair shop but there was
@@ -450,27 +450,29 @@ function GamePage({fname, lname}: GameProps) {
                             }
                         }}>
                             <p className="text-gray-700">Send it to the repair shop</p>
-                            <p className="text-red-800">-${150 * inflation}</p>
+                            <p className="text-red-800">-${formatter.format(150 * gameState.s.inflation)}</p>
                         </div>
                         <div className="eventButton panelButton" onClick={() => {
                             character.satisfaction -= 5;
-                            character.payMoney(600 * inflation);
+                            character.payMoney(600 * gameState.s.inflation);
                             lifeEventManager.NextEvent();
                         }}>
                             <p className="text-gray-700">Buy a new cheap laptop as a replacement</p>
-                            <p className="text-red-800">-${600 * inflation}</p>
+                            <p className="text-red-800">-${formatter.format(600 * gameState.s.inflation)}</p>
                         </div>
                         <div className="eventButton panelButton" onClick={() => {
                             character.satisfaction += 7;
-                            character.payMoney(1200 * inflation);
+                            character.payMoney(1200 * gameState.s.inflation);
                             lifeEventManager.NextEvent();
                         }}>
                             <p className="text-gray-700">Buy a fancier laptop as a replacement</p>
-                            <p className="text-red-800">-${1200 * inflation}</p>
+                            <p className="text-red-800">-${formatter.format(1200 * gameState.s.inflation)}</p>
                         </div>
                     </div>
                 </div>, true), 5, 4, .1, null
             ),
+            new LifeEventSchedule(new LifeEvent("Promotion", new Date(), <PromotionEvent
+                gameState={gameState.s}/>, true), 8, 4, .2, null),
         ]);
 
         document.addEventListener("keyup", (e) => {
@@ -596,7 +598,7 @@ function GamePage({fname, lname}: GameProps) {
                                 <p className="text-gray-700" key={2}>
                                     <input name="character.pretirement" className="w-12 text-end"
                                            min="0"
-                                           max={Math.min(24500 * inflation / character.salary * 100, 100)}
+                                           max={Math.min(24500 * gameState.s.inflation / character.salary * 100, 100)}
                                            defaultValue={character.pretirement}
                                            onChange={e => {
                                                character.pretirement = Math.min(1000, Math.max(0, e.target.valueAsNumber));
@@ -617,9 +619,9 @@ function GamePage({fname, lname}: GameProps) {
                                 return ([
                                     <p className="text-red-800" key={i + "1"} id="ItemizedLivingExpenses">{name}</p>,
                                     <p className="text-red-800"
-                                       key={i + "2"}>{Math.round(amount * 12 * inflation / character.salary * 100)}%</p>,
+                                       key={i + "2"}>{Math.round(amount * 12 * gameState.s.inflation / character.salary * 100)}%</p>,
                                     <p className="text-red-800"
-                                       key={i + "3"}>{formatter.format(amount * inflation * 12)}</p>
+                                       key={i + "3"}>{formatter.format(amount * gameState.s.inflation * 12)}</p>
                                 ]);
                             })}
 

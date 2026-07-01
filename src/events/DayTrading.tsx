@@ -10,7 +10,7 @@ function DayTradingGame({gameState}: LifeEventElementProps) {
     const [hours, setHours] = useState(8);
     const [minutes, setMinutes] = useState(0);
     const [history, setHistory] = useState(() => {
-        let h = [{time: "6:00", value: random.float(10, 420)}]
+        let h = [{time: "6:00", value: random.float(10, 420) * gameState.inflation}]
         let hminute = 0;
         let hhour = 6;
         for (let i = 0; i < 2 * 6; i++) {

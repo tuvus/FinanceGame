@@ -214,6 +214,7 @@ export class GameState {
     date: Date;
     // The number of years the player has played, 0 is when choosing college, 1 is the first year they allocate for and so on
     gameYear: number = 0;
+    inflation: number = 1;
     character: Character;
     formatter: Intl.NumberFormat;
     compactFormatter: Intl.NumberFormat;
