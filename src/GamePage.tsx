@@ -418,7 +418,59 @@ function GamePage({fname, lname}: GameProps) {
         character.accounts = [character.savingsAccount, character.investmentAccount, character.retirementAccount];
         gameState.s.lifeEventScheduler = new LifeEventScheduler(lifeEventManager, gameState.s, [
             new LifeEventSchedule(new LifeEvent("Day Trading", new Date(gameState.s.date.getFullYear(), random.int(0, 11)),
-                <DayTrading gameState={gameState.s}/>, true), 99, 2, .2, () => gameState.s.investmentsUnlocked),
+                <DayTrading gameState={gameState.s}/>, true), 99, 4, .1, () => gameState.s.investmentsUnlocked),
+            new LifeEventSchedule(new LifeEvent("Broken Laptop", new Date(gameState.s.date.getFullYear(), random.int(0, 11)),
+                <div className="flex flex-col w-full items-center mt-6 gap-4">
+                    <p className="w-3/4">Oops... You spilled coffee on your laptop and now it won't start. You need your
+                        laptop for
+                        your daily life and work. How should will you fix it?</p>
+                    <div className="flex justify-center gap-8 w-3/4">
+                        <div className="eventButton panelButton" onClick={() => {
+                            const r = random.float();
+                            if (r < .3) {
+                                character.satisfaction -= 2;
+                                character.payMoney(150 * inflation);
+                                lifeEventManager.ReplaceEvent(new LifeEvent("Laptop Fixed", lifeEventManager.date,
+                                    <div className="flex flex-col w-full items-center mt-6 gap-4">
+                                        <p className="w-3/4">You sent your laptop into the repair shop and they were
+                                            able to fix it and send it back within a few days.
+                                        </p>
+                                    </div>));
+                            } else {
+                                character.satisfaction -= 10;
+                                character.payMoney(750 * inflation);
+                                lifeEventManager.ReplaceEvent(new LifeEvent("Laptop Unrepairable", lifeEventManager.date,
+                                    <div className="flex flex-col w-full items-center mt-6 gap-4">
+                                        <p className="w-3/4">You sent your laptop into the repair shop but there was
+                                            nothing they could do to fix it. Unfortunately, your worranty had expired
+                                            and you had to pay for a new laptop.
+                                        </p>
+                                    </div>
+                                ));
+                            }
+                        }}>
+                            <p className="text-gray-700">Send it to the repair shop</p>
+                            <p className="text-red-800">-${150 * inflation}</p>
+                        </div>
+                        <div className="eventButton panelButton" onClick={() => {
+                            character.satisfaction -= 5;
+                            character.payMoney(600 * inflation);
+                            lifeEventManager.NextEvent();
+                        }}>
+                            <p className="text-gray-700">Buy a new cheap laptop as a replacement</p>
+                            <p className="text-red-800">-${600 * inflation}</p>
+                        </div>
+                        <div className="eventButton panelButton" onClick={() => {
+                            character.satisfaction += 7;
+                            character.payMoney(1200 * inflation);
+                            lifeEventManager.NextEvent();
+                        }}>
+                            <p className="text-gray-700">Buy a fancier laptop as a replacement</p>
+                            <p className="text-red-800">-${1200 * inflation}</p>
+                        </div>
+                    </div>
+                </div>, true), 5, 4, .1, null
+            ),
         ]);
 
         document.addEventListener("keyup", (e) => {
@@ -466,303 +518,321 @@ function GamePage({fname, lname}: GameProps) {
 
 
     const pages = [
-        {
-            page: <div className="flex flex-col gap-1 items-center">
-                <h1>Year in review {gameState.s.date.getFullYear() - 1}</h1>
-                <div className="grid grid-cols-2">
-                    {character.accounts.filter(a => (a.name != "Investment Account" || gameState.s.investmentsUnlocked)
-                        && (a.name != "Retirement Account" || gameState.s.retirementUnlocked)).map((account, i) => (
-                        <div key={i} id={"YIRAccount" + account.name}
+            {
+                page: <div className="flex flex-col gap-1 items-center">
+                    <h1>Year in review {gameState.s.date.getFullYear() - 1}
+                    </h1>
+                    <div className="grid grid-cols-2">
+                        {character.accounts.filter(a => (a.name != "Investment Account" || gameState.s.investmentsUnlocked)
+                            && (a.name != "Retirement Account" || gameState.s.retirementUnlocked)).map((account, i) => (
+                            <div key={i} id={"YIRAccount" + account.name}
+                                 className="flex flex-col items-center bg-amber-100 rounded-xl p-4 m-4 gap-1 w-130 h-70">
+                                <h3 className="text-gray-700 font-bold">{account.name}</h3>
+                                <div className="flex items-baseline gap-2">
+                                    <p className="text-gray-700">{formatter.format(account.getTotalValue())}</p>
+                                    {account.diff ? account.diff >= 0 ? (
+                                            <p className="text-green-700">+{account.diff}%</p>)
+                                        : <p className="text-red-800">{account.diff}%</p> : <></>}
+                                </div>
+                                <LineChart
+                                    data={account.history}
+                                    index="dateString"
+                                    showLegend={false}
+                                    minValue={Math.min(0, Math.min(...account.history.map(h => h.balance)))}
+                                    maxValue={Math.max(...account.history.map(h => h.balance))}
+                                    aria-hidden="true"
+                                    categories={["balance"]}
+                                    valueFormatter={(number: number) => compactFormatter.format(number)}/>
+                            </div>))}
+                        <div id="DonutChart"
                              className="flex flex-col items-center bg-amber-100 rounded-xl p-4 m-4 gap-1 w-130 h-70">
-                            <h3 className="text-gray-700 font-bold">{account.name}</h3>
-                            <div className="flex items-baseline gap-2">
-                                <p className="text-gray-700">{formatter.format(account.getTotalValue())}</p>
-                                {account.diff ? account.diff >= 0 ? (<p className="text-green-700">+{account.diff}%</p>)
-                                    : <p className="text-red-800">{account.diff}%</p> : <></>}
-                            </div>
-                            <LineChart
-                                data={account.history}
-                                index="dateString"
-                                showLegend={false}
-                                minValue={Math.min(0, Math.min(...account.history.map(h => h.balance)))}
-                                maxValue={Math.max(...account.history.map(h => h.balance))}
-                                aria-hidden="true"
-                                categories={["balance"]}
-                                valueFormatter={(number: number) => compactFormatter.format(number)}/>
-                        </div>))}
-                    <div id="DonutChart"
-                         className="flex flex-col items-center bg-amber-100 rounded-xl p-4 m-4 gap-1 w-130 h-70">
-                        <h3 className="text-gray-700 font-bold">Total Assets</h3>
-                        <DonutChart className="h-full w-full m-auto"
-                                    data={[
-                                        {
-                                            name: "Cash",
-                                            amount: character.accounts.reduce((sum, curr) => sum + curr.balance, 0)
-                                        },
-                                        {
-                                            name: "Stocks",
-                                            amount: character.accounts.filter(a => a instanceof StockAccount).map(a => a as StockAccount)
-                                                .reduce((sum, curr) => sum + curr.getStockValue(), 0)
-                                        }, {
-                                            name: "Bonds",
-                                            amount: character.accounts.filter(a => a instanceof StockAccount).map(a => a as StockAccount)
-                                                .reduce((sum, curr) => sum + curr.getBondValue(), 0)
-                                        }, {
-                                            name: "Loans",
-                                            amount: character.totalLoans.getTotalValue()
-                                        }
-                                    ]}
-                                    label={formatter.format(character.accounts.reduce((sum, curr) => sum + curr.getTotalValue(), 0) - character.totalLoans.balance)}
-                                    category="name" value="amount" showLabel={true}
-                                    valueFormatter={(number: number) => formatter.format(number)}/>
+                            <h3 className="text-gray-700 font-bold">Total Assets</h3>
+                            <DonutChart className="h-full w-full m-auto"
+                                        data={[
+                                            {
+                                                name: "Cash",
+                                                amount: character.accounts.reduce((sum, curr) => sum + curr.balance, 0)
+                                            },
+                                            {
+                                                name: "Stocks",
+                                                amount: character.accounts.filter(a => a instanceof StockAccount).map(a => a as StockAccount)
+                                                    .reduce((sum, curr) => sum + curr.getStockValue(), 0)
+                                            }, {
+                                                name: "Bonds",
+                                                amount: character.accounts.filter(a => a instanceof StockAccount).map(a => a as StockAccount)
+                                                    .reduce((sum, curr) => sum + curr.getBondValue(), 0)
+                                            }, {
+                                                name: "Loans",
+                                                amount: character.totalLoans.getTotalValue()
+                                            }
+                                        ]}
+                                        label={formatter.format(character.accounts.reduce((sum, curr) => sum + curr.getTotalValue(), 0) - character.totalLoans.balance)}
+                                        category="name" value="amount" showLabel={true}
+                                        valueFormatter={(number: number) => formatter.format(number)}/>
+                        </div>
                     </div>
-                </div>
-                <div className="flex gap-2 justify-center">
-                    <button className="w-60 text-xl h-10 p-1 font-bold" onClick={() => nextPage()}><h3>Next:
-                        Paycheck</h3>
-                    </button>
-                </div>
-            </div>, condition: () => true
-        },
-        {
-            page: <div className="flex flex-col gap-2 items-center">
-                <h1>Allocation</h1>
-                <div className="flex flex-col gap-2 w-1/2 rounded-2xl bg-amber-100 items-center pt-2 pb-2">
-                    <div className="grid grid-cols-3 w-full">
-                        <p className="text-green-700 font-bold" id="Paycheck">Paycheck</p>
-                        <p></p>
-                        <p className="text-green-700 font-bold">{formatter.format(character.salary)}</p>
-                        <hr></hr>
-                        <hr></hr>
-                        <hr></hr>
-
-                        {gameState.s.retirementUnlocked ? [
-                            <p className="text-gray-700" key={1}>Retirement</p>,
-                            <p className="text-gray-700" key={2}>
-                                <input name="character.pretirement" className="w-12 text-end"
-                                       min="0"
-                                       max={Math.min(24500 * inflation / character.salary * 100, 100)}
-                                       defaultValue={character.pretirement}
-                                       onChange={e => {
-                                           character.pretirement = Math.min(1000, Math.max(0, e.target.valueAsNumber));
-                                           render();
-                                       }}
-                                       type="number">
-                                </input>%</p>,
-                            <p className="text-gray-700" key={3}>{formatter.format(character.salary * character.pretirement / 100)}</p>,
-                        ] : []}
-
-
-                        <p className="text-red-800" id="IncomeTaxes">Taxes</p>
-                        <p className="text-red-800">{Math.round(taxes / character.salary * 100)}%</p>
-                        <p className="text-red-800">{formatter.format(taxes)}</p>
-
-                        {character.monthlyLivingExpenses.map(({name, amount}, i) => {
-                            return ([
-                                <p className="text-red-800" key={i + "1"} id="ItemizedLivingExpenses">{name}</p>,
-                                <p className="text-red-800"
-                                   key={i + "2"}>{Math.round(amount * 12 * inflation / character.salary * 100)}%</p>,
-                                <p className="text-red-800"
-                                   key={i + "3"}>{formatter.format(amount * inflation * 12)}</p>
-                            ]);
-                        })}
-
-                        {character.loans.length > 0 ? [
-                            <p className="text-red-800" key="111" id="Loans">Loans</p>,
-                            <p className="text-red-800" key="222">{Math.round(ploans)}%</p>,
-                            <p className="text-red-800"
-                               key="333">{formatter.format(minLoanPayments)}</p>
-                        ] : []}
-
-                        {gameState.s.investmentsUnlocked ? [
-                            <p className="text-gray-700" key={1}>Investments</p>,
-                            <p className="text-gray-700" key={2}>
-                                <input name="character.pinvestments" className="w-12 text-end"
-                                       min="0"
-                                       defaultValue={character.pinvestments}
-                                       onChange={e => {
-                                           character.pinvestments = Math.min(1000, Math.max(0, e.target.valueAsNumber));
-                                           render();
-                                       }}
-                                       type="number">
-                                </input>%</p>,
-                            <p className="text-gray-700" key={3}>{formatter.format(character.salary * character.pinvestments / 100)}</p>,
-                        ] : []}
-
-                        <p className="text-gray-700" id="Leisure">Leisure</p>
-                        <p className="text-gray-700">
-                            <input name="character.pleisure" className="w-12 text-end"
-                                   min="0"
-                                   defaultValue={character.pleisure}
-                                   onChange={e => {
-                                       character.pleisure = Math.min(1000, Math.max(0, e.target.valueAsNumber));
-                                       render()
-                                   }}
-                                   type="number">
-                            </input>%</p>
-                        <p className="text-gray-700">{formatter.format(character.salary * character.pleisure / 100)}</p>
-
-                        <hr/>
-                        <hr/>
-                        <hr/>
-
-                        <p className="text-yellow-600 font-bold" id="Savings">Savings</p>
-                        <p className="text-yellow-600 font-bold">{Math.round(newSavings / character.salary * 100)}%</p>
-                        <p className="text-yellow-600 font-bold">{formatter.format(newSavings)}</p>
-                    </div>
-
-                    <div className="flex gap-2">
-                        <h3 className={newSavings > 0 ? "text-green-700" : "text-red-800"} id="PredictedBalance">
-                            Predicted Balance: {formatter.format(character.savingsAccount.balance + newSavings)}</h3>
-                    </div>
-                </div>
-                <div className="flex gap-2 justify-center">
-                    <button className="w-24 text-xl h-10 p-1 font-bold" onClick={() => previousPage()}><h3>Back</h3>
-                    </button>
-                    {character.loans.length > 0 ?
+                    <div className="flex gap-2 justify-center">
                         <button className="w-60 text-xl h-10 p-1 font-bold" onClick={() => nextPage()}><h3>Next:
-                            Loans</h3>
-                        </button> :
+                            Paycheck</h3>
+                        </button>
+                    </div>
+                </div>, condition:
+                    () => true
+            },
+            {
+                page: <div className="flex flex-col gap-2 items-center">
+                    <h1>Allocation</h1>
+                    <div className="flex flex-col gap-2 w-1/2 rounded-2xl bg-amber-100 items-center pt-2 pb-2">
+                        <div className="grid grid-cols-3 w-full">
+                            <p className="text-green-700 font-bold" id="Paycheck">Paycheck</p>
+                            <p></p>
+                            <p className="text-green-700 font-bold">{formatter.format(character.salary)}</p>
+                            <hr></hr>
+                            <hr></hr>
+                            <hr></hr>
+
+                            {gameState.s.retirementUnlocked ? [
+                                <p className="text-gray-700" key={1}>Retirement</p>,
+                                <p className="text-gray-700" key={2}>
+                                    <input name="character.pretirement" className="w-12 text-end"
+                                           min="0"
+                                           max={Math.min(24500 * inflation / character.salary * 100, 100)}
+                                           defaultValue={character.pretirement}
+                                           onChange={e => {
+                                               character.pretirement = Math.min(1000, Math.max(0, e.target.valueAsNumber));
+                                               render();
+                                           }}
+                                           type="number">
+                                    </input>%</p>,
+                                <p className="text-gray-700"
+                                   key={3}>{formatter.format(character.salary * character.pretirement / 100)}</p>,
+                            ] : []}
+
+
+                            <p className="text-red-800" id="IncomeTaxes">Taxes</p>
+                            <p className="text-red-800">{Math.round(taxes / character.salary * 100)}%</p>
+                            <p className="text-red-800">{formatter.format(taxes)}</p>
+
+                            {character.monthlyLivingExpenses.map(({name, amount}, i) => {
+                                return ([
+                                    <p className="text-red-800" key={i + "1"} id="ItemizedLivingExpenses">{name}</p>,
+                                    <p className="text-red-800"
+                                       key={i + "2"}>{Math.round(amount * 12 * inflation / character.salary * 100)}%</p>,
+                                    <p className="text-red-800"
+                                       key={i + "3"}>{formatter.format(amount * inflation * 12)}</p>
+                                ]);
+                            })}
+
+                            {character.loans.length > 0 ? [
+                                <p className="text-red-800" key="111" id="Loans">Loans</p>,
+                                <p className="text-red-800" key="222">{Math.round(ploans)}%</p>,
+                                <p className="text-red-800"
+                                   key="333">{formatter.format(minLoanPayments)}</p>
+                            ] : []}
+
+                            {gameState.s.investmentsUnlocked ? [
+                                <p className="text-gray-700" key={1}>Investments</p>,
+                                <p className="text-gray-700" key={2}>
+                                    <input name="character.pinvestments" className="w-12 text-end"
+                                           min="0"
+                                           defaultValue={character.pinvestments}
+                                           onChange={e => {
+                                               character.pinvestments = Math.min(1000, Math.max(0, e.target.valueAsNumber));
+                                               render();
+                                           }}
+                                           type="number">
+                                    </input>%</p>,
+                                <p className="text-gray-700"
+                                   key={3}>{formatter.format(character.salary * character.pinvestments / 100)}</p>,
+                            ] : []}
+
+                            <p className="text-gray-700" id="Leisure">Leisure</p>
+                            <p className="text-gray-700">
+                                <input name="character.pleisure" className="w-12 text-end"
+                                       min="0"
+                                       defaultValue={character.pleisure}
+                                       onChange={e => {
+                                           character.pleisure = Math.min(1000, Math.max(0, e.target.valueAsNumber));
+                                           render()
+                                       }}
+                                       type="number">
+                                </input>%</p>
+                            <p className="text-gray-700">{formatter.format(character.salary * character.pleisure / 100)}</p>
+
+                            <hr/>
+                            <hr/>
+                            <hr/>
+
+                            <p className="text-yellow-600 font-bold" id="Savings">Savings</p>
+                            <p className="text-yellow-600 font-bold">{Math.round(newSavings / character.salary * 100)}%</p>
+                            <p className="text-yellow-600 font-bold">{formatter.format(newSavings)}</p>
+                        </div>
+
+                        <div className="flex gap-2">
+                            <h3 className={newSavings > 0 ? "text-green-700" : "text-red-800"} id="PredictedBalance">
+                                Predicted Balance: {formatter.format(character.savingsAccount.balance + newSavings)}</h3>
+                        </div>
+                    </div>
+                    <div className="flex gap-2 justify-center">
+                        <button className="w-24 text-xl h-10 p-1 font-bold" onClick={() => previousPage()}><h3>Back</h3>
+                        </button>
+                        {character.loans.length > 0 ?
+                            <button className="w-60 text-xl h-10 p-1 font-bold" onClick={() => nextPage()}><h3>Next:
+                                Loans</h3>
+                            </button> :
+                            <button className="w-60 text-xl h-10 p-1 font-bold" onClick={() => nextPage()}><h3>Next:
+                                Investments</h3>
+                            </button>
+                        }
+                    </div>
+                </div>, condition:
+                    () => true
+            }
+            ,
+            {
+                page: <div className="flex flex-col gap-2 items-center">
+                    <h1>Loans</h1>
+                    {character.loans.length == 0 ?
+                        <h2 className="mt-2 text-green-700!">
+                            Total Debt: {formatter.format(character.totalLoans.balance)}
+                        </h2> :
+                        <h2 className="mt-2 text-red-600!">
+                            Total Debt: {formatter.format(character.totalLoans.balance)}
+                        </h2>
+                    }
+                    {character.loans.map((loan) =>
+                        <div key={loan.name}
+                             className="flex flex-col items-center w-124 bg-amber-100 rounded-xl p-4 m-4 gap-1">
+                            <h3 className="text-gray-700 font-bold">{loan.name}</h3>
+                            <p className="text-gray-700">Interest Rate: {Math.round(loan.interestRate * 100 - 100)}%
+                                ({formatter.format(loan.balance * (loan.interestRate - 1))})</p>
+                            <LineChart className="h-60 w-120" data={loan.history}
+                                       index="dateString"
+                                       showLegend={false}
+                                       minValue={0}
+                                       maxValue={Math.max(...loan.history.map(h => h.balance))}
+                                       aria-hidden="true"
+                                       categories={["balance"]}
+                                       valueFormatter={(number: number) => compactFormatter.format(number)}/>
+                            <button className="w-60 text-xl h-10 font-bold" onClick={(e) => {
+                                e.stopPropagation()
+                                setFundsToTransfer(0);
+                                setTransferFrom({selectedAccount: character.savingsAccount});
+                                setTransferTo({selectedAccount: loan});
+                                document.getElementById("debt-modal")!.style.display = "block";
+                                document.getElementById("transfer-modal")!.style.display = "none";
+                            }}><h3>Pay Immediately</h3></button>
+                        </div>
+                    )}
+                    <div className="flex gap-2 justify-center">
+                        <button className="w-24 text-xl h-10 p-1 font-bold" onClick={() => previousPage()}><h3>Back</h3>
+                        </button>
                         <button className="w-60 text-xl h-10 p-1 font-bold" onClick={() => nextPage()}><h3>Next:
                             Investments</h3>
                         </button>
-                    }
-                </div>
-            </div>, condition: () => true
-        },
-        {
-            page: <div className="flex flex-col gap-2 items-center">
-                <h1>Loans</h1>
-                {character.loans.length == 0 ?
-                    <h2 className="mt-2 text-green-700!">
-                        Total Debt: {formatter.format(character.totalLoans.balance)}
-                    </h2> :
-                    <h2 className="mt-2 text-red-600!">
-                        Total Debt: {formatter.format(character.totalLoans.balance)}
+                    </div>
+                </div>, condition:
+                    () => character.loans.length > 0
+            }
+            ,
+            {
+                page: <div className="flex flex-col gap-2 items-center">
+                    <h1>Investment Portfolio</h1>
+                    <h2 className="mt-2 text-yellow-600! font-bold" id="Uninvested">
+                        Uninvested: {formatter.format(character.investmentAccount.balance)}
                     </h2>
-                }
-                {character.loans.map((loan) =>
-                    <div key={loan.name}
-                         className="flex flex-col items-center w-124 bg-amber-100 rounded-xl p-4 m-4 gap-1">
-                        <h3 className="text-gray-700 font-bold">{loan.name}</h3>
-                        <p className="text-gray-700">Interest Rate: {Math.round(loan.interestRate * 100 - 100)}%
-                            ({formatter.format(loan.balance * (loan.interestRate - 1))})</p>
-                        <LineChart className="h-60 w-120" data={loan.history}
-                                   index="dateString"
-                                   showLegend={false}
-                                   minValue={0}
-                                   maxValue={Math.max(...loan.history.map(h => h.balance))}
-                                   aria-hidden="true"
-                                   categories={["balance"]}
-                                   valueFormatter={(number: number) => compactFormatter.format(number)}/>
-                        <button className="w-60 text-xl h-10 font-bold" onClick={(e) => {
-                            e.stopPropagation()
-                            setFundsToTransfer(0);
-                            setTransferFrom({selectedAccount: character.savingsAccount});
-                            setTransferTo({selectedAccount: loan});
-                            document.getElementById("debt-modal")!.style.display = "block";
-                            document.getElementById("transfer-modal")!.style.display = "none";
-                        }}><h3>Pay Immediately</h3></button>
+                    <div id="IndexFund"><StockCard stock={indexFund.a} investmentAccount={character.investmentAccount}
+                                                   formatter={formatter}
+                                                   compactFormatter={compactFormatter} render={render}/></div>
+                    <div id="Bond"><StockCard stock={bond.a} investmentAccount={character.investmentAccount}
+                                              formatter={formatter}
+                                              compactFormatter={compactFormatter} render={render}/></div>
+                    <div className="flex gap-2 justify-center">
+                        <button className="w-24 text-xl h-10 p-1 font-bold" onClick={() => previousPage()}><h3>Back</h3>
+                        </button>
+                        <button className="w-60 text-xl h-10 p-1 font-bold" onClick={() => nextPage()}><h3>Next:
+                            Retirement</h3>
+                        </button>
                     </div>
-                )}
-                <div className="flex gap-2 justify-center">
-                    <button className="w-24 text-xl h-10 p-1 font-bold" onClick={() => previousPage()}><h3>Back</h3>
-                    </button>
-                    <button className="w-60 text-xl h-10 p-1 font-bold" onClick={() => nextPage()}><h3>Next:
-                        Investments</h3>
-                    </button>
-                </div>
-            </div>, condition: () => character.loans.length > 0
-        },
-        {
-            page: <div className="flex flex-col gap-2 items-center">
-                <h1>Investment Portfolio</h1>
-                <h2 className="mt-2 text-yellow-600! font-bold" id="Uninvested">
-                    Uninvested: {formatter.format(character.investmentAccount.balance)}
-                </h2>
-                <div id="IndexFund"><StockCard stock={indexFund.a} investmentAccount={character.investmentAccount}
-                                               formatter={formatter}
-                                               compactFormatter={compactFormatter} render={render}/></div>
-                <div id="Bond"><StockCard stock={bond.a} investmentAccount={character.investmentAccount}
-                                          formatter={formatter}
-                                          compactFormatter={compactFormatter} render={render}/></div>
-                <div className="flex gap-2 justify-center">
-                    <button className="w-24 text-xl h-10 p-1 font-bold" onClick={() => previousPage()}><h3>Back</h3>
-                    </button>
-                    <button className="w-60 text-xl h-10 p-1 font-bold" onClick={() => nextPage()}><h3>Next:
-                        Retirement</h3>
-                    </button>
-                </div>
-            </div>, condition: () => gameState.s.investmentsUnlocked
-        },
-        {
-            page: <div className="flex flex-col gap-2 items-center">
-                <h1>Retirement Portfolio</h1>
-                <h2 className="mt-2 text-yellow-600!">
-                    Uninvested: {formatter.format(character.retirementAccount.balance)}
-                </h2>
-                <StockCard stock={indexFund.a} investmentAccount={character.retirementAccount} formatter={formatter}
-                           compactFormatter={compactFormatter} render={render}/>
-                <StockCard stock={bond.a} investmentAccount={character.retirementAccount} formatter={formatter}
-                           compactFormatter={compactFormatter} render={render}/>
-                <div className="flex gap-2 justify-center">
-                    <button className="w-24 text-xl h-10 p-1 font-bold" onClick={() => previousPage()}><h3>Back</h3>
-                    </button>
-                    <button className="w-50 text-xl h-10 p-1 font-bold" onClick={() => nextPage()}><h3>Next:
-                        Summary</h3>
-                    </button>
-                </div>
-            </div>, condition: () => gameState.s.retirementUnlocked
-        },
-        {
-            page: <div className="flex flex-col gap-2 items-center">
-                <h1>Summary</h1>
-                <div className="flex flex-col gap-2 w-1/2 rounded-2xl bg-amber-100 items-center pt-2 pb-2 mb-4">
-                    <div className="grid grid-cols-2 gap-2 w-full">
-                        <p className="text-green-700">Take home income</p>
-                        <p className="text-green-700">{formatter.format(character.salary - taxes)}</p>
-                        <p className="text-red-800">Expenses</p>
-                        <p className="text-red-800">{formatter.format(livingExpenses + minLoanPayments)}</p>
-                        <p className="text-red-800">Loans</p>
-                        <p className="text-red-800">{formatter.format(character.totalLoans.balance)}</p>
-                        <p className="text-gray-700">Investments</p>
-                        <p className="text-gray-700">{formatter.format(character.investmentAccount.balance)}</p>
-                        <p className="text-gray-700">Retirement</p>
-                        <p className="text-gray-700">{formatter.format(character.retirementAccount.balance)}</p>
-                        <p className="text-green-700">Predicted Balance</p>
-                        <p className="text-green-700">{formatter.format(character.savingsAccount.balance + newSavings)}</p>
+                </div>, condition:
+                    () => gameState.s.investmentsUnlocked
+            }
+            ,
+            {
+                page: <div className="flex flex-col gap-2 items-center">
+                    <h1>Retirement Portfolio</h1>
+                    <h2 className="mt-2 text-yellow-600!">
+                        Uninvested: {formatter.format(character.retirementAccount.balance)}
+                    </h2>
+                    <StockCard stock={indexFund.a} investmentAccount={character.retirementAccount} formatter={formatter}
+                               compactFormatter={compactFormatter} render={render}/>
+                    <StockCard stock={bond.a} investmentAccount={character.retirementAccount} formatter={formatter}
+                               compactFormatter={compactFormatter} render={render}/>
+                    <div className="flex gap-2 justify-center">
+                        <button className="w-24 text-xl h-10 p-1 font-bold" onClick={() => previousPage()}><h3>Back</h3>
+                        </button>
+                        <button className="w-50 text-xl h-10 p-1 font-bold" onClick={() => nextPage()}><h3>Next:
+                            Summary</h3>
+                        </button>
                     </div>
-                </div>
-                <div className="flex gap-2 justify-center">
-                    <button className="w-24 text-xl h-10 p-1 font-bold" onClick={() => previousPage()}><h3>Back</h3>
-                    </button>
-                    <button className="w-50 text-xl h-10 p-1 font-bold" onClick={() => nextPage()}><h3>Start the
-                        year</h3>
-                    </button>
-                </div>
-            </div>, condition: () => true
-        },
-        {
-            page: <div>
-                {activeEvent == null ?
-                    <>
-                        <h1>Events</h1>
-                        <button className="w-50 text-xl h-10 p-1 font-bold" onClick={() => nextYear()}><h3>End of
+                </div>, condition:
+                    () => gameState.s.retirementUnlocked
+            }
+            ,
+            {
+                page: <div className="flex flex-col gap-2 items-center">
+                    <h1>Summary</h1>
+                    <div className="flex flex-col gap-2 w-1/2 rounded-2xl bg-amber-100 items-center pt-2 pb-2 mb-4">
+                        <div className="grid grid-cols-2 gap-2 w-full">
+                            <p className="text-green-700">Take home income</p>
+                            <p className="text-green-700">{formatter.format(character.salary - taxes)}</p>
+                            <p className="text-red-800">Expenses</p>
+                            <p className="text-red-800">{formatter.format(livingExpenses + minLoanPayments)}</p>
+                            <p className="text-red-800">Loans</p>
+                            <p className="text-red-800">{formatter.format(character.totalLoans.balance)}</p>
+                            <p className="text-gray-700">Investments</p>
+                            <p className="text-gray-700">{formatter.format(character.investmentAccount.balance)}</p>
+                            <p className="text-gray-700">Retirement</p>
+                            <p className="text-gray-700">{formatter.format(character.retirementAccount.balance)}</p>
+                            <p className="text-green-700">Predicted Balance</p>
+                            <p className="text-green-700">{formatter.format(character.savingsAccount.balance + newSavings)}</p>
+                        </div>
+                    </div>
+                    <div className="flex gap-2 justify-center">
+                        <button className="w-24 text-xl h-10 p-1 font-bold" onClick={() => previousPage()}><h3>Back</h3>
+                        </button>
+                        <button className="w-50 text-xl h-10 p-1 font-bold" onClick={() => nextPage()}><h3>Start the
                             year</h3>
                         </button>
-                    </> : <>
-                        <h1 className="mb-2">{activeEvent.name}</h1>
-                        {activeEvent.element}
-                        {!activeEvent.customContinue ?
-                            <button className="w-50 text-xl h-10 p-1 font-bold mt-2"
-                                    onClick={() => lifeEventManager.NextEvent()}>
-                                <h3>Continue</h3>
-                            </button> : <></>}
-                    </>
-                }
-            </div>, condition: () => true
-        },
-    ];
+                    </div>
+                </div>, condition:
+                    () => true
+            }
+            ,
+            {
+                page: <div>
+                    {activeEvent == null ?
+                        <>
+                            <h1>Events</h1>
+                            <button className="w-50 text-xl h-10 p-1 font-bold" onClick={() => nextYear()}><h3>End of
+                                year</h3>
+                            </button>
+                        </> : <>
+                            <h1 className="mb-2">{activeEvent.name}</h1>
+                            {activeEvent.element}
+                            {!activeEvent.customContinue ?
+                                <button className="w-50 text-xl h-10 p-1 font-bold mt-2"
+                                        onClick={() => lifeEventManager.NextEvent()}>
+                                    <h3>Continue</h3>
+                                </button> : <></>}
+                        </>
+                    }
+                </div>, condition:
+                    () => true
+            }
+            ,
+        ]
+    ;
     const previousPage = () => {
         if (page == 3 && character.loans.length == 0) setPage(page - 2);
         else if (page != 0) setPage(page - 1);
