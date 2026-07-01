@@ -13,7 +13,7 @@ function PromotionEvent({gameState}: LifeEventElementProps) {
         </p>
         <button className="w-50 text-xl h-10 p-1 font-bold mt-2" onClick={() => {
             gameState.character.salary *= increase;
-            gameState.character.satisfaction += random.int(4,7) * increase;
+            gameState.character.satisfaction += random.int(4, 7) * increase;
             gameState.lifeEventManager!.NextEvent();
         }}>Nice!
         </button>

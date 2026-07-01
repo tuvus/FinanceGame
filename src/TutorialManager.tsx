@@ -1,4 +1,5 @@
 import type {ReactElement} from "react";
+import type {GameState} from "./Data.tsx";
 
 class ElementHighlighter {
     targetElement: HTMLElement | null;
@@ -68,12 +69,14 @@ export class TutorialChain {
 }
 
 export class TutorialManager {
+    gameState: GameState;
     highlighter: ElementHighlighter;
     tutorialChains: TutorialChain[];
     activeTutorial: TutorialChain | null;
     render: () => void;
 
-    constructor(tutorialChains: TutorialChain[], render: () => void) {
+    constructor(gameState: GameState, tutorialChains: TutorialChain[], render: () => void) {
+        this.gameState = gameState;
         this.highlighter = new ElementHighlighter();
         this.tutorialChains = tutorialChains;
         this.activeTutorial = null;
@@ -83,7 +86,7 @@ export class TutorialManager {
     checkActiveTutorial() {
         if (this.activeTutorial == null) {
             for (const tutorialChain of this.tutorialChains) {
-                if (!tutorialChain.tutorialCondition())
+                if (!this.gameState.tutorial || !tutorialChain.tutorialCondition())
                     continue;
                 this.activeTutorial = tutorialChain;
                 this.tutorialChains = this.tutorialChains.filter(c => c != this.activeTutorial);

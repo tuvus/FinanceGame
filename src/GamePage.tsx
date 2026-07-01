@@ -12,16 +12,17 @@ import {LifeEvent, LifeEventManager, LifeEventSchedule, LifeEventScheduler} from
 import {TutorialChain, TutorialEvent, TutorialManager} from "./TutorialManager.tsx";
 import DayTrading from "./events/DayTrading.tsx";
 import PromotionEvent from "./events/Promotion.tsx";
+import BrokenLaptopEvent from "./events/BrokenLaptop.tsx";
 
 type GameProps = {
-    fname: string; lname: string;
+    fname: string; lname: string; tutorial: boolean;
 }
 
 interface TransferFundsSelectState {
     selectedAccount: Account | null;
 }
 
-function GamePage({fname, lname}: GameProps) {
+function GamePage({fname, lname, tutorial}: GameProps) {
     const formatter = new Intl.NumberFormat("en", {style: "currency", currency: "USD", maximumFractionDigits: 2});
     const compactFormatter = new Intl.NumberFormat("en", {
         style: "currency",
@@ -41,7 +42,7 @@ function GamePage({fname, lname}: GameProps) {
         {name: "Car Insurance", amount: 236},
         {name: "Health Insurance", amount: 400},
     ], 17));
-    const [gameState] = useState({s: new GameState(new Date(random.int(1940, 2010), 0), character, formatter, compactFormatter)});
+    const [gameState] = useState({s: new GameState(new Date(random.int(1940, 2010), 0), character, formatter, compactFormatter, tutorial)});
     const [indexFund] = useState({a: new StockBond("Index Fund", random.int(7000, 50000) / 100, false)});
     const [bond] = useState({a: new StockBond("Bond", 1, true)});
     const [rerender, setRerender] = useState(0);
@@ -308,7 +309,7 @@ function GamePage({fname, lname}: GameProps) {
     ]));
     const activeEvent = lifeEventManager.GetActiveEvent(gameState.s.date);
 
-    const tutorialManager = useRef(new TutorialManager([
+    const tutorialManager = useRef(new TutorialManager(gameState.s, [
         new TutorialChain("Year In Review Tutorial", () => gameState.s.page == 0, [
             new TutorialEvent("Year in review page", null, (<p className="text-gray-700">
                 On this page, you will be looking at your money's performance from last year and the years before
@@ -420,56 +421,7 @@ function GamePage({fname, lname}: GameProps) {
             new LifeEventSchedule(new LifeEvent("Day Trading", new Date(),
                 <DayTrading gameState={gameState.s}/>, true), 99, 4, .1, () => gameState.s.investmentsUnlocked),
             new LifeEventSchedule(new LifeEvent("Broken Laptop", new Date(),
-                <div className="flex flex-col w-full items-center mt-6 gap-4">
-                    <p className="w-3/4">Oops... You spilled coffee on your laptop and now it won't start. You need your
-                        laptop for
-                        your daily life and work. How should will you fix it?</p>
-                    <div className="flex justify-center gap-8 w-3/4">
-                        <div className="eventButton panelButton" onClick={() => {
-                            const r = random.float();
-                            if (r < .3) {
-                                character.satisfaction -= 2;
-                                character.payMoney(150 * gameState.s.inflation);
-                                lifeEventManager.ReplaceEvent(new LifeEvent("Laptop Fixed", lifeEventManager.date,
-                                    <div className="flex flex-col w-full items-center mt-6 gap-4">
-                                        <p className="w-3/4">You sent your laptop into the repair shop and they were
-                                            able to fix it and send it back within a few days.
-                                        </p>
-                                    </div>));
-                            } else {
-                                character.satisfaction -= 10;
-                                character.payMoney(750 * gameState.s.inflation);
-                                lifeEventManager.ReplaceEvent(new LifeEvent("Laptop Unrepairable", lifeEventManager.date,
-                                    <div className="flex flex-col w-full items-center mt-6 gap-4">
-                                        <p className="w-3/4">You sent your laptop into the repair shop but there was
-                                            nothing they could do to fix it. Unfortunately, your worranty had expired
-                                            and you had to pay for a new laptop.
-                                        </p>
-                                    </div>
-                                ));
-                            }
-                        }}>
-                            <p className="text-gray-700">Send it to the repair shop</p>
-                            <p className="text-red-800">-${formatter.format(150 * gameState.s.inflation)}</p>
-                        </div>
-                        <div className="eventButton panelButton" onClick={() => {
-                            character.satisfaction -= 5;
-                            character.payMoney(600 * gameState.s.inflation);
-                            lifeEventManager.NextEvent();
-                        }}>
-                            <p className="text-gray-700">Buy a new cheap laptop as a replacement</p>
-                            <p className="text-red-800">-${formatter.format(600 * gameState.s.inflation)}</p>
-                        </div>
-                        <div className="eventButton panelButton" onClick={() => {
-                            character.satisfaction += 7;
-                            character.payMoney(1200 * gameState.s.inflation);
-                            lifeEventManager.NextEvent();
-                        }}>
-                            <p className="text-gray-700">Buy a fancier laptop as a replacement</p>
-                            <p className="text-red-800">-${formatter.format(1200 * gameState.s.inflation)}</p>
-                        </div>
-                    </div>
-                </div>, true), 5, 4, .1, null
+                <BrokenLaptopEvent gameState={gameState.s}/>, true), 5, 4, .1, null
             ),
             new LifeEventSchedule(new LifeEvent("Promotion", new Date(), <PromotionEvent
                 gameState={gameState.s}/>, true), 8, 4, .2, null),
@@ -863,6 +815,11 @@ function GamePage({fname, lname}: GameProps) {
     gameState.s.lifeEventManager = lifeEventManager;
     return (
         <div>
+            <button className="fixed left-1 mt-1 w-40 text-xl h-10 font-bold"
+                    onClick={() => {
+                        gameState.s.tutorial = !gameState.s.tutorial;
+                        render();
+                    }}>{gameState.s.tutorial ? "Tutorials" : "No Tutorials"}</button>
             {page < pages.length ?
                 <div className="fixed right-1 p-2 rounded-2xl justify-end bg-amber-100 mt-1">
                     <h2 className="text-gray-700! pt-1 pl-2 pr-2">Satisfaction: {Math.floor(character.satisfaction)}</h2>

@@ -66,7 +66,7 @@ export class Character {
     payMoney(amount: number) {
         this.savingsAccount.balance -= amount;
         if (this.savingsAccount.balance < 0) {
-            addCreditDebt(-this.savingsAccount.balance);
+            this.addCreditDebt(-this.savingsAccount.balance);
             this.savingsAccount.balance = 0;
         }
     }
@@ -222,12 +222,14 @@ export class GameState {
     lifeEventScheduler: LifeEventScheduler | null;
     investmentsUnlocked: boolean = false;
     retirementUnlocked: boolean = false;
+    tutorial: boolean;
 
-    constructor(date: Date, character: Character, formatter: Intl.NumberFormat, compactFormatter: Intl.NumberFormat) {
+    constructor(date: Date, character: Character, formatter: Intl.NumberFormat, compactFormatter: Intl.NumberFormat, tutorial: boolean) {
         this.date = date;
         this.character = character;
         this.formatter = formatter;
         this.compactFormatter = compactFormatter;
+        this.tutorial = tutorial;
         this.lifeEventManager = null;
         this.lifeEventScheduler = null
     }
