@@ -204,6 +204,7 @@ export class Loan extends Account {
 export class GameState {
     page: number = 0;
     date: Date;
+    gameYear: number = 0;
     character: Character;
     formatter: Intl.NumberFormat;
     compactFormatter: Intl.NumberFormat;
