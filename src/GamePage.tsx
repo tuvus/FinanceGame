@@ -60,7 +60,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
         const taxableIncome = Math.max(0, character.salary * (1 - character.pretirement / 100) - 15750);
         character.taxableIncome = taxableIncome;
         const taxes = CalculateTaxes(taxableIncome);
-        const newSavings = character.salary * (100 - character.pinvestments - character.pretirement - character.pleisure) / 100 - taxes - livingExpenses - character.loans.reduce((sum, l) => sum + l.getPayment(), 0);
+        const newSavings = character.salary * (100 - character.pinvestments - character.pretirement - character.pleisure) / 100 - taxes - livingExpenses;
 
         // Go on trips!
         character.satisfaction += (character.loans.length > 0 ? 5 : 8) + character.satisfaction * character.pleisure / 100 / gameState.s.inflation;
@@ -805,7 +805,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                     new LifeEvent("Another year passes", gameState.s.date,
                         (<div><h3 className="m-4">There were no special events this year.</h3></div>))
                 );
-            // }
+                // }
             } else {
                 lifeEventManager.AddEvent(new LifeEvent("New Year", new Date(gameState.s.date.getFullYear(), 11, 31),
                     <h3>The year of {gameState.s.date.getFullYear()} flew by quickly, now its time to plan for the next
