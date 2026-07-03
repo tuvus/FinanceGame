@@ -86,10 +86,12 @@ export class TutorialManager {
     checkActiveTutorial() {
         if (this.activeTutorial == null) {
             for (const tutorialChain of this.tutorialChains) {
-                if (!this.gameState.tutorial || !tutorialChain.tutorialCondition())
+                if (!tutorialChain.tutorialCondition())
+                    continue;
+                this.tutorialChains = this.tutorialChains.filter(c => c != tutorialChain);
+                if (!this.gameState.tutorial)
                     continue;
                 this.activeTutorial = tutorialChain;
-                this.tutorialChains = this.tutorialChains.filter(c => c != this.activeTutorial);
                 break;
             }
         }
