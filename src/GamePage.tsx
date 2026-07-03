@@ -13,6 +13,7 @@ import {TutorialChain, TutorialEvent, TutorialManager} from "./TutorialManager.t
 import DayTrading from "./events/DayTrading.tsx";
 import PromotionEvent from "./events/Promotion.tsx";
 import BrokenLaptopEvent from "./events/BrokenLaptop.tsx";
+import BalanceNumber from "./UI.tsx";
 
 type GameProps = {
     fname: string; lname: string; tutorial: boolean;
@@ -999,8 +1000,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                 <div className="grid grid-cols-4 content-center align-items-middle mx-auto h-full ml-4 mr-4">
                     <h2 className="text-gray-700! align-self-middle text-start w-100">{fname} {lname} ({character.age})</h2>
                     {(page < pages.length ? [
-                            <h2 className="text-gray-700! justify-self-end mt-2"
-                                key="1">{formatter.format(character.savingsAccount.balance)}</h2>,
+                            <BalanceNumber gameState={gameState.s} balance={character.savingsAccount.balance} key="1"/>,
                             <button className="w-50 ml-4 text-xl font-bold h-10 justify-self-left" key="2"
                                     onClick={() => {
                                         setFundsToTransfer(NaN);
