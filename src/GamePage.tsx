@@ -414,6 +414,12 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                 the top.
             </p>), "Bond", null, "Next"),
         ]),
+        new TutorialChain("Retirement Portfolio", () => gameState.s.page == 4 && gameState.s.gameYear == 8, [
+            new TutorialEvent("Saving for Retirement", null,
+                (<p className="text-gray-700">Now that you are getting to the middle of your life its time to
+                    start saving for retirement. Retirement account unlocked.</p>),
+                null, null, "Continue")
+        ]),
     ], render));
 
     useEffect(() => {
