@@ -805,6 +805,11 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                     new LifeEvent("Another year passes", gameState.s.date,
                         (<div><h3 className="m-4">There were no special events this year.</h3></div>))
                 );
+            // }
+            } else {
+                lifeEventManager.AddEvent(new LifeEvent("New Year", new Date(gameState.s.date.getFullYear(), 11, 31),
+                    <h3>The year of {gameState.s.date.getFullYear()} flew by quickly, now its time to plan for the next
+                        year.</h3>))
             }
         }
         setPage(nextPage);

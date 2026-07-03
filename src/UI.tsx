@@ -34,10 +34,10 @@ export function BalanceNumber({gameState, amount}: NumberAnimationProps) {
             {gameState.formatter.format(displayedBalance)}
             {increaseAnimationState >= 0 ?
                 (amount - previousBalance > 0 ?
-                        <h2 className="relative text-green-400! left-0 bottom-22"
-                        >+{gameState.formatter.format(amount - previousBalance)}</h2>
-                        : <h2 className="relative text-red-400! left-0 bottom-22"
-                        >{gameState.formatter.format(amount - previousBalance)}</h2>
+                        <div><h2 className="relative text-green-400! left-0 bottom-22"
+                        >+{gameState.formatter.format(amount - previousBalance)}</h2></div>
+                        : <div><h2 className="relative text-red-400! left-0 bottom-22"
+                        >{gameState.formatter.format(amount - previousBalance)}</h2></div>
                 ) : <></>}</h2>);
 }
 
@@ -68,11 +68,16 @@ export function SatisfactionNumber({amount}: NumberAnimationProps) {
     return (
         <div className="fixed right-1 p-2 rounded-2xl justify-end bg-amber-100 h-16 mt-1">
             <h2 className="text-gray-700! pt-1 pl-2 pr-2">Satisfaction: {Math.floor(displayedSatisfaction)}</h2>
-            {increaseAnimationState >= 0 ?
-                (amount - previousSatisfaction > 0 ?
-                        <h2 className="relative text-green-400! left-0 top-2"
-                        >+{Math.floor(amount - previousSatisfaction)}</h2>
-                        : <h2 className="relative text-red-400! left-0 top-2"
-                        >{Math.floor(amount - previousSatisfaction)}</h2>
-                ) : <></>}</div>);
+            {
+                increaseAnimationState >= 0 ?
+                    (amount - previousSatisfaction > 0 ?
+                            <div>
+                                <h2 className="relative text-green-400! left-0 top-2"
+                                >+{Math.floor(amount - previousSatisfaction)}</h2>
+                            </div>
+                            : <div><h2 className="relative text-red-400! left-0 top-2"
+                            >{Math.floor(amount - previousSatisfaction)}</h2></div>
+                    ) : <></>
+            }</div>)
+        ;
 }
