@@ -81,3 +81,15 @@ export function SatisfactionNumber({amount}: NumberAnimationProps) {
             }</div>)
         ;
 }
+
+export type SavingsAccountTutorialProps = {
+    gameState: GameState;
+}
+export function SavingsAccountTutorial({gameState}: SavingsAccountTutorialProps) {
+    return (<p className="text-gray-700">
+        Here is your savings account, currently you have a balance
+        of {gameState.formatter.format(gameState.character.savingsAccount.balance)}. Below the account you can see a
+        graph of the
+        account's previous balance.
+    </p>);
+}

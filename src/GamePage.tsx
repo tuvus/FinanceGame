@@ -13,7 +13,7 @@ import {TutorialChain, TutorialEvent, TutorialManager} from "./TutorialManager.t
 import DayTrading from "./events/DayTrading.tsx";
 import PromotionEvent from "./events/Promotion.tsx";
 import BrokenLaptopEvent from "./events/BrokenLaptop.tsx";
-import {BalanceNumber, SatisfactionNumber} from "./UI.tsx";
+import {BalanceNumber, SatisfactionNumber, SavingsAccountTutorial} from "./UI.tsx";
 
 type GameProps = {
     fname: string; lname: string; tutorial: boolean;
@@ -317,11 +317,8 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                 inorder to determine how to allocate this year's income. Each account that you own will show up on this
                 page.
             </p>), null, null, "Next"),
-            new TutorialEvent("Savings history", null, (<p className="text-gray-700">
-                Here is your savings account, currently you have a balance
-                of {formatter.format(character.savingsAccount.balance)}. Below the account you can see a graph of the
-                account's previous balance.
-            </p>), "YIRAccountSavings Account", null, "Next"),
+            new TutorialEvent("Savings history", null,
+                <SavingsAccountTutorial gameState={gameState.s}/>, "YIRAccountSavings Account", null, "Next"),
             new TutorialEvent("Asset Positions", null, (<p className="text-gray-700">
                 Here is a pie chart displaying your <a href="https://www.investopedia.com/terms/p/portfolio.asp"
                                                        target="_blank">portfolio</a>, or where your money is.
