@@ -13,7 +13,7 @@ import {TutorialChain, TutorialEvent, TutorialManager} from "./TutorialManager.t
 import DayTrading from "./events/DayTrading.tsx";
 import PromotionEvent from "./events/Promotion.tsx";
 import BrokenLaptopEvent from "./events/BrokenLaptop.tsx";
-import BalanceNumber from "./UI.tsx";
+import {BalanceNumber, SatisfactionNumber} from "./UI.tsx";
 
 type GameProps = {
     fname: string; lname: string; tutorial: boolean;
@@ -822,10 +822,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                         render();
                     }}>{gameState.s.tutorial ? "Tutorials" : "No Tutorials"}</button>
             {page < pages.length ?
-                <div className="fixed right-1 p-2 rounded-2xl justify-end bg-amber-100 mt-1">
-                    <h2 className="text-gray-700! pt-1 pl-2 pr-2">Satisfaction: {Math.floor(character.satisfaction)}</h2>
-                </div>
-                : <></>}
+                <SatisfactionNumber gameState={gameState.s} amount={character.satisfaction}/> : <></>}
             {pages[Math.min(page, pages.length - 1)].page}
             <div id="debt-modal" className="flex hmodal justify-center"
                  onClick={() => document.getElementById("debt-modal")!.style.display = "none"}>
@@ -1000,7 +997,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                 <div className="grid grid-cols-4 content-center align-items-middle mx-auto h-full ml-4 mr-4">
                     <h2 className="text-gray-700! align-self-middle text-start w-100">{fname} {lname} ({character.age})</h2>
                     {(page < pages.length ? [
-                            <BalanceNumber gameState={gameState.s} balance={character.savingsAccount.balance} key="1"/>,
+                            <BalanceNumber gameState={gameState.s} amount={character.savingsAccount.balance} key="1"/>,
                             <button className="w-50 ml-4 text-xl font-bold h-10 justify-self-left" key="2"
                                     onClick={() => {
                                         setFundsToTransfer(NaN);
