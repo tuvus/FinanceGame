@@ -33,9 +33,12 @@ function BalanceNumber({gameState, balance}: BalanceNumberProps) {
         <h2 className="text-gray-700! justify-self-end mt-2 h-9" id="balancetext">
             {gameState.formatter.format(displayedBalance)}
             {increaseAnimationState >= 0 ?
-                <h2 className="relative text-green-400! left-0 bottom-22"
-                >{balance - previousBalance > 0 ? "+" : ""}
-                    {gameState.formatter.format(balance - previousBalance)}</h2> : <></>}</h2>);
+                (balance - previousBalance > 0 ?
+                        <h2 className="relative text-green-400! left-0 bottom-22"
+                        >+{gameState.formatter.format(balance - previousBalance)}</h2>
+                        : <h2 className="relative text-red-400! left-0 bottom-22"
+                        >{gameState.formatter.format(balance - previousBalance)}</h2>
+                ) : <></>}</h2>);
 }
 
 export default BalanceNumber;
