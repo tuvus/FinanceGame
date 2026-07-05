@@ -8,7 +8,7 @@ type SetupProps = {
 function SetupPage({fname, lname, startGame}: SetupProps) {
     const [firstName, setFirstname] = useState(fname);
     const [lastName, setLastName] = useState(lname);
-    const [tutorial, setTutorial] = useState(true)
+    const [tutorial, setTutorial] = useState(false)
     const finishSetup = () => {
         startGame(firstName, lastName, tutorial)
     }

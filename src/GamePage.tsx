@@ -13,6 +13,7 @@ import {TutorialChain, TutorialEvent, TutorialManager} from "./TutorialManager.t
 import DayTrading from "./events/DayTrading.tsx";
 import PromotionEvent from "./events/Promotion.tsx";
 import BrokenLaptopEvent from "./events/BrokenLaptop.tsx";
+import {BalanceNumber, SatisfactionNumber, SavingsAccountTutorial} from "./UI.tsx";
 
 type GameProps = {
     fname: string; lname: string; tutorial: boolean;
@@ -59,7 +60,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
         const taxableIncome = Math.max(0, character.salary * (1 - character.pretirement / 100) - 15750);
         character.taxableIncome = taxableIncome;
         const taxes = CalculateTaxes(taxableIncome);
-        const newSavings = character.salary * (100 - character.pinvestments - character.pretirement - character.pleisure) / 100 - taxes - livingExpenses - character.loans.reduce((sum, l) => sum + l.getPayment(), 0);
+        const newSavings = character.salary * (100 - character.pinvestments - character.pretirement - character.pleisure) / 100 - taxes - livingExpenses;
 
         // Go on trips!
         character.satisfaction += (character.loans.length > 0 ? 5 : 8) + character.satisfaction * character.pleisure / 100 / gameState.s.inflation;
@@ -316,11 +317,8 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                 inorder to determine how to allocate this year's income. Each account that you own will show up on this
                 page.
             </p>), null, null, "Next"),
-            new TutorialEvent("Savings history", null, (<p className="text-gray-700">
-                Here is your savings account, currently you have a balance
-                of {formatter.format(character.savingsAccount.balance)}. Below the account you can see a graph of the
-                account's previous balance.
-            </p>), "YIRAccountSavings Account", null, "Next"),
+            new TutorialEvent("Savings history", null,
+                <SavingsAccountTutorial gameState={gameState.s}/>, "YIRAccountSavings Account", null, "Next"),
             new TutorialEvent("Asset Positions", null, (<p className="text-gray-700">
                 Here is a pie chart displaying your <a href="https://www.investopedia.com/terms/p/portfolio.asp"
                                                        target="_blank">portfolio</a>, or where your money is.
@@ -412,6 +410,12 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                 would. They have fixed income and have a set end date. The current yearly interest rate is displayed at
                 the top.
             </p>), "Bond", null, "Next"),
+        ]),
+        new TutorialChain("Retirement Portfolio", () => gameState.s.page == 4 && gameState.s.gameYear == 8, [
+            new TutorialEvent("Saving for Retirement", null,
+                (<p className="text-gray-700">Now that you are getting to the middle of your life its time to
+                    start saving for retirement. Retirement account unlocked.</p>),
+                null, null, "Continue")
         ]),
     ], render));
 
@@ -751,6 +755,32 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                             <p className="text-green-700">Predicted Balance</p>
                             <p className="text-green-700">{formatter.format(character.savingsAccount.balance + newSavings)}</p>
                         </div>
+                        <DonutChart className="w-60 h-60 m-auto" variant="pie"
+                                    data={[
+                                        {
+                                            name: "Cash",
+                                            amount: character.accounts.reduce((sum, curr) => sum + curr.balance, 0)
+                                        },
+                                        {
+                                            name: "Stocks",
+                                            amount: character.accounts.filter(a => a instanceof StockAccount).map(a => a as StockAccount)
+                                                .reduce((sum, curr) => sum + curr.getStockValue(), 0)
+                                        }, {
+                                            name: "Bonds",
+                                            amount: character.accounts.filter(a => a instanceof StockAccount).map(a => a as StockAccount)
+                                                .reduce((sum, curr) => sum + curr.getBondValue(), 0)
+                                        }, {
+                                            name: "Loans",
+                                            amount: character.totalLoans.getTotalValue()
+                                        }
+                                    ]}
+                                    label={formatter.format(character.accounts.reduce((sum, curr) => sum + curr.getTotalValue(), 0) - character.totalLoans.balance)}
+                                    category="name" value="amount" showLabel={true}
+                                    valueFormatter={(number: number) => formatter.format(number)}/>
+                        <h3 className="text-gray-700 p-2">
+                            Total Net
+                            Worth: {formatter.format(character.accounts.reduce((sum, a) => sum + a.balance, 0) - character.totalLoans.balance)}
+                        </h3>
                     </div>
                     <div className="flex gap-2 justify-center">
                         <button className="w-24 text-xl h-10 p-1 font-bold" onClick={() => previousPage()}><h3>Back</h3>
@@ -804,6 +834,11 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                     new LifeEvent("Another year passes", gameState.s.date,
                         (<div><h3 className="m-4">There were no special events this year.</h3></div>))
                 );
+                // }
+            } else {
+                lifeEventManager.AddEvent(new LifeEvent("New Year", new Date(gameState.s.date.getFullYear(), 11, 31),
+                    <h3>The year of {gameState.s.date.getFullYear()} flew by quickly, now its time to plan for the next
+                        year.</h3>))
             }
         }
         setPage(nextPage);
@@ -821,10 +856,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                         render();
                     }}>{gameState.s.tutorial ? "Tutorials" : "No Tutorials"}</button>
             {page < pages.length ?
-                <div className="fixed right-1 p-2 rounded-2xl justify-end bg-amber-100 mt-1">
-                    <h2 className="text-gray-700! pt-1 pl-2 pr-2">Satisfaction: {Math.floor(character.satisfaction)}</h2>
-                </div>
-                : <></>}
+                <SatisfactionNumber gameState={gameState.s} amount={character.satisfaction}/> : <></>}
             {pages[Math.min(page, pages.length - 1)].page}
             <div id="debt-modal" className="flex hmodal justify-center"
                  onClick={() => document.getElementById("debt-modal")!.style.display = "none"}>
@@ -999,8 +1031,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                 <div className="grid grid-cols-4 content-center align-items-middle mx-auto h-full ml-4 mr-4">
                     <h2 className="text-gray-700! align-self-middle text-start w-100">{fname} {lname} ({character.age})</h2>
                     {(page < pages.length ? [
-                            <h2 className="text-gray-700! justify-self-end mt-2"
-                                key="1">{formatter.format(character.savingsAccount.balance)}</h2>,
+                            <BalanceNumber gameState={gameState.s} amount={character.savingsAccount.balance} key="1"/>,
                             <button className="w-50 ml-4 text-xl font-bold h-10 justify-self-left" key="2"
                                     onClick={() => {
                                         setFundsToTransfer(NaN);
