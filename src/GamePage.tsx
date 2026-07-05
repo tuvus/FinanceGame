@@ -755,6 +755,32 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                             <p className="text-green-700">Predicted Balance</p>
                             <p className="text-green-700">{formatter.format(character.savingsAccount.balance + newSavings)}</p>
                         </div>
+                        <DonutChart className="w-60 h-60 m-auto" variant="pie"
+                                    data={[
+                                        {
+                                            name: "Cash",
+                                            amount: character.accounts.reduce((sum, curr) => sum + curr.balance, 0)
+                                        },
+                                        {
+                                            name: "Stocks",
+                                            amount: character.accounts.filter(a => a instanceof StockAccount).map(a => a as StockAccount)
+                                                .reduce((sum, curr) => sum + curr.getStockValue(), 0)
+                                        }, {
+                                            name: "Bonds",
+                                            amount: character.accounts.filter(a => a instanceof StockAccount).map(a => a as StockAccount)
+                                                .reduce((sum, curr) => sum + curr.getBondValue(), 0)
+                                        }, {
+                                            name: "Loans",
+                                            amount: character.totalLoans.getTotalValue()
+                                        }
+                                    ]}
+                                    label={formatter.format(character.accounts.reduce((sum, curr) => sum + curr.getTotalValue(), 0) - character.totalLoans.balance)}
+                                    category="name" value="amount" showLabel={true}
+                                    valueFormatter={(number: number) => formatter.format(number)}/>
+                        <h3 className="text-gray-700 p-2">
+                            Total Net
+                            Worth: {formatter.format(character.accounts.reduce((sum, a) => sum + a.balance, 0) - character.totalLoans.balance)}
+                        </h3>
                     </div>
                     <div className="flex gap-2 justify-center">
                         <button className="w-24 text-xl h-10 p-1 font-bold" onClick={() => previousPage()}><h3>Back</h3>
