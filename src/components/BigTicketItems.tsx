@@ -2,11 +2,24 @@ import {type GameStateProps} from "../Data.tsx";
 import {useState} from "react";
 import Select from "react-select";
 
+class ItemType {
+    name: string;
+
+    constructor(name: string) {
+        this.name = name;
+    }
+}
+
+interface ItemTypeSelectState {
+    selectedType: ItemType | null;
+}
+
 export function BigTicketItemsPage({gameState}: GameStateProps) {
 
     const [selectedBigTicketItem, setSelectedBigTicketItem] = useState(null);
     const [addBigTicketItem, setAddBigTicketItem] = useState(false);
-    const [itemType, setItemType] = useState("")
+    const [itemType, setItemType] = useState<ItemTypeSelectState>({selectedType: null});
+    const [itemTypes] = useState([new ItemType("Car"), new ItemType("House")]);
 
     return (<div>{gameState.character.bigTicketItems.bigTicketItems.map((bt, i) =>
             <div
@@ -24,10 +37,9 @@ export function BigTicketItemsPage({gameState}: GameStateProps) {
                         <h3 className="text-gray-700">Big Ticket Item</h3>
 
                         <Select
-                            options={["Car", "House"]}
-                            value={itemType}
-                            getOptionLabel={i => i}
-                            getOptionValue={i => i}
+                            options={itemTypes}
+                            getOptionLabel={a => a.name}
+                            value={itemType.selectedType}
                             isSearchable={false}
                             styles={{
                                 control: (baseStyles, state) => ({
@@ -55,7 +67,7 @@ export function BigTicketItemsPage({gameState}: GameStateProps) {
                                     borderRadius: 10
                                 })
                             }}
-                            onChange={(t: string | null) => setItemType(t ?? "")}></Select>
+                            onChange={(t: ItemType | null) => setItemType({selectedType: t})}></Select>
                     </div>
                 </div>
                 : <></>}
