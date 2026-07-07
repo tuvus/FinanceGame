@@ -1,9 +1,9 @@
 /* eslint-disable react-hooks/immutability */
-import type {LifeEventElementProps} from "../EventManager.tsx";
+import type {GameStateProps} from "../EventManager.tsx";
 import {useState} from "react";
 import random from "random";
 
-function PromotionEvent({gameState}: LifeEventElementProps) {
+function PromotionEvent({gameState}: GameStateProps) {
     const [increase] = useState(random.float(1.03, 1.12));
     return (<div>
         <p>Your manager has offered you a promotion for your hard work!</p>

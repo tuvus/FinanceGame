@@ -2,10 +2,6 @@ import type {ReactElement} from "react";
 import {type GameState} from "./Data.tsx";
 import random from "random";
 
-export type LifeEventElementProps = {
-    gameState: GameState;
-}
-
 export class LifeEvent {
     name: string;
     date: Date;

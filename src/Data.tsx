@@ -1,5 +1,9 @@
 import {type LifeEventManager, LifeEventScheduler} from "./EventManager.tsx";
 
+export type GameStateProps = {
+    gameState: GameState;
+}
+
 export class Character {
     firstName: string;
     lastName: string;
@@ -14,6 +18,7 @@ export class Character {
     monthlyLivingExpenses: { name: string, amount: number }[];
     age: number;
     savingsAccount: Account;
+    bigTicketItems: BigTicketItems;
     investmentAccount: StockAccount;
     retirementAccount: StockAccount;
     taxableIncome: number;
@@ -35,6 +40,7 @@ export class Character {
         this.monthlyLivingExpenses = monthlyLivingExpenses;
         this.age = age;
         this.savingsAccount = new Account("Savings Account", 0, true);
+        this.bigTicketItems = new BigTicketItems();
         this.investmentAccount = new StockAccount("Investment Account", 0);
         this.retirementAccount = new StockAccount("Retirement Account", 0);
         this.taxableIncome = 0;
@@ -173,6 +179,19 @@ export class StockAccount extends Account {
     getBondValue() {
         return [...this.positions.entries()].filter(a => a[0].bond).map(e => e[0].balance * e[1].amount)
             .reduce((sum, current) => sum + current, 0);
+    }
+}
+
+export class BigTicketItems {
+    bigTicketItems: { name: string, buyDate: Date, targetBalance: number, balance: number } [] = [];
+
+    AddBigTicketItem(name: string, buyDate: Date, targetBalance: number) {
+        this.bigTicketItems = [...this.bigTicketItems, {
+            name: name,
+            buyDate: buyDate,
+            targetBalance: targetBalance,
+            balance: 0
+        }];
     }
 }
 

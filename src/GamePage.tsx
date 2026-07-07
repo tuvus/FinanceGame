@@ -14,6 +14,7 @@ import DayTrading from "./events/DayTrading.tsx";
 import PromotionEvent from "./events/Promotion.tsx";
 import BrokenLaptopEvent from "./events/BrokenLaptop.tsx";
 import {BalanceNumber, SatisfactionNumber, SavingsAccountTutorial} from "./UI.tsx";
+import {BigTicketItemsPage} from "./components/BigTicketItems.tsx";
 
 type GameProps = {
     fname: string; lname: string; tutorial: boolean;
@@ -691,6 +692,21 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                     </div>
                 </div>, condition:
                     () => character.loans.length > 0
+            }
+            ,
+            {
+                page: <div className="flex flex-col gap-2 items-center">
+                    <h1>Big-ticket Items</h1>
+                    <BigTicketItemsPage gameState={gameState.s}/>
+                    <div className="flex gap-2 justify-center">
+                        <button className="w-24 text-xl h-10 p-1 font-bold" onClick={() => previousPage()}><h3>Back</h3>
+                        </button>
+                        <button className="w-60 text-xl h-10 p-1 font-bold" onClick={() => nextPage()}><h3>Next:
+                            investment</h3>
+                        </button>
+                    </div>
+                </div>, condition:
+                    () => true
             }
             ,
             {
