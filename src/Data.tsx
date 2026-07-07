@@ -69,6 +69,14 @@ export class Character {
         }
     }
 
+    addMoney(amount: number) {
+        this.savingsAccount.balance += amount;
+        if (this.savingsAccount.balance < 0) {
+            this.addCreditDebt(-this.savingsAccount.balance);
+            this.savingsAccount.balance = 0;
+        }
+    }
+
     payMoney(amount: number) {
         this.savingsAccount.balance -= amount;
         if (this.savingsAccount.balance < 0) {
@@ -193,6 +201,16 @@ export class BigTicketItems {
             balance: 0
         }];
     }
+
+    GetYearlyAllocation(date: Date) {
+        return this.bigTicketItems.reduce((sum, bt) =>
+            sum + (bt.targetBalance - bt.balance) / (bt.buyDate.getFullYear() - date.getFullYear()), 0);
+    }
+
+    DoYearlyAllocations(date: Date) {
+        this.bigTicketItems.forEach(bt =>
+            bt.balance += (bt.targetBalance - bt.balance) / (bt.buyDate.getFullYear() - date.getFullYear()));
+    }
 }
 
 export class Loan extends Account {
@@ -239,6 +257,7 @@ export class GameState {
     compactFormatter: Intl.NumberFormat;
     lifeEventManager: LifeEventManager | null;
     lifeEventScheduler: LifeEventScheduler | null;
+    bigTicketItemsUnlocked: boolean = false;
     investmentsUnlocked: boolean = false;
     retirementUnlocked: boolean = false;
     tutorial: boolean;

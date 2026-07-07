@@ -181,8 +181,7 @@ export function BigTicketItemsPage({gameState}: GameStateProps) {
                                                 }}>Add
                                         </button>
                                     </div>,
-                                ]
-                                : <div key={-1}></div>],
+                                ] : <div key={-1}></div>],
                         ] : <></>}
                     </div>
                 </div>

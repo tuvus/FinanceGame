@@ -67,20 +67,22 @@ function GamePage({fname, lname, tutorial}: GameProps) {
         character.satisfaction += (character.loans.length > 0 ? 5 : 8) + character.satisfaction * character.pleisure / 100 / gameState.s.inflation;
 
         // Income and interest
-        character.savingsAccount.balance += newSavings;
-        if (character.savingsAccount.balance < 0) {
-            character.addCreditDebt(-character.savingsAccount.balance)
-            character.savingsAccount.balance = 0;
-        }
+        character.addMoney(newSavings);
         character.investmentAccount.balance += character.salary * character.pinvestments / 100;
         character.retirementAccount.balance += character.salary * character.pretirement / 100;
+
+        // Big ticket items
+        character.payMoney(character.bigTicketItems.GetYearlyAllocation(gameState.s.date));
+        character.bigTicketItems.DoYearlyAllocations(gameState.s.date);
+
+        //Stocks and bonds
         indexFund.a.balance *= random.float(.85, 1.2);
+        bond.a.balance *= 1.052;
 
         // Inflation
         const newInflation = random.float(1.01, 1.04);
         gameState.s.inflation *= newInflation;
         indexFund.a.balance *= newInflation;
-        bond.a.balance *= 1.052;
 
         // History log
         indexFund.a.endYear(gameState.s.date);
@@ -93,7 +95,9 @@ function GamePage({fname, lname, tutorial}: GameProps) {
         endYear();
         setPage(0);
         gameState.s.gameYear++;
-        if (gameState.s.gameYear == 3) {
+        if (gameState.s.gameYear == 2) {
+            gameState.s.bigTicketItemsUnlocked = true;
+        } else if (gameState.s.gameYear == 3) {
             gameState.s.investmentsUnlocked = true;
         } else if (gameState.s.gameYear == 8) {
             gameState.s.retirementUnlocked = true;
@@ -107,7 +111,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
     const livingExpenses = monthlyLivingExpenses * 12;
     const minLoanPayments = character.loans.reduce((sum, l) => sum + l.getPayment(), 0);
 
-    const newSavings = character.salary * (100 - character.pinvestments - character.pretirement - character.pleisure) / 100 - taxes - livingExpenses - minLoanPayments;
+    const newSavings = character.salary * (100 - character.pinvestments - character.pretirement - character.pleisure) / 100 - taxes - livingExpenses - minLoanPayments - character.bigTicketItems.GetYearlyAllocation(gameState.s.date);
     const ploans = character.loans.reduce((sum, l) => sum + l.getPayment(), 0) / character.salary * 100;
 
 
@@ -585,8 +589,15 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                             {character.loans.length > 0 ? [
                                 <p className="text-red-800" key="111" id="Loans">Loans</p>,
                                 <p className="text-red-800" key="222">{Math.round(ploans)}%</p>,
-                                <p className="text-red-800"
-                                   key="333">{formatter.format(minLoanPayments)}</p>
+                                <p className="text-red-800" key="333">{formatter.format(minLoanPayments)}</p>
+                            ] : []}
+
+                            {gameState.s.bigTicketItemsUnlocked ? [
+                                <p className="text-gray-700" key={1}>Big Ticket Items</p>,
+                                <p className="text-gray-700" key={2}>
+                                    {Math.round(character.bigTicketItems.GetYearlyAllocation(gameState.s.date) / character.salary * 100)}%</p>,
+                                <p className="text-gray-700" key={3}>
+                                    {formatter.format(character.bigTicketItems.GetYearlyAllocation(gameState.s.date))}</p>,
                             ] : []}
 
                             {gameState.s.investmentsUnlocked ? [
