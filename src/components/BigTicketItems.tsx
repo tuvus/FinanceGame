@@ -47,25 +47,26 @@ export function BigTicketItemsPage({gameState}: GameStateProps) {
     const [transferFrom, setTransferFrom] = useState<TransferFundsSelectState>({selectedAccount: null});
     const [fundsToTransfer, setFundsToTransfer] = useState(0);
 
-    return (<div>{gameState.character.bigTicketItems.bigTicketItems.map((bt, i) =>
-            <div
-                className="flex flex-col items-center w-124 bg-amber-100 rounded-xl p-4 m-4 gap-1 cursor-pointer"
-                key={i} onClick={() => {
-                setSelectedBigTicketItem(bt);
-                setTransferMoney(false);
-                setDuration(bt.buyDate.getFullYear() - gameState.date.getFullYear());
-            }}>
-                <h3 className="text-gray-700 font-bold">{bt.name}</h3>
-                <p className="text-gray-700">Total cost: {gameState.formatter.format(bt.targetBalance)}</p>
-                <p className="text-gray-700">Allocated: {gameState.formatter.format(bt.balance)}</p>
-                <p className="text-gray-700">Years to
-                    purchase: {bt.buyDate.getFullYear() - gameState.date.getFullYear()}</p>
-                <p className="text-gray-700">Yearly
-                    allocation: {gameState.formatter.format((bt.targetBalance - bt.balance) / (bt.buyDate.getFullYear() - gameState.date.getFullYear()))}</p>
-
-            </div>
-        )}
+    return (<div>
             <button className="w-40 text-xl h-10 font-bold" onClick={() => setAddBigTicketItem(true)}>Add Item</button>
+            {gameState.character.bigTicketItems.bigTicketItems.map((bt, i) =>
+                <div
+                    className="flex flex-col items-center w-124 bg-amber-100 rounded-xl p-4 m-4 gap-1 cursor-pointer"
+                    key={i} onClick={() => {
+                    setSelectedBigTicketItem(bt);
+                    setTransferMoney(false);
+                    setDuration(bt.buyDate.getFullYear() - gameState.date.getFullYear());
+                }}>
+                    <h3 className="text-gray-700 font-bold">{bt.name}</h3>
+                    <p className="text-gray-700">Total cost: {gameState.formatter.format(bt.targetBalance)}</p>
+                    <p className="text-gray-700">Allocated: {gameState.formatter.format(bt.balance)}</p>
+                    <p className="text-gray-700">Years to
+                        purchase: {bt.buyDate.getFullYear() - gameState.date.getFullYear()}</p>
+                    <p className="text-gray-700">Yearly
+                        allocation: {gameState.formatter.format((bt.targetBalance - bt.balance) / (bt.buyDate.getFullYear() - gameState.date.getFullYear()))}</p>
+
+                </div>
+            )}
             {addBigTicketItem ?
                 <div className="flex modal justify-center" onClick={() => setAddBigTicketItem(false)}>
                     <div
@@ -188,13 +189,13 @@ export function BigTicketItemsPage({gameState}: GameStateProps) {
 
                         <p className="text-gray-700">Yearly
                             payment: {gameState.formatter.format((selectedBigTicketItem.targetBalance * ((100 - pLoans) / 100) - selectedBigTicketItem.balance) / duration)}</p>
-                            <button className="w-50 text-xl h-10 p-1 font-bold mt-2 bg-red-700!"
-                                    onClick={() => {
-                                        gameState.character.bigTicketItems.RemoveBigTicketItem(selectedBigTicketItem);
-                                        setSelectedBigTicketItem(null);
-                                        gameState.render();
-                                    }}>Remove
-                            </button>
+                        <button className="w-50 text-xl h-10 p-1 font-bold mt-2 bg-red-700!"
+                                onClick={() => {
+                                    gameState.character.bigTicketItems.RemoveBigTicketItem(selectedBigTicketItem);
+                                    setSelectedBigTicketItem(null);
+                                    gameState.render();
+                                }}>Remove
+                        </button>
                         <div className="flex gap-2 justify-center">
                             <button className="w-50 text-xl h-10 p-1 font-bold mt-2"
                                     onClick={() => setSelectedBigTicketItem(null)}>Close
@@ -215,7 +216,8 @@ export function BigTicketItemsPage({gameState}: GameStateProps) {
                         <h3 className="text-gray-700">Transfer Funds</h3>
                         <p className="text-gray-700 text-lg!">Allocated: {gameState.formatter.format(selectedBigTicketItem.balance)}
                         </p>
-                        <p className="text-gray-700 text-lg!">To Allocate: {gameState.formatter.format(selectedBigTicketItem.targetBalance - selectedBigTicketItem.balance)}
+                        <p className="text-gray-700 text-lg!">To
+                            Allocate: {gameState.formatter.format(selectedBigTicketItem.targetBalance - selectedBigTicketItem.balance)}
                         </p>
                         <Select
                             options={gameState.character.accounts.filter(a => a.isOwnedAccount)}
@@ -253,7 +255,7 @@ export function BigTicketItemsPage({gameState}: GameStateProps) {
                                 id="transfer-confirm"
                                 disabled={transferFrom.selectedAccount == null || isNaN(fundsToTransfer) || fundsToTransfer > (Math.min(transferFrom?.selectedAccount.balance ?? 0, selectedBigTicketItem.targetBalance - selectedBigTicketItem.balance)) || -fundsToTransfer > selectedBigTicketItem.balance}
                                 onClick={() => {
-                                    if (transferFrom.selectedAccount != null ) {
+                                    if (transferFrom.selectedAccount != null) {
                                         const toTransfer = Math.max(Math.min(Math.min(fundsToTransfer, transferFrom.selectedAccount.balance), selectedBigTicketItem.targetBalance - selectedBigTicketItem.balance), -selectedBigTicketItem.balance);
                                         transferFrom.selectedAccount.balance -= toTransfer;
                                         selectedBigTicketItem!.balance += toTransfer;
