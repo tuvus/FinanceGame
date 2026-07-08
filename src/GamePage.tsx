@@ -874,6 +874,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
     gameState.s.page = page;
     gameState.s.nextPage = nextPage;
     gameState.s.previousPage = previousPage;
+    gameState.s.render = render;
     gameState.s.lifeEventManager = lifeEventManager;
     return (
         <div>

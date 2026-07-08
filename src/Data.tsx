@@ -40,7 +40,7 @@ export class Character {
         this.monthlyLivingExpenses = monthlyLivingExpenses;
         this.age = age;
         this.savingsAccount = new Account("Savings Account", 0, true);
-        this.bigTicketItems = new BigTicketItems();
+        this.bigTicketItems = new BigTicketItems(this);
         this.investmentAccount = new StockAccount("Investment Account", 0);
         this.retirementAccount = new StockAccount("Retirement Account", 0);
         this.taxableIncome = 0;
@@ -191,7 +191,10 @@ export class StockAccount extends Account {
 }
 
 export class BigTicketItem {
-    name: string; buyDate: Date; targetBalance: number; balance: number;
+    name: string;
+    buyDate: Date;
+    targetBalance: number;
+    balance: number;
 
     constructor(name: string, buyDate: Date, targetBalance: number, balance: number) {
         this.name = name;
@@ -203,6 +206,11 @@ export class BigTicketItem {
 
 export class BigTicketItems {
     bigTicketItems: BigTicketItem [] = [];
+    character: Character;
+
+    constructor(character: Character) {
+        this.character = character;
+    }
 
     AddBigTicketItem(name: string, buyDate: Date, targetBalance: number) {
         this.bigTicketItems = [...this.bigTicketItems, {
@@ -211,6 +219,11 @@ export class BigTicketItems {
             targetBalance: targetBalance,
             balance: 0
         }];
+    }
+
+    RemoveBigTicketItem(bigTicketItem: BigTicketItem) {
+        this.character.addMoney(bigTicketItem.balance);
+        this.bigTicketItems = this.bigTicketItems.filter(bt => bt != bigTicketItem);
     }
 
     GetYearlyAllocation(date: Date) {
@@ -283,8 +296,7 @@ export class GameState {
         this.lifeEventScheduler = null
     }
 
-    nextPage = (): void => {
-    };
-    previousPage = (): void => {
-    };
+    nextPage = (): void => {};
+    previousPage = (): void => {};
+    render = (): void => {};
 }

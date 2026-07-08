@@ -233,6 +233,15 @@ export function BigTicketItemsPage({gameState}: GameStateProps) {
                             payment: {gameState.formatter.format((selectedBigTicketItem.targetBalance * ((100 - pLoans) / 100) - selectedBigTicketItem.balance) / duration)}</p>
                         <div className="flex gap-2 justify-center">
                             <button className="w-50 text-xl h-10 p-1 font-bold mt-2"
+                                    onClick={() => {
+                                        gameState.character.bigTicketItems.RemoveBigTicketItem(selectedBigTicketItem);
+                                        setSelectedBigTicketItem(null);
+                                        gameState.render();
+                                    }}>Remove
+                            </button>
+                        </div>
+                        <div className="flex gap-2 justify-center">
+                            <button className="w-50 text-xl h-10 p-1 font-bold mt-2"
                                     onClick={() => setSelectedBigTicketItem(null)}>Close
                             </button>
                         </div>
