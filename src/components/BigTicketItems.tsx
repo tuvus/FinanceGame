@@ -1,4 +1,5 @@
-import {type GameStateProps} from "../Data.tsx";
+/* eslint-disable react-hooks/immutability */
+import {BigTicketItem, type GameStateProps} from "../Data.tsx";
 import {useState} from "react";
 import Select from "react-select";
 
@@ -27,7 +28,7 @@ interface PayYearSelectState {
 }
 
 export function BigTicketItemsPage({gameState}: GameStateProps) {
-    // const [selectedBigTicketItem, setSelectedBigTicketItem] = useState(null);
+    const [selectedBigTicketItem, setSelectedBigTicketItem] = useState<BigTicketItem | null>(null);
     const [addBigTicketItem, setAddBigTicketItem] = useState(false);
     const [itemType, setItemType] = useState<ItemTypeSelectState>({selectedType: null});
     const [itemTypeOptions] = useState([new ItemType("Car"), new ItemType("House")]);
@@ -36,17 +37,21 @@ export function BigTicketItemsPage({gameState}: GameStateProps) {
     const [payYearOptions] = useState([new PayYear(2), new PayYear(3), new PayYear(4), new PayYear(5), new PayYear(8), new PayYear(10), new PayYear(15), new PayYear(20), new PayYear(25), new PayYear(30), new PayYear(40)]);
     const [payYear, setPayYear] = useState<PayYearSelectState>({selectedYear: payYearOptions[3]});
     const [pLoans, setPLoans] = useState(0);
+    const [duration, setDuration] = useState(0)
 
     return (<div>{gameState.character.bigTicketItems.bigTicketItems.map((bt, i) =>
             <div
                 className="flex flex-col items-center w-124 bg-amber-100 rounded-xl p-4 m-4 gap-1 cursor-pointer"
-                key={i}>
+                key={i} onClick={() => {
+                setSelectedBigTicketItem(bt);
+                setDuration(bt.buyDate.getFullYear() - gameState.date.getFullYear());
+            }}>
                 <h3 className="text-gray-700 font-bold">{bt.name}</h3>
                 <p className="text-gray-700">Total cost: {gameState.formatter.format(bt.targetBalance)}</p>
                 <p className="text-gray-700">Allocated: {gameState.formatter.format(bt.balance)}</p>
                 <p className="text-gray-700">Years to
                     purchase: {bt.buyDate.getFullYear() - gameState.date.getFullYear()}</p>
-                <p className="text-gray-700">Monthly
+                <p className="text-gray-700">Yearly
                     allocation: {gameState.formatter.format((bt.targetBalance - bt.balance) / (bt.buyDate.getFullYear() - gameState.date.getFullYear()))}</p>
 
             </div>
@@ -158,7 +163,7 @@ export function BigTicketItemsPage({gameState}: GameStateProps) {
                                        key={2}>Cost: {gameState.formatter.format(bigTicketBaseValue)}</p>,
                                     <p className="text-gray-700" key={3}>Percent financed from loans at time of
                                         purchase: <input
-                                            name="character.pretirement" className="w-16 bg-gray-200 rounded-lg p-1"
+                                            className="w-16 bg-gray-200 rounded-lg p-1"
                                             min={0}
                                             max={80}
                                             value={pLoans}
@@ -186,6 +191,55 @@ export function BigTicketItemsPage({gameState}: GameStateProps) {
                     </div>
                 </div>
                 : <></>}
+
+            {selectedBigTicketItem ?
+                <div className="flex modal justify-center" onClick={() => setSelectedBigTicketItem(null)}>
+                    <div
+                        className="flex flex-col gap-2 ml-auto mr-auto mb-auto mt-[20%] bg-amber-100 rounded-xl items-center p-4"
+                        onClick={e => e.stopPropagation()}>
+                        <h3 className="text-gray-700">Big Ticket Item</h3>
+                        <p className="text-gray-700">Cost: {gameState.formatter.format(selectedBigTicketItem.targetBalance)}</p>
+                        <p className="text-gray-700">Allocated: {gameState.formatter.format(selectedBigTicketItem.balance)}</p>
+                        <div className="flex gap-2">
+                            <p className="text-gray-700 content-center">
+                                Years until the item is bought <input
+                                className="w-14 bg-gray-200 rounded-lg p-1"
+                                min={1}
+                                max={99}
+                                value={duration}
+                                onChange={e => {
+                                    if (!isNaN(e.target.valueAsNumber) && e.target.valueAsNumber >= 1) {
+                                        setDuration(e.target.valueAsNumber);
+                                        selectedBigTicketItem.buyDate = new Date(gameState.date.getFullYear() + e.target.valueAsNumber, 0);
+                                    }
+                                }}
+                                type="number">
+                            </input>
+                            </p>
+                        </div>
+                        <p className="text-gray-700">Percent financed from loans at time of
+                            purchase: <input
+                                className="w-16 bg-gray-200 rounded-lg p-1"
+                                min={0}
+                                max={80}
+                                value={pLoans}
+                                onChange={e => {
+                                    setPLoans(e.target.valueAsNumber);
+                                }}
+                                type="number">
+                            </input> %</p>
+
+                        <p className="text-gray-700">Yearly
+                            payment: {gameState.formatter.format((selectedBigTicketItem.targetBalance * ((100 - pLoans) / 100) - selectedBigTicketItem.balance) / duration)}</p>
+                        <div className="flex gap-2 justify-center">
+                            <button className="w-50 text-xl h-10 p-1 font-bold mt-2"
+                                    onClick={() => setSelectedBigTicketItem(null)}>Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                : <></>}
+
         </div>
     );
 }

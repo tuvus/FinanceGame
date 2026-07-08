@@ -190,8 +190,19 @@ export class StockAccount extends Account {
     }
 }
 
+export class BigTicketItem {
+    name: string; buyDate: Date; targetBalance: number; balance: number;
+
+    constructor(name: string, buyDate: Date, targetBalance: number, balance: number) {
+        this.name = name;
+        this.buyDate = buyDate;
+        this.targetBalance = targetBalance;
+        this.balance = balance;
+    }
+}
+
 export class BigTicketItems {
-    bigTicketItems: { name: string, buyDate: Date, targetBalance: number, balance: number } [] = [];
+    bigTicketItems: BigTicketItem [] = [];
 
     AddBigTicketItem(name: string, buyDate: Date, targetBalance: number) {
         this.bigTicketItems = [...this.bigTicketItems, {
