@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/immutability */
-import {BigTicketItem, type GameStateProps} from "../Data.tsx";
+import {Account, BigTicketItem, type GameStateProps} from "../Data.tsx";
 import {useState} from "react";
 import Select from "react-select";
 
@@ -27,6 +27,10 @@ interface PayYearSelectState {
     selectedYear: PayYear | null;
 }
 
+interface TransferFundsSelectState {
+    selectedAccount: Account | null;
+}
+
 export function BigTicketItemsPage({gameState}: GameStateProps) {
     const [selectedBigTicketItem, setSelectedBigTicketItem] = useState<BigTicketItem | null>(null);
     const [addBigTicketItem, setAddBigTicketItem] = useState(false);
@@ -37,13 +41,17 @@ export function BigTicketItemsPage({gameState}: GameStateProps) {
     const [payYearOptions] = useState([new PayYear(2), new PayYear(3), new PayYear(4), new PayYear(5), new PayYear(8), new PayYear(10), new PayYear(15), new PayYear(20), new PayYear(25), new PayYear(30), new PayYear(40)]);
     const [payYear, setPayYear] = useState<PayYearSelectState>({selectedYear: payYearOptions[3]});
     const [pLoans, setPLoans] = useState(0);
-    const [duration, setDuration] = useState(0)
+    const [duration, setDuration] = useState(0);
+    const [transferMoney, setTransferMoney] = useState(false);
+    const [transferFrom, setTransferFrom] = useState<TransferFundsSelectState>({selectedAccount: null});
+    const [fundsToTransfer, setFundsToTransfer] = useState(0);
 
     return (<div>{gameState.character.bigTicketItems.bigTicketItems.map((bt, i) =>
             <div
                 className="flex flex-col items-center w-124 bg-amber-100 rounded-xl p-4 m-4 gap-1 cursor-pointer"
                 key={i} onClick={() => {
                 setSelectedBigTicketItem(bt);
+                setTransferMoney(false);
                 setDuration(bt.buyDate.getFullYear() - gameState.date.getFullYear());
             }}>
                 <h3 className="text-gray-700 font-bold">{bt.name}</h3>
@@ -195,7 +203,7 @@ export function BigTicketItemsPage({gameState}: GameStateProps) {
             {selectedBigTicketItem ?
                 <div className="flex modal justify-center" onClick={() => setSelectedBigTicketItem(null)}>
                     <div
-                        className="flex flex-col gap-2 ml-auto mr-auto mb-auto mt-[20%] bg-amber-100 rounded-xl items-center p-4"
+                        className="flex flex-col gap-2 ml-auto mr-auto mb-auto mt-[15%] bg-amber-100 rounded-xl items-center p-4"
                         onClick={e => e.stopPropagation()}>
                         <h3 className="text-gray-700">Big Ticket Item</h3>
                         <p className="text-gray-700">Cost: {gameState.formatter.format(selectedBigTicketItem.targetBalance)}</p>
@@ -231,24 +239,111 @@ export function BigTicketItemsPage({gameState}: GameStateProps) {
 
                         <p className="text-gray-700">Yearly
                             payment: {gameState.formatter.format((selectedBigTicketItem.targetBalance * ((100 - pLoans) / 100) - selectedBigTicketItem.balance) / duration)}</p>
-                        <div className="flex gap-2 justify-center">
-                            <button className="w-50 text-xl h-10 p-1 font-bold mt-2"
+                            <button className="w-50 text-xl h-10 p-1 font-bold mt-2 bg-red-700!"
                                     onClick={() => {
                                         gameState.character.bigTicketItems.RemoveBigTicketItem(selectedBigTicketItem);
                                         setSelectedBigTicketItem(null);
                                         gameState.render();
                                     }}>Remove
                             </button>
-                        </div>
                         <div className="flex gap-2 justify-center">
                             <button className="w-50 text-xl h-10 p-1 font-bold mt-2"
                                     onClick={() => setSelectedBigTicketItem(null)}>Close
+                            </button>
+                            <button className="w-50 text-xl h-10 p-1 font-bold mt-2"
+                                    onClick={() => setTransferMoney(true)}>Allocate Money
                             </button>
                         </div>
                     </div>
                 </div>
                 : <></>}
+            {selectedBigTicketItem && transferMoney ?
+                <div className="modal justify-center"
+                     onClick={() => setTransferMoney(false)}>
+                    <div
+                        className="flex flex-col gap-2 ml-auto mr-auto mt-[20%] w-100 bg-amber-100 rounded-xl justify-center p-4"
+                        onClick={e => e.stopPropagation()}>
+                        <h3 className="text-gray-700">Transfer Funds</h3>
+                        <p className="text-gray-700 text-lg!">Allocated: {gameState.formatter.format(selectedBigTicketItem.balance)}
+                        </p>
+                        <p className="text-gray-700 text-lg!">To Allocate: {gameState.formatter.format(selectedBigTicketItem.targetBalance - selectedBigTicketItem.balance)}
+                        </p>
+                        <Select
+                            options={gameState.character.accounts.filter(a => a.isOwnedAccount)}
+                            getOptionLabel={a => a.name}
+                            value={transferFrom.selectedAccount}
+                            isSearchable={false}
+                            styles={{
+                                control: (baseStyles, state) => ({
+                                    ...baseStyles, backgroundColor: "#e5e7eb", borderRadius: 10,
+                                    border: state.isFocused ? "2px solid #fe9a00" : "2px solid #cccccc",
+                                    "&:hover": {
+                                        border: "2px solid #fe9a00",
+                                    },
+                                    "&:focus": {
+                                        border: "2px solid #fe9a00",
+                                        boxShadow: "none"
+                                    },
+                                    boxShadow: "none"
+                                }),
+                                placeholder: (baseStyles) => ({
+                                    ...baseStyles, fontSize: 20
+                                }),
+                                singleValue: (baseStyles) => ({
+                                    ...baseStyles, fontSize: 20
+                                }),
+                                option: (baseStyles, state) => ({
+                                    ...baseStyles,
+                                    color: "#364153",
+                                    backgroundColor: state.isFocused ? "#e5e7eb" : undefined,
+                                    borderRadius: 10
+                                })
+                            }}
+                            onChange={(a: Account | null) => {
+                                setTransferFrom({selectedAccount: a});
+                            }}></Select>
+                        {transferFrom.selectedAccount ?
+                            <p className="text-gray-700 text-lg!">Balance: {gameState.formatter.format(transferFrom.selectedAccount!.balance)}
+                            </p>
+                            : <></>
+                        }
+                        <div className="flex">
+                            <p className="text-xl text-gray-700! p-2">$</p>
+                            <input name="transfer-funds" className="w-80 bg-gray-200 rounded-xl p-1 text-gray-700"
+                                   min={-selectedBigTicketItem.balance}
+                                   max={Math.min(transferFrom.selectedAccount?.balance ?? 0, selectedBigTicketItem.targetBalance - selectedBigTicketItem.balance)}
+                                   disabled={transferFrom.selectedAccount == null}
+                                   value={fundsToTransfer}
+                                   onChange={e => setFundsToTransfer(Math.min(Math.min(transferFrom.selectedAccount?.balance ?? 0, e.target.valueAsNumber), selectedBigTicketItem.targetBalance - selectedBigTicketItem.balance))}
+                                   type="number">
+                            </input>
+                        </div>
 
+                        <div className="flex gap-2 justify-center">
+                            <button
+                                id="transfer-cancel"
+                                onClick={() => setTransferMoney(false)}
+                                className="p-2 w-25">Cancel
+                            </button>
+                            <button
+                                id="transfer-confirm"
+                                disabled={transferFrom.selectedAccount == null || isNaN(fundsToTransfer) || fundsToTransfer > (Math.min(transferFrom?.selectedAccount.balance ?? 0, selectedBigTicketItem.targetBalance - selectedBigTicketItem.balance)) || -fundsToTransfer > selectedBigTicketItem.balance}
+                                onClick={() => {
+                                    if (transferFrom.selectedAccount != null ) {
+                                        const toTransfer = Math.max(Math.min(Math.min(fundsToTransfer, transferFrom.selectedAccount.balance), selectedBigTicketItem.targetBalance - selectedBigTicketItem.balance), -selectedBigTicketItem.balance);
+                                        transferFrom.selectedAccount.balance -= toTransfer;
+                                        selectedBigTicketItem!.balance += toTransfer;
+                                        gameState.render();
+                                    }
+                                    setTransferMoney(false);
+                                }}
+                                className="p-2 w-25 enabled:bg-green-700! disabled:bg-gray-400!">Transfer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                : <></>
+            }
         </div>
     );
 }
