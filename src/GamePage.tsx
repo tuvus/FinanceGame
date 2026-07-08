@@ -368,6 +368,53 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                 current balance plus your savings from your paycheck.
             </p>), "PredictedBalance", null, "Close"),
         ]),
+        new TutorialChain("College Debt Tutorial", () => gameState.s.page == 2 && character.loans.some(l => l.name == "College Debt"), [
+            new TutorialEvent("College Debt", null, (<p className="text-gray-700">
+                You have college <a href="https://www.investopedia.com/terms/d/debt.asp" target="_blank">debt</a>. This
+                is the page where you will be able to manage it.
+            </p>), null, null, "Next"),
+            new TutorialEvent("College Debt", null, (<p className="text-gray-700">
+                Here you can see the interest rate on your debt, graph showing the history of your debt, and a button
+                where you can make a single-time payment towards the repayment of the debt. This makes it so you can pay
+                your debt off early.
+            </p>), "LoanCollege Debt", null, "Next"),
+        ]),
+        new TutorialChain("Trade School Debt Tutorial", () => gameState.s.page == 2 && character.loans.some(l => l.name == "Trade School Debt"), [
+            new TutorialEvent("Trade School Debt", null, (<p className="text-gray-700">
+                You have trade school <a href="https://www.investopedia.com/terms/d/debt.asp" target="_blank">debt</a>.
+                This is the page where you will be able to manage it.
+            </p>), null, null, "Next"),
+            new TutorialEvent("Trade School Debt", null, (<p className="text-gray-700">
+                Here you can see the interest rate on your debt, graph showing the history of your debt, and a button
+                where you can make a single-time payment towards the repayment of the debt. This makes it so you can pay
+                your debt off early.
+            </p>), "LoanTrade School Debt", null, "Next"),
+        ]),
+        new TutorialChain("Credit Card Debt Tutorial", () => gameState.s.page == 2 && character.loans.some(l => l.name == "Credit Card Debt"), [
+            new TutorialEvent("Credit Card Debt", null, (<p className="text-gray-700">
+                You have credit card <a href="https://www.investopedia.com/terms/d/debt.asp" target="_blank">debt</a>.
+                This is the page where you will be able to manage it.
+            </p>), null, null, "Next"),
+            new TutorialEvent("Credit Card Debt", null, (<p className="text-gray-700">
+                Here you can see the interest rate on your debt, graph showing the history of your debt, and a button
+                where you can make a single-time payment towards the repayment of the debt. This makes it so you can pay
+                your debt off early.
+            </p>), "LoanCredit Card Debt", null, "Next"),
+        ]),
+        new TutorialChain("Summary Tutorial", () => gameState.s.page == 5, [
+            new TutorialEvent("Summary Page", null, (<p className="text-gray-700">
+                Here you can see the summary of the year.
+            </p>), null, null, "Next"),
+            new TutorialEvent("Take Home Income", null, (<p className="text-gray-700">
+                Take home income is your salary minus taxes.
+            </p>), "takeHomeIncomeText", null, "Next"),
+            new TutorialEvent("Expenses", null, (<p className="text-gray-700">
+                This is the sum of your living expenses an your minimum loan payments.
+            </p>), "expensesText", null, "Next"),
+            new TutorialEvent("Summary", null, (<p className="text-gray-700">
+                It also shows how much you have in loans if you have any, and your current net worth.
+            </p>), "summary", null, "Close"),
+        ]),
         new TutorialChain("Investment Tutorial Year In Review", () => gameState.s.page == 0 && gameState.s.gameYear == 3, [
             new TutorialEvent("Investment Accounts", null, (<p className="text-gray-700">
                 It is time to learn about investing.
@@ -387,7 +434,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                 towards the investment account by using the arrows.
             </p>), null, null, "Next"),
         ]),
-        new TutorialChain("Investment Portfolio", () => gameState.s.page == 3 && gameState.s.gameYear == 3, [
+        new TutorialChain("Investment Tutorial Portfolio", () => gameState.s.page == 3 && gameState.s.gameYear == 3, [
             new TutorialEvent("Investing", null, (<p className="text-gray-700">
                 Here is the page where you will be able to invest your money into stocks and bonds. You can click on the
                 different types of investments to expand them. This will display a graph of the investment's performance
@@ -411,10 +458,11 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                 the top.
             </p>), "Bond", null, "Next"),
         ]),
-        new TutorialChain("Retirement Portfolio", () => gameState.s.page == 4 && gameState.s.gameYear == 8, [
+        new TutorialChain("Retirement Tutorial Portfolio", () => gameState.s.page == 4 && gameState.s.gameYear == 8, [
             new TutorialEvent("Saving for Retirement", null,
-                (<p className="text-gray-700">Now that you are getting to the middle of your life its time to
-                    start saving for retirement. Retirement account unlocked.</p>),
+                (<p className="text-gray-700">Now that you are getting to the middle of your life its time to start
+                    saving for retirement. You now have access to your retirement account. This account works similar to
+                    your investment account but for retirement.</p>),
                 null, null, "Continue")
         ]),
     ], render));
@@ -659,7 +707,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                         </h2>
                     }
                     {character.loans.map((loan) =>
-                        <div key={loan.name}
+                        <div key={loan.name} id={"Loan" + loan.name}
                              className="flex flex-col items-center w-124 bg-amber-100 rounded-xl p-4 m-4 gap-1">
                             <h3 className="text-gray-700 font-bold">{loan.name}</h3>
                             <p className="text-gray-700">Interest Rate: {Math.round(loan.interestRate * 100 - 100)}%
@@ -740,11 +788,11 @@ function GamePage({fname, lname, tutorial}: GameProps) {
             {
                 page: <div className="flex flex-col gap-2 items-center">
                     <h1>Summary</h1>
-                    <div className="flex flex-col gap-2 w-1/2 rounded-2xl bg-amber-100 items-center pt-2 pb-2 mb-4">
+                    <div className="flex flex-col gap-2 w-1/2 rounded-2xl bg-amber-100 items-center pt-2 pb-2 mb-4" id="summary">
                         <div className="grid grid-cols-2 gap-2 w-full">
-                            <p className="text-green-700">Take home income</p>
+                            <p className="text-green-700" id="takeHomeIncomeText">Take home income</p>
                             <p className="text-green-700">{formatter.format(character.salary - taxes)}</p>
-                            <p className="text-red-800">Expenses</p>
+                            <p className="text-red-800" id="expensesText">Expenses</p>
                             <p className="text-red-800">{formatter.format(livingExpenses + minLoanPayments)}</p>
                             <p className="text-red-800">Loans</p>
                             <p className="text-red-800">{formatter.format(character.totalLoans.balance)}</p>
