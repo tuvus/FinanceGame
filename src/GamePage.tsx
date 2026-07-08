@@ -6,7 +6,7 @@ import {LineChart} from "./components/LineChart.tsx";
 import Select from 'react-select';
 import {Account, Character, GameState, Loan, StockAccount, StockBond} from "./Data.tsx";
 import StockCard from "./components/StockCard.tsx";
-import {CalculateTaxes, GetDateString} from "./Utils.tsx";
+import {CalculateTaxes, GetDateString, GetReactSelectStyle} from "./Utils.tsx";
 import {DonutChart} from "./components/DonutChart.tsx";
 import {LifeEvent, LifeEventManager, LifeEventSchedule, LifeEventScheduler} from "./EventManager.tsx";
 import {TutorialChain, TutorialEvent, TutorialManager} from "./TutorialManager.tsx";
@@ -946,32 +946,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                         getOptionLabel={a => a.name}
                         value={transferFrom.selectedAccount}
                         isSearchable={false}
-                        styles={{
-                            control: (baseStyles, state) => ({
-                                ...baseStyles, backgroundColor: "#e5e7eb", borderRadius: 10,
-                                border: state.isFocused ? "2px solid #fe9a00" : "2px solid #cccccc",
-                                "&:hover": {
-                                    border: "2px solid #fe9a00",
-                                },
-                                "&:focus": {
-                                    border: "2px solid #fe9a00",
-                                    boxShadow: "none"
-                                },
-                                boxShadow: "none"
-                            }),
-                            placeholder: (baseStyles) => ({
-                                ...baseStyles, fontSize: 20
-                            }),
-                            singleValue: (baseStyles) => ({
-                                ...baseStyles, fontSize: 20
-                            }),
-                            option: (baseStyles, state) => ({
-                                ...baseStyles,
-                                color: "#364153",
-                                backgroundColor: state.isFocused ? "#e5e7eb" : undefined,
-                                borderRadius: 10
-                            })
-                        }}
+                        styles={GetReactSelectStyle<Account>()}
                         onChange={(a: Account | null) => {
                             let to = transferTo.selectedAccount;
                             if (a == to) to = transferFrom.selectedAccount;
@@ -988,32 +963,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                         getOptionLabel={a => a.name}
                         value={transferTo.selectedAccount}
                         isSearchable={false}
-                        styles={{
-                            control: (baseStyles, state) => ({
-                                ...baseStyles, backgroundColor: "#e5e7eb", borderRadius: 10,
-                                border: state.isFocused ? "2px solid #fe9a00" : "2px solid #cccccc",
-                                "&:hover": {
-                                    border: "2px solid #fe9a00",
-                                },
-                                "&:focus": {
-                                    border: "2px solid #fe9a00",
-                                    boxShadow: "none"
-                                },
-                                boxShadow: "none"
-                            }),
-                            placeholder: (baseStyles) => ({
-                                ...baseStyles, fontSize: 20
-                            }),
-                            singleValue: (baseStyles) => ({
-                                ...baseStyles, fontSize: 20
-                            }),
-                            option: (baseStyles, state) => ({
-                                ...baseStyles,
-                                color: "#364153",
-                                backgroundColor: state.isFocused ? "#e5e7eb" : undefined,
-                                borderRadius: 10
-                            })
-                        }}
+                        styles={GetReactSelectStyle<Account>()}
                         onChange={(a: Account | null) => setTransferTo({selectedAccount: a})}></Select>
 
                     <div className="flex">

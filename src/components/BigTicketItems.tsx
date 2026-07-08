@@ -2,6 +2,7 @@
 import {Account, BigTicketItem, type GameStateProps} from "../Data.tsx";
 import {useState} from "react";
 import Select from "react-select";
+import {GetReactSelectStyle} from "../Utils.tsx";
 
 class ItemType {
     name: string;
@@ -77,32 +78,7 @@ export function BigTicketItemsPage({gameState}: GameStateProps) {
                                 getOptionLabel={a => a.name}
                                 value={itemType.selectedType}
                                 isSearchable={false}
-                                styles={{
-                                    control: (baseStyles, state) => ({
-                                        ...baseStyles, backgroundColor: "#e5e7eb", borderRadius: 10,
-                                        border: state.isFocused ? "2px solid #fe9a00" : "2px solid #cccccc",
-                                        "&:hover": {
-                                            border: "2px solid #fe9a00",
-                                        },
-                                        "&:focus": {
-                                            border: "2px solid #fe9a00",
-                                            boxShadow: "none"
-                                        },
-                                        boxShadow: "none"
-                                    }),
-                                    placeholder: (baseStyles) => ({
-                                        ...baseStyles, fontSize: 20
-                                    }),
-                                    singleValue: (baseStyles) => ({
-                                        ...baseStyles, fontSize: 20
-                                    }),
-                                    option: (baseStyles, state) => ({
-                                        ...baseStyles,
-                                        color: "#364153",
-                                        backgroundColor: state.isFocused ? "#e5e7eb" : undefined,
-                                        borderRadius: 10
-                                    })
-                                }}
+                                styles={GetReactSelectStyle<ItemType>()}
                                 onChange={(t: ItemType | null) => setItemType({selectedType: t})}/>
                         {itemType.selectedType?.name == "Car" ? [
                             <div className="flex gap-4" key={0}>
@@ -137,34 +113,7 @@ export function BigTicketItemsPage({gameState}: GameStateProps) {
                                             getOptionLabel={a => a.year.toString()}
                                             value={payYear.selectedYear}
                                             isSearchable={false}
-                                            styles={{
-                                                control: (baseStyles, state) => ({
-                                                    ...baseStyles,
-                                                    backgroundColor: "#e5e7eb",
-                                                    borderRadius: 10,
-                                                    border: state.isFocused ? "2px solid #fe9a00" : "2px solid #cccccc",
-                                                    "&:hover": {
-                                                        border: "2px solid #fe9a00",
-                                                    },
-                                                    "&:focus": {
-                                                        border: "2px solid #fe9a00",
-                                                        boxShadow: "none"
-                                                    },
-                                                    boxShadow: "none"
-                                                }),
-                                                placeholder: (baseStyles) => ({
-                                                    ...baseStyles, fontSize: 20
-                                                }),
-                                                singleValue: (baseStyles) => ({
-                                                    ...baseStyles, fontSize: 20
-                                                }),
-                                                option: (baseStyles, state) => ({
-                                                    ...baseStyles,
-                                                    color: "#364153",
-                                                    backgroundColor: state.isFocused ? "#e5e7eb" : undefined,
-                                                    borderRadius: 10
-                                                })
-                                            }}
+                                            styles={GetReactSelectStyle<PayYear>()}
                                             onChange={(t: PayYear | null) => setPayYear({selectedYear: t})}/>
                                 </div>,
                                     <p className="text-gray-700"
@@ -273,32 +222,7 @@ export function BigTicketItemsPage({gameState}: GameStateProps) {
                             getOptionLabel={a => a.name}
                             value={transferFrom.selectedAccount}
                             isSearchable={false}
-                            styles={{
-                                control: (baseStyles, state) => ({
-                                    ...baseStyles, backgroundColor: "#e5e7eb", borderRadius: 10,
-                                    border: state.isFocused ? "2px solid #fe9a00" : "2px solid #cccccc",
-                                    "&:hover": {
-                                        border: "2px solid #fe9a00",
-                                    },
-                                    "&:focus": {
-                                        border: "2px solid #fe9a00",
-                                        boxShadow: "none"
-                                    },
-                                    boxShadow: "none"
-                                }),
-                                placeholder: (baseStyles) => ({
-                                    ...baseStyles, fontSize: 20
-                                }),
-                                singleValue: (baseStyles) => ({
-                                    ...baseStyles, fontSize: 20
-                                }),
-                                option: (baseStyles, state) => ({
-                                    ...baseStyles,
-                                    color: "#364153",
-                                    backgroundColor: state.isFocused ? "#e5e7eb" : undefined,
-                                    borderRadius: 10
-                                })
-                            }}
+                            styles={GetReactSelectStyle<Account>()}
                             onChange={(a: Account | null) => {
                                 setTransferFrom({selectedAccount: a});
                             }}></Select>
