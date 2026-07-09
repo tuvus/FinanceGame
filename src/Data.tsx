@@ -192,12 +192,14 @@ export class StockAccount extends Account {
 
 export class BigTicketItem {
     name: string;
+    desc: string;
     buyDate: Date;
     targetBalance: number;
     balance: number;
 
-    constructor(name: string, buyDate: Date, targetBalance: number, balance: number) {
+    constructor(name: string, desc: string, buyDate: Date, targetBalance: number, balance: number) {
         this.name = name;
+        this.desc = desc;
         this.buyDate = buyDate;
         this.targetBalance = targetBalance;
         this.balance = balance;
@@ -212,9 +214,10 @@ export class BigTicketItems {
         this.character = character;
     }
 
-    AddBigTicketItem(name: string, buyDate: Date, targetBalance: number) {
+    AddBigTicketItem(name: string, desc: string, buyDate: Date, targetBalance: number) {
         this.bigTicketItems = [...this.bigTicketItems, {
             name: name,
+            desc: desc,
             buyDate: buyDate,
             targetBalance: targetBalance,
             balance: 0
@@ -240,7 +243,7 @@ export class BigTicketItems {
         this.bigTicketItems.forEach(bt => {
             if (bt.balance >= bt.targetBalance) {
                 lifeEventManager.AddEvent(new LifeEvent(bt.name, bt.buyDate,
-                    <div>You bought your car!</div>, false));
+                    <div>{bt.desc}</div>, false));
             }
         });
         this.bigTicketItems = this.bigTicketItems.filter(bt => bt.balance < bt.targetBalance);

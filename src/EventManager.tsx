@@ -44,7 +44,6 @@ export class LifeEventManager {
     }
 
     NextEvent() {
-        console.trace();
         const date = this.lifeEvents[0].date;
         this.lifeEvents = this.lifeEvents.splice(1);
 
@@ -58,20 +57,16 @@ export class LifeEventManager {
     }
 
     ReplaceEvent(lifeEvent: LifeEvent) {
-        console.trace();
         this.lifeEvents[0] = lifeEvent;
         this.date.setDate(this.lifeEvents[0].date.getDate());
         this.render();
     }
 
     GetActiveEvent(date: Date): LifeEvent | null {
-        console.trace();
         if (this.lifeEvents.length > 0
             && this.lifeEvents[0].date.getFullYear() == date.getFullYear()
-            && this.lifeEvents[0].date.getMonth() >= date.getMonth()) {
-            console.log(this.lifeEvents[0]);
+            && this.lifeEvents[0].date.getMonth() >= date.getMonth())
             return this.lifeEvents[0];
-        }
         return null;
     }
 
