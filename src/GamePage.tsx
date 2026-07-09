@@ -370,49 +370,64 @@ function GamePage({fname, lname, tutorial}: GameProps) {
         ]),
         new TutorialChain("College Debt Tutorial", () => gameState.s.page == 2 && character.loans.some(l => l.name == "College Debt"), [
             new TutorialEvent("College Debt", null, (<p className="text-gray-700">
-                You have college <a href="https://www.investopedia.com/terms/d/debt.asp" target="_blank">debt</a>. This
-                is the page where you will be able to manage it.
+                You have <a href="https://www.investopedia.com/terms/d/debt.asp" target="_blank">debt</a> from going on
+                to college. This is the page where you will be able to manage it.
             </p>), null, null, "Next"),
             new TutorialEvent("College Debt", null, (<p className="text-gray-700">
-                Here you can see the interest rate on your debt, graph showing the history of your debt, and a button
-                where you can make a single-time payment towards the repayment of the debt. This makes it so you can pay
-                your debt off early.
+                Something about college debt
+                College debt can be a lot of money. Taking on grants and scholarships is ideal, as they help pay for
+                college without needing to pay the money back later. If those don't fully cover your school, subsidized
+                loans are the next best resource, as they don't acquire interest during your schooling. Federal loans
+                are more flexible than private loans, and tend to have lower interest rates.
             </p>), "LoanCollege Debt", null, "Next"),
         ]),
         new TutorialChain("Trade School Debt Tutorial", () => gameState.s.page == 2 && character.loans.some(l => l.name == "Trade School Debt"), [
             new TutorialEvent("Trade School Debt", null, (<p className="text-gray-700">
-                You have trade school <a href="https://www.investopedia.com/terms/d/debt.asp" target="_blank">debt</a>.
-                This is the page where you will be able to manage it.
+                You have <a href="https://www.investopedia.com/terms/d/debt.asp" target="_blank">debt</a> from going to
+                trade school.
+                On this page you will be able to see and manage your debt.
             </p>), null, null, "Next"),
             new TutorialEvent("Trade School Debt", null, (<p className="text-gray-700">
-                Here you can see the interest rate on your debt, graph showing the history of your debt, and a button
-                where you can make a single-time payment towards the repayment of the debt. This makes it so you can pay
-                your debt off early.
+                It is possible for financial aid that people get for going to college to also be available for those
+                going into trade schools.
+                Taking on grants and scholarships is ideal, as they help pay for schooling
+                without needing to pay the money back later. If those don't fully cover your school, subsidized loans
+                are the next best resource, as they don't acquire interest during your schooling. Federal loans are more
+                flexible than private loans, and tend to have lower interest rates.
             </p>), "LoanTrade School Debt", null, "Next"),
         ]),
         new TutorialChain("Credit Card Debt Tutorial", () => gameState.s.page == 2 && character.loans.some(l => l.name == "Credit Card Debt"), [
             new TutorialEvent("Credit Card Debt", null, (<p className="text-gray-700">
                 You have credit card <a href="https://www.investopedia.com/terms/d/debt.asp" target="_blank">debt</a>.
-                This is the page where you will be able to manage it.
+                On this page you will be able to see and manage your debt.
             </p>), null, null, "Next"),
             new TutorialEvent("Credit Card Debt", null, (<p className="text-gray-700">
-                Here you can see the interest rate on your debt, graph showing the history of your debt, and a button
-                where you can make a single-time payment towards the repayment of the debt. This makes it so you can pay
-                your debt off early.
-            </p>), "LoanCredit Card Debt", null, "Next"),
+                Credit card loans have very high interest rates. This can make them hard to pay off when they start
+                gaining interest.
+            </p>), "LoanCredit Card Debt", null, "Close"),
+        ]),
+        new TutorialChain("Loan Page Tutorial", () => gameState.s.page == 2, [
+            new TutorialEvent("Loans", null, (<p className="text-gray-700">
+                Each loan consists of liabilities, this is the amount of money that you need to pay back to the
+                lender.
+                Each year the liability increases by the interest rate, meaning, the longer you take to pay off the
+                debt, the more money you have to pay.
+                Each loan has a minimum payment that must be paid periodically which will show on the allocation table.
+            </p>), null, null, "close"),
         ]),
         new TutorialChain("Summary Tutorial", () => gameState.s.page == 5, [
             new TutorialEvent("Summary Page", null, (<p className="text-gray-700">
-                Here you can see the summary of the year.
+                Here you can see your financial status at a glance. Take time to review and finalize your plans for the
+                year.
             </p>), null, null, "Next"),
             new TutorialEvent("Take Home Income", null, (<p className="text-gray-700">
-                Take home income is your salary minus taxes.
+                Here is your take home income, which is your salary minus the income taxes you will pay.
             </p>), "takeHomeIncomeText", null, "Next"),
             new TutorialEvent("Expenses", null, (<p className="text-gray-700">
-                This is the sum of your living expenses an your minimum loan payments.
+                This is the sum of your living expenses and your yearly loan payments.
             </p>), "expensesText", null, "Next"),
             new TutorialEvent("Summary", null, (<p className="text-gray-700">
-                It also shows how much you have in loans if you have any, and your current net worth.
+                The pie chart shows the current positions of your money. Your net worth shows your total assets minus your total liabilities.
             </p>), "summary", null, "Close"),
         ]),
         new TutorialChain("Investment Tutorial Year In Review", () => gameState.s.page == 0 && gameState.s.gameYear == 3, [
@@ -422,17 +437,17 @@ function GamePage({fname, lname, tutorial}: GameProps) {
             new TutorialEvent("Investment Accounts", null, (<p className="text-gray-700">
                 You now have a new investment account where you will be able to
                 invest your money!
-            </p>), "YIRAccountInvestment Account", null, "Next"),
-            new TutorialEvent("Transferring Money", null, (<p className="text-gray-700">
-                You can click on the transfer money button to transfer money between different accounts at anytime in
-                the year.
-            </p>), "BottomBar", null, "Next"),
+            </p>), "YIRAccountInvestment Account", null, "Close"),
         ]),
         new TutorialChain("Investment Tutorial Allocation", () => gameState.s.page == 1 && gameState.s.gameYear == 3, [
             new TutorialEvent("Allocating To Investments", null, (<p className="text-gray-700">
                 The investment account now shows up in the allocation page. You can change the amount to be allocated
                 towards the investment account by using the arrows.
             </p>), null, null, "Next"),
+            new TutorialEvent("Transferring Money", null, (<p className="text-gray-700">
+                Although allocation is the main way you can send money to the investment account, you can click on the
+                transfer money button to transfer money between different accounts at anytime in the year.
+            </p>), "BottomBar", null, "Close"),
         ]),
         new TutorialChain("Investment Tutorial Portfolio", () => gameState.s.page == 3 && gameState.s.gameYear == 3, [
             new TutorialEvent("Investing", null, (<p className="text-gray-700">
@@ -456,7 +471,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                 investment that is considered safer than stocks, but generally won't give as much return as stocks
                 would. They have fixed income and have a set end date. The current yearly interest rate is displayed at
                 the top.
-            </p>), "Bond", null, "Next"),
+            </p>), "Bond", null, "Close"),
         ]),
         new TutorialChain("Retirement Tutorial Portfolio", () => gameState.s.page == 4 && gameState.s.gameYear == 8, [
             new TutorialEvent("Saving for Retirement", null,
@@ -788,7 +803,8 @@ function GamePage({fname, lname, tutorial}: GameProps) {
             {
                 page: <div className="flex flex-col gap-2 items-center">
                     <h1>Summary</h1>
-                    <div className="flex flex-col gap-2 w-1/2 rounded-2xl bg-amber-100 items-center pt-2 pb-2 mb-4" id="summary">
+                    <div className="flex flex-col gap-2 w-1/2 rounded-2xl bg-amber-100 items-center pt-2 pb-2 mb-4"
+                         id="summary">
                         <div className="grid grid-cols-2 gap-2 w-full">
                             <p className="text-green-700" id="takeHomeIncomeText">Take home income</p>
                             <p className="text-green-700">{formatter.format(character.salary - taxes)}</p>
