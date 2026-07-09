@@ -2,7 +2,8 @@
 import {Account, BigTicketItem, type GameStateProps} from "../Data.tsx";
 import {useState} from "react";
 import Select from "react-select";
-import {GetReactSelectStyle} from "../Utils.tsx";
+import {GetReactSelectStyle, ReplaceYear} from "../Utils.tsx";
+import random from "random";
 
 class ItemType {
     name: string;
@@ -140,7 +141,7 @@ export function BigTicketItemsPage({gameState}: GameStateProps) {
                                         <button className="w-50 text-xl h-10 p-1 font-bold mt-2"
                                                 onClick={() => {
                                                     setAddBigTicketItem(false);
-                                                    gameState.character.bigTicketItems.AddBigTicketItem(carType + " car", new Date(gameState.date.getFullYear() + (payYear.selectedYear?.year ?? 1), 0), bigTicketBaseValue * ((100 - pLoans) / 100));
+                                                    gameState.character.bigTicketItems.AddBigTicketItem(carType + " car", new Date(gameState.date.getFullYear() + (payYear.selectedYear?.year ?? 1), random.int(0, 11), random.int(0, 28), random.int(9, 18)), bigTicketBaseValue * ((100 - pLoans) / 100));
                                                 }}>Add
                                         </button>
                                     </div>,
@@ -168,7 +169,7 @@ export function BigTicketItemsPage({gameState}: GameStateProps) {
                                 onChange={e => {
                                     if (!isNaN(e.target.valueAsNumber) && e.target.valueAsNumber >= 1) {
                                         setDuration(e.target.valueAsNumber);
-                                        selectedBigTicketItem.buyDate = new Date(gameState.date.getFullYear() + e.target.valueAsNumber, 0);
+                                        selectedBigTicketItem.buyDate = ReplaceYear(selectedBigTicketItem.buyDate, gameState.date.getFullYear() + e.target.valueAsNumber);
                                     }
                                 }}
                                 type="number">

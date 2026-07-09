@@ -53,3 +53,7 @@ export function GetReactSelectStyle<T>() {
     };
     return style;
 }
+
+export function ReplaceYear(date: Date, year:number) {
+    return new Date(year, date.getMonth(), date.getDay(), date.getTime());
+}

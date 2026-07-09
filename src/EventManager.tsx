@@ -35,7 +35,7 @@ export class LifeEventManager {
 
     AddEvent(lifeEvent: LifeEvent) {
         this.lifeEvents = [...this.lifeEvents, lifeEvent];
-        this.lifeEvents.sort((a, b) => b.date.getTime() - a.date.getTime());
+        this.lifeEvents.sort((a, b) => a.date.getTime() - b.date.getTime());
     }
 
     RemoveFirstEvent() {
@@ -44,6 +44,7 @@ export class LifeEventManager {
     }
 
     NextEvent() {
+        console.trace();
         const date = this.lifeEvents[0].date;
         this.lifeEvents = this.lifeEvents.splice(1);
 
@@ -57,16 +58,20 @@ export class LifeEventManager {
     }
 
     ReplaceEvent(lifeEvent: LifeEvent) {
+        console.trace();
         this.lifeEvents[0] = lifeEvent;
         this.date.setDate(this.lifeEvents[0].date.getDate());
         this.render();
     }
 
     GetActiveEvent(date: Date): LifeEvent | null {
+        console.trace();
         if (this.lifeEvents.length > 0
             && this.lifeEvents[0].date.getFullYear() == date.getFullYear()
-            && this.lifeEvents[0].date.getMonth() >= date.getMonth())
+            && this.lifeEvents[0].date.getMonth() >= date.getMonth()) {
+            console.log(this.lifeEvents[0]);
             return this.lifeEvents[0];
+        }
         return null;
     }
 
@@ -104,7 +109,7 @@ export class LifeEventScheduler {
         this.eventSchedules = eventSchedules;
     }
 
-    generateEvents() {
+    GenerateEvents() {
         const eventsToDo = this.eventSchedules
             .filter((e) => (!e.condition || e.condition())
                 && e.maxOccurrences > 0
@@ -117,6 +122,5 @@ export class LifeEventScheduler {
             e.e.lastOccurrence = this.gameState.gameYear;
             e.e.maxOccurrences--;
         })
-
     }
 }

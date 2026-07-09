@@ -1,4 +1,4 @@
-import {type LifeEventManager, LifeEventScheduler} from "./EventManager.tsx";
+import {LifeEvent, type LifeEventManager, LifeEventScheduler} from "./EventManager.tsx";
 
 export type GameStateProps = {
     gameState: GameState;
@@ -234,6 +234,16 @@ export class BigTicketItems {
     DoYearlyAllocations(date: Date) {
         this.bigTicketItems.forEach(bt =>
             bt.balance += (bt.targetBalance - bt.balance) / (bt.buyDate.getFullYear() - date.getFullYear()));
+    }
+
+    ScheduleBigTicketItems(lifeEventManager: LifeEventManager) {
+        this.bigTicketItems.forEach(bt => {
+            if (bt.balance >= bt.targetBalance) {
+                lifeEventManager.AddEvent(new LifeEvent(bt.name, bt.buyDate,
+                    <div>You bought your car!</div>, false));
+            }
+        });
+        this.bigTicketItems = this.bigTicketItems.filter(bt => bt.balance < bt.targetBalance);
     }
 }
 
