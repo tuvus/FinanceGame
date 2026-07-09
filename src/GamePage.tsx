@@ -775,10 +775,18 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                             <p className="text-red-800">{formatter.format(livingExpenses + minLoanPayments)}</p>
                             <p className="text-red-800">Loans</p>
                             <p className="text-red-800">{formatter.format(character.totalLoans.balance)}</p>
-                            <p className="text-gray-700">Investments</p>
-                            <p className="text-gray-700">{formatter.format(character.investmentAccount.balance)}</p>
-                            <p className="text-gray-700">Retirement</p>
-                            <p className="text-gray-700">{formatter.format(character.retirementAccount.balance)}</p>
+                            {gameState.s.investmentsUnlocked ?
+                                <>
+                                    <p className="text-gray-700">Investments</p>
+                                    <p className="text-gray-700">{formatter.format(character.investmentAccount.balance)}</p>
+                                </>
+                                : <></>}
+                            {gameState.s.retirementUnlocked ?
+                                <>
+                                    <p className="text-gray-700">Retirement</p>
+                                    <p className="text-gray-700">{formatter.format(character.retirementAccount.balance)}</p>
+                                </>
+                                : <></>}
                             <p className="text-green-700">Predicted Balance</p>
                             <p className="text-green-700">{formatter.format(character.savingsAccount.balance + newSavings)}</p>
                         </div>
