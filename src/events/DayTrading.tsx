@@ -1,11 +1,11 @@
 /* eslint-disable react-hooks/immutability */
-import {type LifeEventElementProps} from "../EventManager.tsx";
 import {useEffect, useState} from "react";
 import {LineChart} from "../components/LineChart.tsx";
 import random from "random";
 import {CalculateTaxes} from "../Utils.tsx";
+import type {GameStateProps} from "../Data.tsx";
 
-function DayTradingGame({gameState}: LifeEventElementProps) {
+function DayTradingGame({gameState}: GameStateProps) {
     const [page, setPage] = useState(0);
     const [hours, setHours] = useState(8);
     const [minutes, setMinutes] = useState(0);
