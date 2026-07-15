@@ -2,10 +2,6 @@ import type {ReactElement} from "react";
 import {type GameState} from "./Data.tsx";
 import random from "random";
 
-export type LifeEventElementProps = {
-    gameState: GameState;
-}
-
 export class LifeEvent {
     name: string;
     date: Date;
@@ -39,7 +35,7 @@ export class LifeEventManager {
 
     AddEvent(lifeEvent: LifeEvent) {
         this.lifeEvents = [...this.lifeEvents, lifeEvent];
-        this.lifeEvents.sort((a, b) => b.date.getTime() - a.date.getTime());
+        this.lifeEvents.sort((a, b) => a.date.getTime() - b.date.getTime());
     }
 
     RemoveFirstEvent() {
@@ -108,7 +104,7 @@ export class LifeEventScheduler {
         this.eventSchedules = eventSchedules;
     }
 
-    generateEvents() {
+    GenerateEvents() {
         const eventsToDo = this.eventSchedules
             .filter((e) => (!e.condition || e.condition())
                 && e.maxOccurrences > 0
@@ -121,6 +117,5 @@ export class LifeEventScheduler {
             e.e.lastOccurrence = this.gameState.gameYear;
             e.e.maxOccurrences--;
         })
-
     }
 }

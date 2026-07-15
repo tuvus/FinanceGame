@@ -1,8 +1,8 @@
 /* eslint-disable react-hooks/immutability */
-import {LifeEvent, type LifeEventElementProps} from "../EventManager.tsx";
+import {LifeEvent, type GameStateProps} from "../EventManager.tsx";
 import random from "random";
 
-function BrokenLaptopEvent({gameState}: LifeEventElementProps) {
+function BrokenLaptopEvent({gameState}: GameStateProps) {
 
     return (
         <div className="flex flex-col w-full items-center mt-6 gap-4">

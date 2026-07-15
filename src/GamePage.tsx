@@ -6,7 +6,7 @@ import {LineChart} from "./components/LineChart.tsx";
 import Select from 'react-select';
 import {Account, Character, GameState, Loan, StockAccount, StockBond} from "./Data.tsx";
 import StockCard from "./components/StockCard.tsx";
-import {CalculateTaxes, GetDateString} from "./Utils.tsx";
+import {CalculateTaxes, GetDateString, GetReactSelectStyle} from "./Utils.tsx";
 import {DonutChart} from "./components/DonutChart.tsx";
 import {LifeEvent, LifeEventManager, LifeEventSchedule, LifeEventScheduler} from "./EventManager.tsx";
 import {TutorialChain, TutorialEvent, TutorialManager} from "./TutorialManager.tsx";
@@ -14,6 +14,7 @@ import DayTrading from "./events/DayTrading.tsx";
 import PromotionEvent from "./events/Promotion.tsx";
 import BrokenLaptopEvent from "./events/BrokenLaptop.tsx";
 import {BalanceNumber, SatisfactionNumber, SavingsAccountTutorial} from "./UI.tsx";
+import {BigTicketItemsPage} from "./components/BigTicketItems.tsx";
 
 type GameProps = {
     fname: string; lname: string; tutorial: boolean;
@@ -66,20 +67,22 @@ function GamePage({fname, lname, tutorial}: GameProps) {
         character.satisfaction += (character.loans.length > 0 ? 5 : 8) + character.satisfaction * character.pleisure / 100 / gameState.s.inflation;
 
         // Income and interest
-        character.savingsAccount.balance += newSavings;
-        if (character.savingsAccount.balance < 0) {
-            character.addCreditDebt(-character.savingsAccount.balance)
-            character.savingsAccount.balance = 0;
-        }
+        character.addMoney(newSavings);
         character.investmentAccount.balance += character.salary * character.pinvestments / 100;
         character.retirementAccount.balance += character.salary * character.pretirement / 100;
+
+        // Big ticket items
+        character.payMoney(character.bigTicketItems.GetYearlyAllocation(gameState.s.date));
+        character.bigTicketItems.DoYearlyAllocations(gameState.s.date);
+
+        //Stocks and bonds
         indexFund.a.balance *= random.float(.85, 1.2);
+        bond.a.balance *= 1.052;
 
         // Inflation
         const newInflation = random.float(1.01, 1.04);
         gameState.s.inflation *= newInflation;
         indexFund.a.balance *= newInflation;
-        bond.a.balance *= 1.052;
 
         // History log
         indexFund.a.endYear(gameState.s.date);
@@ -92,7 +95,9 @@ function GamePage({fname, lname, tutorial}: GameProps) {
         endYear();
         setPage(0);
         gameState.s.gameYear++;
-        if (gameState.s.gameYear == 3) {
+        if (gameState.s.gameYear == 2) {
+            gameState.s.bigTicketItemsUnlocked = true;
+        } else if (gameState.s.gameYear == 3) {
             gameState.s.investmentsUnlocked = true;
         } else if (gameState.s.gameYear == 8) {
             gameState.s.retirementUnlocked = true;
@@ -106,7 +111,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
     const livingExpenses = monthlyLivingExpenses * 12;
     const minLoanPayments = character.loans.reduce((sum, l) => sum + l.getPayment(), 0);
 
-    const newSavings = character.salary * (100 - character.pinvestments - character.pretirement - character.pleisure) / 100 - taxes - livingExpenses - minLoanPayments;
+    const newSavings = character.salary * (100 - character.pinvestments - character.pretirement - character.pleisure) / 100 - taxes - livingExpenses - minLoanPayments - character.bigTicketItems.GetYearlyAllocation(gameState.s.date);
     const ploans = character.loans.reduce((sum, l) => sum + l.getPayment(), 0) / character.salary * 100;
 
 
@@ -632,8 +637,15 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                             {character.loans.length > 0 ? [
                                 <p className="text-red-800" key="111" id="Loans">Loans</p>,
                                 <p className="text-red-800" key="222">{Math.round(ploans)}%</p>,
-                                <p className="text-red-800"
-                                   key="333">{formatter.format(minLoanPayments)}</p>
+                                <p className="text-red-800" key="333">{formatter.format(minLoanPayments)}</p>
+                            ] : []}
+
+                            {gameState.s.bigTicketItemsUnlocked ? [
+                                <p className="text-gray-700" key={1}>Big Ticket Items</p>,
+                                <p className="text-gray-700" key={2}>
+                                    {Math.round(character.bigTicketItems.GetYearlyAllocation(gameState.s.date) / character.salary * 100)}%</p>,
+                                <p className="text-gray-700" key={3}>
+                                    {formatter.format(character.bigTicketItems.GetYearlyAllocation(gameState.s.date))}</p>,
                             ] : []}
 
                             {gameState.s.investmentsUnlocked ? [
@@ -743,6 +755,21 @@ function GamePage({fname, lname, tutorial}: GameProps) {
             ,
             {
                 page: <div className="flex flex-col gap-2 items-center">
+                    <h1>Big-ticket Items</h1>
+                    <BigTicketItemsPage gameState={gameState.s}/>
+                    <div className="flex gap-2 justify-center">
+                        <button className="w-24 text-xl h-10 p-1 font-bold" onClick={() => previousPage()}><h3>Back</h3>
+                        </button>
+                        <button className="w-60 text-xl h-10 p-1 font-bold" onClick={() => nextPage()}><h3>Next:
+                            investment</h3>
+                        </button>
+                    </div>
+                </div>, condition:
+                    () => true
+            }
+            ,
+            {
+                page: <div className="flex flex-col gap-2 items-center">
                     <h1>Investment Portfolio</h1>
                     <h2 className="mt-2 text-yellow-600! font-bold" id="Uninvested">
                         Uninvested: {formatter.format(character.investmentAccount.balance)}
@@ -796,10 +823,18 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                             <p className="text-red-800">{formatter.format(livingExpenses + minLoanPayments)}</p>
                             <p className="text-red-800">Loans</p>
                             <p className="text-red-800">{formatter.format(character.totalLoans.balance)}</p>
-                            <p className="text-gray-700">Investments</p>
-                            <p className="text-gray-700">{formatter.format(character.investmentAccount.balance)}</p>
-                            <p className="text-gray-700">Retirement</p>
-                            <p className="text-gray-700">{formatter.format(character.retirementAccount.balance)}</p>
+                            {gameState.s.investmentsUnlocked ?
+                                <>
+                                    <p className="text-gray-700">Investments</p>
+                                    <p className="text-gray-700">{formatter.format(character.investmentAccount.balance)}</p>
+                                </>
+                                : <></>}
+                            {gameState.s.retirementUnlocked ?
+                                <>
+                                    <p className="text-gray-700">Retirement</p>
+                                    <p className="text-gray-700">{formatter.format(character.retirementAccount.balance)}</p>
+                                </>
+                                : <></>}
                             <p className="text-green-700">Predicted Balance</p>
                             <p className="text-green-700">{formatter.format(character.savingsAccount.balance + newSavings)}</p>
                         </div>
@@ -876,13 +911,13 @@ function GamePage({fname, lname, tutorial}: GameProps) {
             if (pages[nextPage].condition()) break;
         }
         if (nextPage == pages.length - 1) {
-            gameState.s.lifeEventScheduler!.generateEvents();
+            character.bigTicketItems.ScheduleBigTicketItems(gameState.s.lifeEventManager!);
+            gameState.s.lifeEventScheduler!.GenerateEvents();
             if (!lifeEventManager.GetActiveEvent(gameState.s.date)) {
                 lifeEventManager.AddEvent(
                     new LifeEvent("Another year passes", gameState.s.date,
                         (<div><h3 className="m-4">There were no special events this year.</h3></div>))
                 );
-                // }
             } else {
                 lifeEventManager.AddEvent(new LifeEvent("New Year", new Date(gameState.s.date.getFullYear(), 11, 31),
                     <h3>The year of {gameState.s.date.getFullYear()} flew by quickly, now its time to plan for the next
@@ -895,6 +930,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
     gameState.s.page = page;
     gameState.s.nextPage = nextPage;
     gameState.s.previousPage = previousPage;
+    gameState.s.render = render;
     gameState.s.lifeEventManager = lifeEventManager;
     return (
         <div>
@@ -966,32 +1002,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                         getOptionLabel={a => a.name}
                         value={transferFrom.selectedAccount}
                         isSearchable={false}
-                        styles={{
-                            control: (baseStyles, state) => ({
-                                ...baseStyles, backgroundColor: "#e5e7eb", borderRadius: 10,
-                                border: state.isFocused ? "2px solid #fe9a00" : "2px solid #cccccc",
-                                "&:hover": {
-                                    border: "2px solid #fe9a00",
-                                },
-                                "&:focus": {
-                                    border: "2px solid #fe9a00",
-                                    boxShadow: "none"
-                                },
-                                boxShadow: "none"
-                            }),
-                            placeholder: (baseStyles) => ({
-                                ...baseStyles, fontSize: 20
-                            }),
-                            singleValue: (baseStyles) => ({
-                                ...baseStyles, fontSize: 20
-                            }),
-                            option: (baseStyles, state) => ({
-                                ...baseStyles,
-                                color: "#364153",
-                                backgroundColor: state.isFocused ? "#e5e7eb" : undefined,
-                                borderRadius: 10
-                            })
-                        }}
+                        styles={GetReactSelectStyle<Account>()}
                         onChange={(a: Account | null) => {
                             let to = transferTo.selectedAccount;
                             if (a == to) to = transferFrom.selectedAccount;
@@ -1008,32 +1019,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                         getOptionLabel={a => a.name}
                         value={transferTo.selectedAccount}
                         isSearchable={false}
-                        styles={{
-                            control: (baseStyles, state) => ({
-                                ...baseStyles, backgroundColor: "#e5e7eb", borderRadius: 10,
-                                border: state.isFocused ? "2px solid #fe9a00" : "2px solid #cccccc",
-                                "&:hover": {
-                                    border: "2px solid #fe9a00",
-                                },
-                                "&:focus": {
-                                    border: "2px solid #fe9a00",
-                                    boxShadow: "none"
-                                },
-                                boxShadow: "none"
-                            }),
-                            placeholder: (baseStyles) => ({
-                                ...baseStyles, fontSize: 20
-                            }),
-                            singleValue: (baseStyles) => ({
-                                ...baseStyles, fontSize: 20
-                            }),
-                            option: (baseStyles, state) => ({
-                                ...baseStyles,
-                                color: "#364153",
-                                backgroundColor: state.isFocused ? "#e5e7eb" : undefined,
-                                borderRadius: 10
-                            })
-                        }}
+                        styles={GetReactSelectStyle<Account>()}
                         onChange={(a: Account | null) => setTransferTo({selectedAccount: a})}></Select>
 
                     <div className="flex">

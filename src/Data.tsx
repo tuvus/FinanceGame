@@ -1,4 +1,8 @@
-import {type LifeEventManager, LifeEventScheduler} from "./EventManager.tsx";
+import {LifeEvent, type LifeEventManager, LifeEventScheduler} from "./EventManager.tsx";
+
+export type GameStateProps = {
+    gameState: GameState;
+}
 
 export class Character {
     firstName: string;
@@ -14,6 +18,7 @@ export class Character {
     monthlyLivingExpenses: { name: string, amount: number }[];
     age: number;
     savingsAccount: Account;
+    bigTicketItems: BigTicketItems;
     investmentAccount: StockAccount;
     retirementAccount: StockAccount;
     taxableIncome: number;
@@ -35,6 +40,7 @@ export class Character {
         this.monthlyLivingExpenses = monthlyLivingExpenses;
         this.age = age;
         this.savingsAccount = new Account("Savings Account", 0, true);
+        this.bigTicketItems = new BigTicketItems(this);
         this.investmentAccount = new StockAccount("Investment Account", 0);
         this.retirementAccount = new StockAccount("Retirement Account", 0);
         this.taxableIncome = 0;
@@ -60,6 +66,14 @@ export class Character {
             loan.balance += amount;
         } else {
             this.addLoan(new Loan("Credit Card Debt", amount, this.savingsAccount, 1.27, false));
+        }
+    }
+
+    addMoney(amount: number) {
+        this.savingsAccount.balance += amount;
+        if (this.savingsAccount.balance < 0) {
+            this.addCreditDebt(-this.savingsAccount.balance);
+            this.savingsAccount.balance = 0;
         }
     }
 
@@ -176,6 +190,66 @@ export class StockAccount extends Account {
     }
 }
 
+export class BigTicketItem {
+    name: string;
+    desc: string;
+    buyDate: Date;
+    targetBalance: number;
+    balance: number;
+
+    constructor(name: string, desc: string, buyDate: Date, targetBalance: number, balance: number) {
+        this.name = name;
+        this.desc = desc;
+        this.buyDate = buyDate;
+        this.targetBalance = targetBalance;
+        this.balance = balance;
+    }
+}
+
+export class BigTicketItems {
+    bigTicketItems: BigTicketItem [] = [];
+    character: Character;
+
+    constructor(character: Character) {
+        this.character = character;
+    }
+
+    AddBigTicketItem(name: string, desc: string, buyDate: Date, targetBalance: number) {
+        this.bigTicketItems = [...this.bigTicketItems, {
+            name: name,
+            desc: desc,
+            buyDate: buyDate,
+            targetBalance: targetBalance,
+            balance: 0
+        }];
+    }
+
+    RemoveBigTicketItem(bigTicketItem: BigTicketItem) {
+        this.character.addMoney(bigTicketItem.balance);
+        this.bigTicketItems = this.bigTicketItems.filter(bt => bt != bigTicketItem);
+    }
+
+    GetYearlyAllocation(date: Date) {
+        return this.bigTicketItems.reduce((sum, bt) =>
+            sum + (bt.targetBalance - bt.balance) / (bt.buyDate.getFullYear() - date.getFullYear()), 0);
+    }
+
+    DoYearlyAllocations(date: Date) {
+        this.bigTicketItems.forEach(bt =>
+            bt.balance += (bt.targetBalance - bt.balance) / (bt.buyDate.getFullYear() - date.getFullYear()));
+    }
+
+    ScheduleBigTicketItems(lifeEventManager: LifeEventManager) {
+        this.bigTicketItems.forEach(bt => {
+            if (bt.balance >= bt.targetBalance) {
+                lifeEventManager.AddEvent(new LifeEvent(bt.name, bt.buyDate,
+                    <div>{bt.desc}</div>, false));
+            }
+        });
+        this.bigTicketItems = this.bigTicketItems.filter(bt => bt.balance < bt.targetBalance);
+    }
+}
+
 export class Loan extends Account {
     linkedAccount: Account;
     interestRate: number;
@@ -220,6 +294,7 @@ export class GameState {
     compactFormatter: Intl.NumberFormat;
     lifeEventManager: LifeEventManager | null;
     lifeEventScheduler: LifeEventScheduler | null;
+    bigTicketItemsUnlocked: boolean = false;
     investmentsUnlocked: boolean = false;
     retirementUnlocked: boolean = false;
     tutorial: boolean;
@@ -234,8 +309,7 @@ export class GameState {
         this.lifeEventScheduler = null
     }
 
-    nextPage = (): void => {
-    };
-    previousPage = (): void => {
-    };
+    nextPage = (): void => {};
+    previousPage = (): void => {};
+    render = (): void => {};
 }
