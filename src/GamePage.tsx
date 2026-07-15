@@ -15,6 +15,7 @@ import PromotionEvent from "./events/Promotion.tsx";
 import BrokenLaptopEvent from "./events/BrokenLaptop.tsx";
 import {BalanceNumber, SatisfactionNumber, SavingsAccountTutorial} from "./UI.tsx";
 import {BigTicketItemsPage} from "./components/BigTicketItems.tsx";
+import {Outline} from "./components/Outline.tsx";
 
 type GameProps = {
     fname: string; lname: string; tutorial: boolean;
@@ -55,6 +56,22 @@ function GamePage({fname, lname, tutorial}: GameProps) {
     const [transferFrom, setTransferFrom] = useState<TransferFundsSelectState>({selectedAccount: null});
     const [transferTo, setTransferTo] = useState<TransferFundsSelectState>({selectedAccount: null});
     const [fundsToTransfer, setFundsToTransfer] = useState(0);
+
+    const startYear = () => {
+        setPage(pages.length - 1);
+        character.bigTicketItems.ScheduleBigTicketItems(gameState.s.lifeEventManager!);
+        gameState.s.lifeEventScheduler!.GenerateEvents();
+        if (!lifeEventManager.GetActiveEvent(gameState.s.date)) {
+            lifeEventManager.AddEvent(
+                new LifeEvent("Another year passes", gameState.s.date,
+                    (<div><h3 className="m-4">There were no special events this year.</h3></div>))
+            );
+        } else {
+            lifeEventManager.AddEvent(new LifeEvent("New Year", new Date(gameState.s.date.getFullYear(), 11, 31),
+                <h3>The year of {gameState.s.date.getFullYear()} flew by quickly, now its time to plan for the next
+                    year.</h3>))
+        }
+    }
 
     const endYear = () => {
         const livingExpenses = character.monthlyLivingExpenses.map(e => e.amount).reduce((sum, curr) => sum + curr, 0) * gameState.s.inflation * 12;
@@ -877,18 +894,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
     const nextPage = () => {
         if (nPage == null) return;
         if (nPage == pages.length - 1) {
-            character.bigTicketItems.ScheduleBigTicketItems(gameState.s.lifeEventManager!);
-            gameState.s.lifeEventScheduler!.GenerateEvents();
-            if (!lifeEventManager.GetActiveEvent(gameState.s.date)) {
-                lifeEventManager.AddEvent(
-                    new LifeEvent("Another year passes", gameState.s.date,
-                        (<div><h3 className="m-4">There were no special events this year.</h3></div>))
-                );
-            } else {
-                lifeEventManager.AddEvent(new LifeEvent("New Year", new Date(gameState.s.date.getFullYear(), 11, 31),
-                    <h3>The year of {gameState.s.date.getFullYear()} flew by quickly, now its time to plan for the next
-                        year.</h3>))
-            }
+            startYear();
         }
         setPage(nPage);
     }
@@ -898,6 +904,11 @@ function GamePage({fname, lname, tutorial}: GameProps) {
     gameState.s.nextPage = nextPage;
     gameState.s.previousPage = previousPage;
     gameState.s.render = render;
+    gameState.s.switchToPage = (name:string) => {
+        if (gameState.s.pages.some(p => p.name === name)) {
+            setPage(gameState.s.pages.findIndex(p => p.name === name));
+        }
+    }
     gameState.s.lifeEventManager = lifeEventManager;
     return (
         <div>
@@ -906,6 +917,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                         gameState.s.tutorial = !gameState.s.tutorial;
                         render();
                     }}>{gameState.s.tutorial ? "Tutorials" : "No Tutorials"}</button>
+            <Outline gameState={gameState.s} page={page} startYear={startYear}/>
             {page < pages.length ?
                 <SatisfactionNumber gameState={gameState.s} amount={character.satisfaction}/> : <></>}
             {pages[Math.min(page, pages.length - 1)].page}
