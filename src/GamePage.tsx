@@ -316,7 +316,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
     const activeEvent = lifeEventManager.GetActiveEvent(gameState.s.date);
 
     const tutorialManager = useRef(new TutorialManager(gameState.s, [
-        new TutorialChain("Year In Review Tutorial", () => gameState.s.page == 0, [
+        new TutorialChain("Year In Review Tutorial", () => gameState.s.GetCurrentPage().name == "Year in review", [
             new TutorialEvent("Year in review page", null, (<p className="text-gray-700">
                 On this page, you will be looking at your money's performance from last year and the years before
                 inorder to determine how to allocate this year's income. Each account that you own will show up on this
@@ -329,7 +329,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                                        target="_blank">portfolio</a>, or where your money is.
             </p>), "DonutChart", null, "Close"),
         ]),
-        new TutorialChain("Allocation Tutorial", () => gameState.s.page == 1, [
+        new TutorialChain("Allocation Tutorial", () => gameState.s.GetCurrentPage().name == "Allocation", [
             new TutorialEvent("Allocation Page", null, (<p className="text-gray-700">
                 Congratulations on getting your first job! This page shows you where your paycheck this year will go,
                 and gives you the ability to <a
@@ -373,7 +373,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                 current balance plus your savings from your paycheck.
             </p>), "PredictedBalance", null, "Close"),
         ]),
-        new TutorialChain("College Debt Tutorial", () => gameState.s.page == 2 && character.loans.some(l => l.name == "College Debt"), [
+        new TutorialChain("College Debt Tutorial", () => gameState.s.GetCurrentPage().name == "Loans" && character.loans.some(l => l.name == "College Debt"), [
             new TutorialEvent("College Debt", null, (<p className="text-gray-700">
                 You have college <a href="https://www.investopedia.com/terms/d/debt.asp" target="_blank">debt</a>. This
                 is the page where you will be able to manage it.
@@ -384,7 +384,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                 your debt off early.
             </p>), "LoanCollege Debt", null, "Next"),
         ]),
-        new TutorialChain("Trade School Debt Tutorial", () => gameState.s.page == 2 && character.loans.some(l => l.name == "Trade School Debt"), [
+        new TutorialChain("Trade School Debt Tutorial", () => gameState.s.GetCurrentPage().name == "Loans" && character.loans.some(l => l.name == "Trade School Debt"), [
             new TutorialEvent("Trade School Debt", null, (<p className="text-gray-700">
                 You have trade school <a href="https://www.investopedia.com/terms/d/debt.asp" target="_blank">debt</a>.
                 This is the page where you will be able to manage it.
@@ -395,7 +395,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                 your debt off early.
             </p>), "LoanTrade School Debt", null, "Next"),
         ]),
-        new TutorialChain("Credit Card Debt Tutorial", () => gameState.s.page == 2 && character.loans.some(l => l.name == "Credit Card Debt"), [
+        new TutorialChain("Credit Card Debt Tutorial", () => gameState.s.GetCurrentPage().name == "Loans" && character.loans.some(l => l.name == "Credit Card Debt"), [
             new TutorialEvent("Credit Card Debt", null, (<p className="text-gray-700">
                 You have credit card <a href="https://www.investopedia.com/terms/d/debt.asp" target="_blank">debt</a>.
                 This is the page where you will be able to manage it.
@@ -406,7 +406,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                 your debt off early.
             </p>), "LoanCredit Card Debt", null, "Next"),
         ]),
-        new TutorialChain("Summary Tutorial", () => gameState.s.page == 5, [
+        new TutorialChain("Summary Tutorial", () => gameState.s.GetCurrentPage().name == "Summary", [
             new TutorialEvent("Summary Page", null, (<p className="text-gray-700">
                 Here you can see the summary of the year.
             </p>), null, null, "Next"),
@@ -420,7 +420,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                 It also shows how much you have in loans if you have any, and your current net worth.
             </p>), "summary", null, "Close"),
         ]),
-        new TutorialChain("Investment Tutorial Year In Review", () => gameState.s.page == 0 && gameState.s.gameYear == 3, [
+        new TutorialChain("Investment Tutorial Year In Review", () => gameState.s.GetCurrentPage().name == "Year in review" && gameState.s.gameYear == 3, [
             new TutorialEvent("Investment Accounts", null, (<p className="text-gray-700">
                 It is time to learn about investing.
             </p>), null, null, "Next"),
@@ -433,13 +433,13 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                 the year.
             </p>), "BottomBar", null, "Next"),
         ]),
-        new TutorialChain("Investment Tutorial Allocation", () => gameState.s.page == 1 && gameState.s.gameYear == 3, [
+        new TutorialChain("Investment Tutorial Allocation", () => gameState.s.GetCurrentPage().name == "Allocation" && gameState.s.gameYear == 3, [
             new TutorialEvent("Allocating To Investments", null, (<p className="text-gray-700">
                 The investment account now shows up in the allocation page. You can change the amount to be allocated
                 towards the investment account by using the arrows.
             </p>), null, null, "Next"),
         ]),
-        new TutorialChain("Investment Tutorial Portfolio", () => gameState.s.page == 3 && gameState.s.gameYear == 3, [
+        new TutorialChain("Investment Tutorial Portfolio", () => gameState.s.GetCurrentPage().name == "Investments" && gameState.s.gameYear == 3, [
             new TutorialEvent("Investing", null, (<p className="text-gray-700">
                 Here is the page where you will be able to invest your money into stocks and bonds. You can click on the
                 different types of investments to expand them. This will display a graph of the investment's performance
@@ -463,7 +463,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                 the top.
             </p>), "Bond", null, "Next"),
         ]),
-        new TutorialChain("Retirement Tutorial Portfolio", () => gameState.s.page == 4 && gameState.s.gameYear == 8, [
+        new TutorialChain("Retirement Tutorial Portfolio", () => gameState.s.GetCurrentPage().name == "Retirement" && gameState.s.gameYear == 8, [
             new TutorialEvent("Saving for Retirement", null,
                 (<p className="text-gray-700">Now that you are getting to the middle of your life its time to start
                     saving for retirement. You now have access to your retirement account. This account works similar to
@@ -766,7 +766,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
             name: "Summary",
             page: <div className="flex flex-col gap-2 items-center">
                 <h1>Summary</h1>
-                <div className="flex flex-col gap-2 w-1/2 rounded-2xl bg-amber-100 items-center pt-2 pb-2">
+                <div className="flex flex-col gap-2 w-1/2 rounded-2xl bg-amber-100 items-center pt-2 pb-2" id="summary">
                     <div className="grid grid-cols-2 gap-2 w-full">
                         <p className="text-green-700" id="takeHomeIncomeText">Take home income</p>
                         <p className="text-green-700">{formatter.format(character.salary - taxes)}</p>
@@ -879,6 +879,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
     }
 
     gameState.s.page = page;
+    gameState.s.pages = pages;
     gameState.s.nextPage = nextPage;
     gameState.s.previousPage = previousPage;
     gameState.s.render = render;
