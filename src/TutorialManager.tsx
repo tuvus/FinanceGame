@@ -115,6 +115,8 @@ export class TutorialManager {
             } else {
                 this.highlighter.setTargetElement(null);
             }
+        } else {
+            this.highlighter.setTargetElement(null);
         }
     }
 

@@ -1,4 +1,5 @@
 import {LifeEvent, type LifeEventManager, LifeEventScheduler} from "./EventManager.tsx";
+import type {JSX} from "react";
 
 export type GameStateProps = {
     gameState: GameState;
@@ -285,6 +286,11 @@ export class Loan extends Account {
 
 export class GameState {
     page: number = 0;
+    pages: {
+        name: string
+        page: JSX.Element
+        displayCondition: () => boolean
+    }[] = [];
     date: Date;
     // The number of years the player has played, 0 is when choosing college, 1 is the first year they allocate for and so on
     gameYear: number = 0;
@@ -307,6 +313,10 @@ export class GameState {
         this.tutorial = tutorial;
         this.lifeEventManager = null;
         this.lifeEventScheduler = null
+    }
+
+    GetCurrentPage() {
+        return this.pages[Math.min(this.page, this.pages.length - 1)];
     }
 
     nextPage = (): void => {};
