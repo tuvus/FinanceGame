@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/immutability */
-import {LifeEvent, type GameStateProps} from "../EventManager.tsx";
+import {LifeEvent} from "../EventManager.tsx";
 import random from "random";
+import type {GameStateProps} from "../Data.tsx";
 
 function BrokenLaptopEvent({gameState}: GameStateProps) {
 
