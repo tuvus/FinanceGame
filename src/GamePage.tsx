@@ -452,7 +452,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                 The pie chart shows the current positions of your money. Your net worth shows your total assets minus your total liabilities.
             </p>), "summary", null, "Close"),
         ]),
-        new TutorialChain("Investment Tutorial Year In Review", () => gameState.s.GetCurrentPage().name == "Year in review" && gameState.s.gameYear == 3, [
+        new TutorialChain("Investment Tutorial Year In Review", () => gameState.s.GetCurrentPage().name == "Year in review" && gameState.s.gameYear >= 3, [
             new TutorialEvent("Investment Accounts", null, (<p className="text-gray-700">
                 It is time to learn about investing.
             </p>), null, null, "Next"),
@@ -461,7 +461,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                 invest your money!
             </p>), "YIRAccountInvestment Account", null, "Close"),
         ]),
-        new TutorialChain("Investment Tutorial Allocation", () => gameState.s.GetCurrentPage().name == "Allocation" && gameState.s.gameYear == 3, [
+        new TutorialChain("Investment Tutorial Allocation", () => gameState.s.GetCurrentPage().name == "Allocation" && gameState.s.gameYear >= 3, [
             new TutorialEvent("Allocating To Investments", null, (<p className="text-gray-700">
                 The investment account now shows up in the allocation page. You can change the amount to be allocated
                 towards the investment account by using the arrows.
@@ -471,7 +471,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                 transfer money button to transfer money between different accounts at anytime in the year.
             </p>), "BottomBar", null, "Close"),
         ]),
-        new TutorialChain("Investment Tutorial Portfolio", () => gameState.s.GetCurrentPage().name == "Investments" && gameState.s.gameYear == 3, [
+        new TutorialChain("Investment Tutorial Portfolio", () => gameState.s.GetCurrentPage().name == "Investments" && gameState.s.gameYear >= 3, [
             new TutorialEvent("Investing", null, (<p className="text-gray-700">
                 Here is the page where you will be able to invest your money into stocks and bonds. You can click on the
                 different types of investments to expand them. This will display a graph of the investment's performance
@@ -495,7 +495,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                 the top.
             </p>), "Bond", null, "Close"),
         ]),
-        new TutorialChain("Retirement Tutorial Portfolio", () => gameState.s.GetCurrentPage().name == "Retirement" && gameState.s.gameYear == 8, [
+        new TutorialChain("Retirement Tutorial Portfolio", () => gameState.s.GetCurrentPage().name == "Retirement" && gameState.s.gameYear >= 8, [
             new TutorialEvent("Saving for Retirement", null,
                 (<p className="text-gray-700">Now that you are getting to the middle of your life its time to start
                     saving for retirement. You now have access to your retirement account. This account works similar to
