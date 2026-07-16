@@ -329,6 +329,46 @@ function GamePage({fname, lname, tutorial}: GameProps) {
         </>),
         new LifeEvent("Event Tutorial", new Date(gameState.s.date.getFullYear() + 6, 1),
             (<div><p>During the year you will encounter events that may have a financial impact.</p></div>)),
+        new LifeEvent("Car Big Ticket Items Tutorial", new Date(gameState.s.date.getFullYear() + 6, 1),
+            (<div className="flex flex-col items-center gap-4">
+                <p className="w-200">Your parents have decided to celebrate your new job by getting you a car, as your car you
+                currently use is at the end of its life. They are letting you decide whether it is new, used, and how
+                extravagant it is. They will pay up to </p>
+                <div className="grid grid-cols-2 w-208 justify-center gap-4">
+                    <div className="eventButton panelButton" onClick={() => {
+                        character.satisfaction += 7;
+                        character.payMoney(25945 * gameState.s.inflation);
+                        gameState.s.lifeEventManager!.NextEvent();
+                    }}>
+                        <p className="text-gray-700">Buy a used simple car</p>
+                        <p className="text-red-800">{formatter.format(-25945 * gameState.s.inflation)}</p>
+                    </div>
+                    <div className="eventButton panelButton" onClick={() => {
+                        character.satisfaction += 6;
+                        character.payMoney(49814 * gameState.s.inflation);
+                        gameState.s.lifeEventManager!.NextEvent();
+                    }}>
+                        <p className="text-gray-700">Buy a new simple car</p>
+                        <p className="text-red-800">{formatter.format(-49814 * gameState.s.inflation)}</p>
+                    </div>
+                    <div className="eventButton panelButton" onClick={() => {
+                        character.satisfaction += 9;
+                        character.payMoney(26000 * gameState.s.inflation);
+                        gameState.s.lifeEventManager!.NextEvent();
+                    }}>
+                        <p className="text-gray-700">Buy a used extravagant car</p>
+                        <p className="text-red-800">{formatter.format(-26000 * gameState.s.inflation)}</p>
+                    </div>
+                    <div className="eventButton panelButton" onClick={() => {
+                        character.satisfaction += 10;
+                        character.payMoney(50000 * gameState.s.inflation);
+                        gameState.s.lifeEventManager!.NextEvent();
+                    }}>
+                        <p className="text-gray-700">Buy a new extravagant car</p>
+                        <p className="text-red-800">{formatter.format(-50000 * gameState.s.inflation)}</p>
+                    </div>
+                </div>
+            </div>)),
     ]));
     const activeEvent = lifeEventManager.GetActiveEvent(gameState.s.date);
 
@@ -449,7 +489,8 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                 This is the sum of your living expenses and your yearly loan payments.
             </p>), "expensesText", null, "Next"),
             new TutorialEvent("Summary", null, (<p className="text-gray-700">
-                The pie chart shows the current positions of your money. Your net worth shows your total assets minus your total liabilities.
+                The pie chart shows the current positions of your money. Your net worth shows your total assets minus
+                your total liabilities.
             </p>), "summary", null, "Close"),
         ]),
         new TutorialChain("Investment Tutorial Year In Review", () => gameState.s.GetCurrentPage().name == "Year in review" && gameState.s.gameYear >= 3, [
@@ -904,7 +945,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
     gameState.s.nextPage = nextPage;
     gameState.s.previousPage = previousPage;
     gameState.s.render = render;
-    gameState.s.switchToPage = (name:string) => {
+    gameState.s.switchToPage = (name: string) => {
         if (gameState.s.pages.some(p => p.name === name)) {
             setPage(gameState.s.pages.findIndex(p => p.name === name));
         }
