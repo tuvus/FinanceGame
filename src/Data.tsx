@@ -20,6 +20,7 @@ export class Character {
     age: number;
     savingsAccount: Account;
     bigTicketItems: BigTicketItems;
+    goals: Goal[];
     investmentAccount: StockAccount;
     retirementAccount: StockAccount;
     taxableIncome: number;
@@ -42,6 +43,7 @@ export class Character {
         this.age = age;
         this.savingsAccount = new Account("Savings Account", 0, true);
         this.bigTicketItems = new BigTicketItems(this);
+        this.goals = [];
         this.investmentAccount = new StockAccount("Investment Account", 0);
         this.retirementAccount = new StockAccount("Retirement Account", 0);
         this.taxableIncome = 0;
@@ -251,6 +253,22 @@ export class BigTicketItems {
     }
 }
 
+export class Goal {
+    name: string;
+    description: string;
+    targetDate: Date;
+    condition: (gameState: GameState) => boolean;
+    onCompleted: (gameState: GameState) => void;
+
+    constructor(name: string, description: string, targetDate: Date, condition: (gameState: GameState) => boolean, onCompleted: (gameState: GameState) => void) {
+        this.name = name;
+        this.description = description;
+        this.targetDate = targetDate;
+        this.condition = condition;
+        this.onCompleted = onCompleted;
+    }
+}
+
 export class Loan extends Account {
     linkedAccount: Account;
     interestRate: number;
@@ -319,12 +337,16 @@ export class GameState {
         return this.pages[Math.min(this.page, this.pages.length - 1)];
     }
 
-    nextPage = (): void => {};
-    previousPage = (): void => {};
+    nextPage = (): void => {
+    };
+    previousPage = (): void => {
+    };
     /* eslint-disable @typescript-eslint/no-unused-vars */
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    switchToPage = (name: string): void => {};
+    switchToPage = (name: string): void => {
+    };
     /* eslint-enable @typescript-eslint/no-unused-vars */
-    render = (): void => {};
+    render = (): void => {
+    };
 }

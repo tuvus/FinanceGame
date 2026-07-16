@@ -56,6 +56,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
     const [transferFrom, setTransferFrom] = useState<TransferFundsSelectState>({selectedAccount: null});
     const [transferTo, setTransferTo] = useState<TransferFundsSelectState>({selectedAccount: null});
     const [fundsToTransfer, setFundsToTransfer] = useState(0);
+    const [selectedGoal, setSelectedGoal] = useState("")
 
     const startYear = () => {
         setPage(pages.length - 1);
@@ -449,7 +450,8 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                 This is the sum of your living expenses and your yearly loan payments.
             </p>), "expensesText", null, "Next"),
             new TutorialEvent("Summary", null, (<p className="text-gray-700">
-                The pie chart shows the current positions of your money. Your net worth shows your total assets minus your total liabilities.
+                The pie chart shows the current positions of your money. Your net worth shows your total assets minus
+                your total liabilities.
             </p>), "summary", null, "Close"),
         ]),
         new TutorialChain("Investment Tutorial Year In Review", () => gameState.s.GetCurrentPage().name == "Year in review" && gameState.s.gameYear >= 3, [
@@ -904,7 +906,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
     gameState.s.nextPage = nextPage;
     gameState.s.previousPage = previousPage;
     gameState.s.render = render;
-    gameState.s.switchToPage = (name:string) => {
+    gameState.s.switchToPage = (name: string) => {
         if (gameState.s.pages.some(p => p.name === name)) {
             setPage(gameState.s.pages.findIndex(p => p.name === name));
         }
@@ -1047,6 +1049,42 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                     </div>
                 </div>
             </div>
+
+            <div id="goals-modal" className="flex hmodal justify-center"
+                 onClick={() => {
+                     document.getElementById("goals-modal")!.style.display = "none";
+                     setSelectedGoal("");
+                 }}>
+                <div
+                    className="flex flex-col gap-2 ml-auto mr-auto mt-[15%] w-120 bg-amber-100 rounded-xl items-center p-4"
+                    onClick={e => e.stopPropagation()}>
+                    <h2 className="text-gray-700!">Goals</h2>
+                    {character.goals.map(goal =>
+                        (<div key={goal.name} className="eventButton w-full! bg-gray-200! cursor-pointer"
+                              onClick={() => {
+                                  setSelectedGoal(pg => pg === goal.name ? "" : goal.name);
+                              }}>
+                            <div className="grid grid-cols-2 p-1">
+                                <h3 className="text-gray-700 text-start">{goal.name}</h3>
+
+                                <p className="text-gray-700 text-end">Years until
+                                    due: {goal.targetDate.getFullYear() - gameState.s.date.getFullYear()}</p>
+                            </div>
+                            {selectedGoal === goal.name ?
+                                <p className="text-gray-700">
+                                    {goal.description}
+                                </p> : <></>}
+                        </div>))
+                    }
+                    <button
+                        onClick={() => {
+                            document.getElementById("goals-modal")!.style.display = "none";
+                            setSelectedGoal("");
+                        }}
+                        className="p-2 text-2xl w-80">Close
+                    </button>
+                </div>
+            </div>
             {/* eslint-disable-next-line react-hooks/refs */}
             {tutorialManager.current.getTutorialElement()}
             <div className="mb-20"></div>
@@ -1055,7 +1093,8 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                 <div className="grid grid-cols-4 content-center align-items-middle mx-auto h-full ml-4 mr-4">
                     <h2 className="text-gray-700! align-self-middle text-start w-100">{fname} {lname} ({character.age})</h2>
                     {(page < pages.length ? [
-                            <BalanceNumber gameState={gameState.s} amount={character.savingsAccount.balance} key="1"/>,
+                            <BalanceNumber gameState={gameState.s} amount={character.savingsAccount.balance}
+                                           key="1"/>,
                             <button className="w-50 ml-4 text-xl font-bold h-10 justify-self-left" key="2"
                                     onClick={() => {
                                         setFundsToTransfer(NaN);
