@@ -49,13 +49,16 @@ export class Character {
         this.taxableIncome = 0;
     }
 
-    endYear(date: Date, inflation: number) {
+    endYear(gameState: GameState, inflation: number) {
         this.salary *= inflation;
-        this.loans.forEach(l => l.endLoanYear(date, inflation));
-        this.accounts.forEach((account) => account.endYear(date));
+        this.loans.forEach(l => l.endLoanYear(gameState.date, inflation));
+        this.accounts.forEach((account) => account.endYear(gameState.date));
         this.refreshLoans();
-        this.totalLoans.endYear(date);
+        this.totalLoans.endYear(gameState.date);
         this.age++;
+        const achievedGoals = this.goals.filter(g => g.condition(gameState));
+        achievedGoals.forEach(g => g.onCompleted(gameState));
+        this.goals = this.goals.filter(g => !achievedGoals.includes(g));
     }
 
     addLoan(loan: Loan) {

@@ -25,7 +25,7 @@ export function Outline({gameState, page, startYear}: OutlineProps) {
                     <p className={"text-gray-700! " + (currentPageName == p.name ? "font-bold" : "")}>{p.name}</p>
                 </div>)}
         <hr className="bg-black border w-full mt-2"/>
-        <button className="mt-2 w-full text-2xl font-bold" onClick={() =>
+        <button className="m-2 w-full text-2xl font-bold" onClick={() =>
             document.getElementById("goals-modal")!.style.display = "block"
         }>Goals
         </button>

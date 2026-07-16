@@ -4,7 +4,7 @@ import random from "random";
 import {useEffect, useRef, useState} from "react";
 import {LineChart} from "./components/LineChart.tsx";
 import Select from 'react-select';
-import {Account, Character, GameState, Loan, StockAccount, StockBond} from "./Data.tsx";
+import {Account, Character, GameState, Goal, Loan, StockAccount, StockBond} from "./Data.tsx";
 import StockCard from "./components/StockCard.tsx";
 import {CalculateTaxes, GetDateString, GetReactSelectStyle} from "./Utils.tsx";
 import {DonutChart} from "./components/DonutChart.tsx";
@@ -105,7 +105,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
         // History log
         indexFund.a.endYear(gameState.s.date);
         bond.a.endYear(gameState.s.date);
-        character.endYear(gameState.s.date, newInflation);
+        character.endYear(gameState.s, newInflation);
         gameState.s.date.setFullYear(gameState.s.date.getFullYear() + 1);
     }
 
@@ -517,7 +517,6 @@ function GamePage({fname, lname, tutorial}: GameProps) {
             new LifeEventSchedule(new LifeEvent("Promotion", new Date(), <PromotionEvent
                 gameState={gameState.s}/>, true), 8, 4, .2, null),
         ]);
-
         document.addEventListener("keyup", (e) => {
             if (e.key == "Enter") {
                 if (document.getElementById("transfer-modal")!.style.display == "block") {
@@ -1056,7 +1055,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                      setSelectedGoal("");
                  }}>
                 <div
-                    className="flex flex-col gap-2 ml-auto mr-auto mt-[15%] w-120 bg-amber-100 rounded-xl items-center p-4"
+                    className="flex flex-col gap-2 ml-auto mr-auto mt-[10%] w-120 bg-amber-100 rounded-xl items-center p-4"
                     onClick={e => e.stopPropagation()}>
                     <h2 className="text-gray-700!">Goals</h2>
                     {character.goals.map(goal =>
