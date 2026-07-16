@@ -4,7 +4,7 @@ import random from "random";
 import {useEffect, useRef, useState} from "react";
 import {LineChart} from "./components/LineChart.tsx";
 import Select from 'react-select';
-import {Account, Character, GameState, Goal, Loan, StockAccount, StockBond} from "./Data.tsx";
+import {Account, Character, GameState, Loan, StockAccount, StockBond} from "./Data.tsx";
 import StockCard from "./components/StockCard.tsx";
 import {CalculateTaxes, GetDateString, GetReactSelectStyle} from "./Utils.tsx";
 import {DonutChart} from "./components/DonutChart.tsx";
