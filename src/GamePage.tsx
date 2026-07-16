@@ -15,6 +15,7 @@ import PromotionEvent from "./events/Promotion.tsx";
 import BrokenLaptopEvent from "./events/BrokenLaptop.tsx";
 import {BalanceNumber, SatisfactionNumber, SavingsAccountTutorial} from "./UI.tsx";
 import {BigTicketItemsPage} from "./components/BigTicketItems.tsx";
+import {Outline} from "./components/Outline.tsx";
 
 type GameProps = {
     fname: string; lname: string; tutorial: boolean;
@@ -55,6 +56,22 @@ function GamePage({fname, lname, tutorial}: GameProps) {
     const [transferFrom, setTransferFrom] = useState<TransferFundsSelectState>({selectedAccount: null});
     const [transferTo, setTransferTo] = useState<TransferFundsSelectState>({selectedAccount: null});
     const [fundsToTransfer, setFundsToTransfer] = useState(0);
+
+    const startYear = () => {
+        setPage(pages.length - 1);
+        character.bigTicketItems.ScheduleBigTicketItems(gameState.s.lifeEventManager!);
+        gameState.s.lifeEventScheduler!.GenerateEvents();
+        if (!lifeEventManager.GetActiveEvent(gameState.s.date)) {
+            lifeEventManager.AddEvent(
+                new LifeEvent("Another year passes", gameState.s.date,
+                    (<div><h3 className="m-4">There were no special events this year.</h3></div>))
+            );
+        } else {
+            lifeEventManager.AddEvent(new LifeEvent("New Year", new Date(gameState.s.date.getFullYear(), 11, 31),
+                <h3>The year of {gameState.s.date.getFullYear()} flew by quickly, now its time to plan for the next
+                    year.</h3>))
+        }
+    }
 
     const endYear = () => {
         const livingExpenses = character.monthlyLivingExpenses.map(e => e.amount).reduce((sum, curr) => sum + curr, 0) * gameState.s.inflation * 12;
@@ -435,7 +452,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                 The pie chart shows the current positions of your money. Your net worth shows your total assets minus your total liabilities.
             </p>), "summary", null, "Close"),
         ]),
-        new TutorialChain("Investment Tutorial Year In Review", () => gameState.s.GetCurrentPage().name == "Year in review" && gameState.s.gameYear == 3, [
+        new TutorialChain("Investment Tutorial Year In Review", () => gameState.s.GetCurrentPage().name == "Year in review" && gameState.s.gameYear >= 3, [
             new TutorialEvent("Investment Accounts", null, (<p className="text-gray-700">
                 It is time to learn about investing.
             </p>), null, null, "Next"),
@@ -444,7 +461,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                 invest your money!
             </p>), "YIRAccountInvestment Account", null, "Close"),
         ]),
-        new TutorialChain("Investment Tutorial Allocation", () => gameState.s.GetCurrentPage().name == "Allocation" && gameState.s.gameYear == 3, [
+        new TutorialChain("Investment Tutorial Allocation", () => gameState.s.GetCurrentPage().name == "Allocation" && gameState.s.gameYear >= 3, [
             new TutorialEvent("Allocating To Investments", null, (<p className="text-gray-700">
                 The investment account now shows up in the allocation page. You can change the amount to be allocated
                 towards the investment account by using the arrows.
@@ -454,7 +471,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                 transfer money button to transfer money between different accounts at anytime in the year.
             </p>), "BottomBar", null, "Close"),
         ]),
-        new TutorialChain("Investment Tutorial Portfolio", () => gameState.s.GetCurrentPage().name == "Investments" && gameState.s.gameYear == 3, [
+        new TutorialChain("Investment Tutorial Portfolio", () => gameState.s.GetCurrentPage().name == "Investments" && gameState.s.gameYear >= 3, [
             new TutorialEvent("Investing", null, (<p className="text-gray-700">
                 Here is the page where you will be able to invest your money into stocks and bonds. You can click on the
                 different types of investments to expand them. This will display a graph of the investment's performance
@@ -478,7 +495,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                 the top.
             </p>), "Bond", null, "Close"),
         ]),
-        new TutorialChain("Retirement Tutorial Portfolio", () => gameState.s.GetCurrentPage().name == "Retirement" && gameState.s.gameYear == 8, [
+        new TutorialChain("Retirement Tutorial Portfolio", () => gameState.s.GetCurrentPage().name == "Retirement" && gameState.s.gameYear >= 8, [
             new TutorialEvent("Saving for Retirement", null,
                 (<p className="text-gray-700">Now that you are getting to the middle of your life its time to start
                     saving for retirement. You now have access to your retirement account. This account works similar to
@@ -877,18 +894,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
     const nextPage = () => {
         if (nPage == null) return;
         if (nPage == pages.length - 1) {
-            character.bigTicketItems.ScheduleBigTicketItems(gameState.s.lifeEventManager!);
-            gameState.s.lifeEventScheduler!.GenerateEvents();
-            if (!lifeEventManager.GetActiveEvent(gameState.s.date)) {
-                lifeEventManager.AddEvent(
-                    new LifeEvent("Another year passes", gameState.s.date,
-                        (<div><h3 className="m-4">There were no special events this year.</h3></div>))
-                );
-            } else {
-                lifeEventManager.AddEvent(new LifeEvent("New Year", new Date(gameState.s.date.getFullYear(), 11, 31),
-                    <h3>The year of {gameState.s.date.getFullYear()} flew by quickly, now its time to plan for the next
-                        year.</h3>))
-            }
+            startYear();
         }
         setPage(nPage);
     }
@@ -898,6 +904,11 @@ function GamePage({fname, lname, tutorial}: GameProps) {
     gameState.s.nextPage = nextPage;
     gameState.s.previousPage = previousPage;
     gameState.s.render = render;
+    gameState.s.switchToPage = (name:string) => {
+        if (gameState.s.pages.some(p => p.name === name)) {
+            setPage(gameState.s.pages.findIndex(p => p.name === name));
+        }
+    }
     gameState.s.lifeEventManager = lifeEventManager;
     return (
         <div>
@@ -906,6 +917,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                         gameState.s.tutorial = !gameState.s.tutorial;
                         render();
                     }}>{gameState.s.tutorial ? "Tutorials" : "No Tutorials"}</button>
+            <Outline gameState={gameState.s} page={page} startYear={startYear}/>
             {page < pages.length ?
                 <SatisfactionNumber gameState={gameState.s} amount={character.satisfaction}/> : <></>}
             {pages[Math.min(page, pages.length - 1)].page}
