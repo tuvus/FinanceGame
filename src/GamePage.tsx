@@ -329,46 +329,61 @@ function GamePage({fname, lname, tutorial}: GameProps) {
         </>),
         new LifeEvent("Event Tutorial", new Date(gameState.s.date.getFullYear() + 6, 1),
             (<div><p>During the year you will encounter events that may have a financial impact.</p></div>)),
-        new LifeEvent("Car Big Ticket Items Tutorial", new Date(gameState.s.date.getFullYear() + 6, 1),
+        new LifeEvent("Buying a Car", new Date(gameState.s.date.getFullYear() + 6, 1),
             (<div className="flex flex-col items-center gap-4">
-                <p className="w-200">Your parents have decided to celebrate your new job by getting you a car, as your car you
-                currently use is at the end of its life. They are letting you decide whether it is new, used, and how
-                extravagant it is. They will pay up to </p>
-                <div className="grid grid-cols-2 w-208 justify-center gap-4">
-                    <div className="eventButton panelButton" onClick={() => {
-                        character.satisfaction += 7;
-                        character.payMoney(25945 * gameState.s.inflation);
-                        gameState.s.lifeEventManager!.NextEvent();
-                    }}>
-                        <p className="text-gray-700">Buy a used simple car</p>
-                        <p className="text-red-800">{formatter.format(-25945 * gameState.s.inflation)}</p>
-                    </div>
-                    <div className="eventButton panelButton" onClick={() => {
-                        character.satisfaction += 6;
-                        character.payMoney(49814 * gameState.s.inflation);
-                        gameState.s.lifeEventManager!.NextEvent();
-                    }}>
-                        <p className="text-gray-700">Buy a new simple car</p>
-                        <p className="text-red-800">{formatter.format(-49814 * gameState.s.inflation)}</p>
-                    </div>
-                    <div className="eventButton panelButton" onClick={() => {
-                        character.satisfaction += 9;
-                        character.payMoney(26000 * gameState.s.inflation);
-                        gameState.s.lifeEventManager!.NextEvent();
-                    }}>
-                        <p className="text-gray-700">Buy a used extravagant car</p>
-                        <p className="text-red-800">{formatter.format(-26000 * gameState.s.inflation)}</p>
-                    </div>
-                    <div className="eventButton panelButton" onClick={() => {
-                        character.satisfaction += 10;
-                        character.payMoney(50000 * gameState.s.inflation);
-                        gameState.s.lifeEventManager!.NextEvent();
-                    }}>
-                        <p className="text-gray-700">Buy a new extravagant car</p>
-                        <p className="text-red-800">{formatter.format(-50000 * gameState.s.inflation)}</p>
-                    </div>
-                </div>
-            </div>)),
+                <p className="w-200">Your car is nearing the end of its lifespan, and it is about time to buy a new
+                    one. Luckily, your parents have offered to subsidise your purchase in celebration of your new job.
+                    It is time to decide to get a new or used car, and how decked-out it is.</p>
+                <button className="w-60 text-xl h-10 font-bold"
+                        onClick={() => {
+                            character.addMoney(50000 * gameState.s.inflation)
+                            lifeEventManager.ReplaceEvent(new LifeEvent("Choosing a car", gameState.s.date,
+                                <div className="flex flex-col items-center w-full">
+                                    <div className="flex flex-col items-center gap-4 w-3/4">
+                                        <p>Your parents gave you {formatter.format(50000 * gameState.s.inflation)} to
+                                            buy a car. Choose the type of car you want to buy. The money that you don't
+                                            spend on the car you are allowed to keep.</p>
+                                        <div className="grid grid-cols-2 w-208 justify-center gap-4">
+                                            <div className="eventButton panelButton" onClick={() => {
+                                                character.satisfaction += 2;
+                                                character.payMoney(25945 * gameState.s.inflation);
+                                                gameState.s.lifeEventManager!.NextEvent();
+                                            }}>
+                                                <p className="text-gray-700">Buy a used car</p>
+                                                <p className="text-red-800">{formatter.format(25945 * gameState.s.inflation)}</p>
+                                            </div>
+                                            <div className="eventButton panelButton" onClick={() => {
+                                                character.satisfaction += 5;
+                                                character.payMoney(49814 * gameState.s.inflation);
+                                                gameState.s.lifeEventManager!.NextEvent();
+                                            }}>
+                                                <p className="text-gray-700">Buy a new car</p>
+                                                <p className="text-red-800">{formatter.format(49814 * gameState.s.inflation)}</p>
+                                            </div>
+                                            <div className="eventButton panelButton" onClick={() => {
+                                                character.satisfaction += 6;
+                                                character.payMoney(31000 * gameState.s.inflation);
+                                                gameState.s.lifeEventManager!.NextEvent();
+                                            }}>
+                                                <p className="text-gray-700">Buy a used extravagant car</p>
+                                                <p className="text-red-800">{formatter.format(31000 * gameState.s.inflation)}</p>
+                                            </div>
+                                            <div className="eventButton panelButton" onClick={() => {
+                                                character.satisfaction += 10;
+                                                character.payMoney(60000 * gameState.s.inflation);
+                                                gameState.s.lifeEventManager!.NextEvent();
+                                            }}>
+                                                <p className="text-gray-700">Buy a new extravagant car</p>
+                                                <p className="text-red-800">{formatter.format(60000 * gameState.s.inflation)}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>, true
+                            ));
+                        }}>
+                    <p>Choose a car</p>
+                </button>
+            </div>), true),
     ]));
     const activeEvent = lifeEventManager.GetActiveEvent(gameState.s.date);
 
