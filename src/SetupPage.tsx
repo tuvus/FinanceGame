@@ -32,7 +32,7 @@ function SetupPage({fname, lname, startGame}: SetupProps) {
                 </label>
                 <button className="w-40 text-xl h-10 font-bold" onClick={() => setTutorial(t => !t)}>{tutorial? "Tutorials" : "No Tutorials"}</button>
                 <label className="text-gray-700">Age: 18</label>
-                <button className="w-40 text-xl h-10 font-bold mt-4" onClick={finishSetup}>Start</button>
+                <button className="w-40 text-xl h-10 font-bold" onClick={finishSetup}>Start</button>
             </div>
         </div>
     )

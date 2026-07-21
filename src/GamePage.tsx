@@ -331,8 +331,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
             <h2>Its time to start your journey!</h2>
         </>),
         new LifeEvent("Financial Planning", gameState.s.date, <div className="flex flex-col w-full items-center">
-            <div className="flex flex-col items-center gap-2
-             w-3/4">
+            <div className="flex flex-col items-center gap-2 w-3/4">
                 <h2>As an adult you need to plan your finances and how you handle your money.</h2>
                 <p>Now that you are on your own there are many things you would like to do: Buy a car, buy a house, go
                     on vacations, and maybe even start a family. None of these come for free, you will need to
