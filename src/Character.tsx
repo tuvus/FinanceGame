@@ -203,4 +203,8 @@ export class Car {
         this.gpm = gpm;
         this.monthlyInsuranceCost = monthlyInsuranceCost;
     }
+
+    getAvgExpirationDate() {
+        return new Date(this.buyDate.getFullYear() + 10, this.buyDate.getMonth(), this.buyDate.getDate());
+    }
 }

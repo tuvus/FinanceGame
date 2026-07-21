@@ -356,6 +356,14 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                     It is time to decide to get a new or used car, and how decked-out it is.</p>
                 <button className="w-60 text-xl h-10 font-bold"
                         onClick={() => {
+                            const addCarGoal = () => {
+                                const expdate = new Date(character.car.getAvgExpirationDate().toString());
+                                character.addGoal(new Goal("Buy a new car",
+                                    "Your current car isn't going to last forever, you should prepare to buy a new one within one year of " + expdate.getFullYear(),
+                                    character.car.getAvgExpirationDate(),
+                                    (gameState) => gameState.character.car.buyDate.getFullYear() >= expdate.getFullYear() - 1,
+                                    (gameState) => gameState.character.satisfaction += 2))
+                            }
                             character.addMoney(30000 * gameState.s.inflation)
                             lifeEventManager.ReplaceEvent(new LifeEvent("Choosing a car", gameState.s.date,
                                 <div className="flex flex-col items-center w-full">
@@ -369,6 +377,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                                 character.payMoney(25945 * gameState.s.inflation);
                                                 gameState.s.lifeEventManager!.NextEvent();
                                                 character.car = new Car(25945 * gameState.s.inflation, new Date(gameState.s.date.getFullYear() - 3, random.int(0, 11), random.int(0, 28)), 20, 28, 120);
+                                                addCarGoal();
                                             }}>
                                                 <p className="text-gray-700">Buy a used car</p>
                                                 <p className="text-red-800">{formatter.format(25945 * gameState.s.inflation)}</p>
@@ -378,6 +387,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                                 character.payMoney(49814 * gameState.s.inflation);
                                                 gameState.s.lifeEventManager!.NextEvent();
                                                 character.car = new Car(49814 * gameState.s.inflation, new Date(gameState.s.date), 5, 32, 190);
+                                                addCarGoal();
                                             }}>
                                                 <p className="text-gray-700">Buy a new car</p>
                                                 <p className="text-red-800">{formatter.format(49814 * gameState.s.inflation)}</p>
@@ -387,6 +397,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                                 character.payMoney(31000 * gameState.s.inflation);
                                                 gameState.s.lifeEventManager!.NextEvent();
                                                 character.car = new Car(31000 * gameState.s.inflation, new Date(gameState.s.date.getFullYear() - 3, random.int(0, 11), random.int(0, 28)), 20, 27, 160);
+                                                addCarGoal();
                                             }}>
                                                 <p className="text-gray-700">Buy a used extravagant car</p>
                                                 <p className="text-red-800">{formatter.format(31000 * gameState.s.inflation)}</p>
@@ -396,6 +407,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                                 character.payMoney(60000 * gameState.s.inflation);
                                                 gameState.s.lifeEventManager!.NextEvent();
                                                 character.car = new Car(60000 * gameState.s.inflation, new Date(gameState.s.date), 5, 30, 320);
+                                                addCarGoal();
                                             }}>
                                                 <p className="text-gray-700">Buy a new extravagant car</p>
                                                 <p className="text-red-800">{formatter.format(60000 * gameState.s.inflation)}</p>
