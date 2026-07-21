@@ -56,13 +56,18 @@ export function GetReactSelectStyle<T>() {
 }
 
 export function ReplaceYear(date: Date, year: number) {
-    return new Date(year, date.getMonth(), date.getDay(), date.getTime());
+    return new Date(year, date.getMonth(), date.getDay(), date.getHours(), date.getMinutes(), date.getSeconds());
 }
 
-export type ButtonNextProps= {
+export function CopyDate(date: Date) {
+    return new Date(date.getFullYear(), date.getMonth(), date.getDay(), date.getHours(), date.getMinutes(), date.getSeconds());
+}
+
+export type ButtonNextProps = {
     action: () => void; style: string; text: string;
 }
-export function ButtonNext({action, style, text} : ButtonNextProps) {
+
+export function ButtonNext({action, style, text}: ButtonNextProps) {
     const keyPressed = ((e: KeyboardEvent) => {
         if (e.key == "n") {
             action();

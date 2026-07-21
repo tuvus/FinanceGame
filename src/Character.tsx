@@ -167,14 +167,14 @@ export class BigTicketItems {
             bt.balance += (bt.targetBalance - bt.balance) / (bt.buyDate.getFullYear() - date.getFullYear()));
     }
 
-    ScheduleBigTicketItems(lifeEventManager: LifeEventManager) {
+    ScheduleBigTicketItems(lifeEventManager: LifeEventManager, date: Date) {
         this.bigTicketItems.forEach(bt => {
-            if (bt.balance >= bt.targetBalance) {
+            if (bt.buyDate.getFullYear() <= date.getFullYear()) {
                 lifeEventManager.AddEvent(new LifeEvent(bt.name, bt.buyDate,
                     <div>{bt.desc}</div>, false));
             }
         });
-        this.bigTicketItems = this.bigTicketItems.filter(bt => bt.balance < bt.targetBalance);
+        this.bigTicketItems = this.bigTicketItems.filter(bt => bt.buyDate.getFullYear() > date.getFullYear());
     }
 }
 

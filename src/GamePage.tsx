@@ -6,7 +6,7 @@ import {LineChart} from "./components/LineChart.tsx";
 import Select from 'react-select';
 import {Account, GameState, Loan, StockAccount, StockBond} from "./Data.tsx";
 import StockCard from "./components/StockCard.tsx";
-import {ButtonNext, CalculateTaxes, GetDateString, GetReactSelectStyle} from "./Utils.tsx";
+import {ButtonNext, CalculateTaxes, CopyDate, GetDateString, GetReactSelectStyle} from "./Utils.tsx";
 import {DonutChart} from "./components/DonutChart.tsx";
 import {LifeEvent, LifeEventManager, LifeEventSchedule, LifeEventScheduler} from "./EventManager.tsx";
 import {TutorialChain, TutorialEvent, TutorialManager} from "./TutorialManager.tsx";
@@ -58,7 +58,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
 
     const startYear = () => {
         setPage(pages.length - 1);
-        character.bigTicketItems.ScheduleBigTicketItems(gameState.s.lifeEventManager!);
+        character.bigTicketItems.ScheduleBigTicketItems(gameState.s.lifeEventManager!, gameState.s.date);
         character.checkGoals(gameState.s);
         gameState.s.lifeEventScheduler!.GenerateEvents();
         if (!lifeEventManager.GetActiveEvent(gameState.s.date)) {
@@ -356,13 +356,20 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                     It is time to decide to get a new or used car, and how decked-out it is.</p>
                 <button className="w-60 text-xl h-10 font-bold"
                         onClick={() => {
-                            const addCarGoal = () => {
-                                const expdate = new Date(character.car.getAvgExpirationDate().toString());
+                            let addCarGoal = () => {
+                            };
+                            addCarGoal = () => {
+                                const targetDate = new Date(character.car.getAvgExpirationDate().toString());
+                                const buyDate = CopyDate(gameState.s.date);
                                 character.addGoal(new Goal("Buy a new car",
-                                    "Your current car isn't going to last forever, you should prepare to buy a new one within one year of " + expdate.getFullYear(),
+                                    "Your current car isn't going to last forever, you should prepare to buy a new one within one year of " + targetDate.getFullYear(),
                                     character.car.getAvgExpirationDate(),
-                                    (gameState) => gameState.character.car.buyDate.getFullYear() >= expdate.getFullYear() - 1,
-                                    (gameState) => gameState.character.satisfaction += 2))
+                                    (gameState) => gameState.character.car.buyDate.getFullYear() <= targetDate.getFullYear() + 1
+                                        && gameState.character.car.buyDate.getFullYear() > buyDate.getFullYear(),
+                                    (gameState) => {
+                                        gameState.character.satisfaction += 2;
+                                        addCarGoal();
+                                    }));
                             }
                             character.addMoney(30000 * gameState.s.inflation)
                             lifeEventManager.ReplaceEvent(new LifeEvent("Choosing a car", gameState.s.date,
@@ -730,6 +737,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                        max={Math.min(24500 * gameState.s.inflation / character.salary * 100, 100)}
                                        defaultValue={character.pretirement}
                                        onChange={e => {
+                                           if (isNaN(e.target.valueAsNumber)) return;
                                            character.pretirement = Math.min(1000, Math.max(0, e.target.valueAsNumber));
                                            render();
                                        }}
@@ -787,6 +795,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                        min="0"
                                        defaultValue={character.pinvestments}
                                        onChange={e => {
+                                           if (isNaN(e.target.valueAsNumber)) return;
                                            character.pinvestments = Math.min(1000, Math.max(0, e.target.valueAsNumber));
                                            render();
                                        }}
@@ -802,6 +811,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                    min="0"
                                    defaultValue={character.pleisure}
                                    onChange={e => {
+                                       if (isNaN(e.target.valueAsNumber)) return;
                                        character.pleisure = Math.min(1000, Math.max(0, e.target.valueAsNumber));
                                        render()
                                    }}
@@ -959,6 +969,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
             page: <div>
                 {activeEvent == null ?
                     <>
+                        {lifeEventManager.PrintEvents()}
                         <h1>Events</h1>
                         <button className="w-50 text-xl h-10 p-1 font-bold" onClick={() => nextYear()}><h3>End of
                             year</h3>

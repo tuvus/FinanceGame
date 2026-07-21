@@ -238,8 +238,7 @@ export function BigTicketItemsPage({gameState}: GameStateProps) {
                             ] : <p className="text-gray-700"
                                    key={4}>
                                 {gameState.formatter.format(selectedBigTicketItem.fullCost * ((100 - pLoans) / 100) - selectedBigTicketItem.balance)} out
-                                of
-                                pocket payment
+                                of pocket payment
                             </p>
                         )}
                         <button className="w-50 text-xl h-10 p-1 font-bold mt-2 bg-red-700!"
