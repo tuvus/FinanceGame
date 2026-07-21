@@ -47,7 +47,7 @@ export class Character {
         this.retirementAccount = new StockAccount("Retirement Account", 0);
         this.taxableIncome = 0;
         this.previousYearlyBalance = 0;
-        this.car = new Car(30000, new Date(1,1),1,1,1);
+        this.car = new Car(30000, new Date(1, 1), 1, 1, 1);
         this.milesDriven = 300;
     }
 
@@ -117,13 +117,15 @@ export class BigTicketItem {
     name: string;
     desc: string;
     buyDate: Date;
+    fullCost: number
     targetBalance: number;
     balance: number;
 
-    constructor(name: string, desc: string, buyDate: Date, targetBalance: number, balance: number) {
+    constructor(name: string, desc: string, buyDate: Date, fullCost: number, targetBalance: number, balance: number) {
         this.name = name;
         this.desc = desc;
         this.buyDate = buyDate;
+        this.fullCost = fullCost;
         this.targetBalance = targetBalance;
         this.balance = balance;
     }
@@ -137,11 +139,12 @@ export class BigTicketItems {
         this.character = character;
     }
 
-    AddBigTicketItem(name: string, desc: string, buyDate: Date, targetBalance: number) {
+    AddBigTicketItem(name: string, desc: string, buyDate: Date, fullCost: number, targetBalance: number) {
         this.bigTicketItems = [...this.bigTicketItems, {
             name: name,
             desc: desc,
             buyDate: buyDate,
+            fullCost: fullCost,
             targetBalance: targetBalance,
             balance: 0
         }];
@@ -153,8 +156,10 @@ export class BigTicketItems {
     }
 
     GetYearlyAllocation(date: Date) {
-        return this.bigTicketItems.reduce((sum, bt) =>
-            sum + (bt.targetBalance - bt.balance) / (bt.buyDate.getFullYear() - date.getFullYear()), 0);
+        return this.bigTicketItems
+            .filter(bt => bt.buyDate.getFullYear() > date.getFullYear())
+            .reduce((sum, bt) =>
+                sum + (bt.targetBalance - bt.balance) / (bt.buyDate.getFullYear() - date.getFullYear()), 0);
     }
 
     DoYearlyAllocations(date: Date) {
