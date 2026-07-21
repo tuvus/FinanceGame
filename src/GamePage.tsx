@@ -4,7 +4,7 @@ import random from "random";
 import {useEffect, useRef, useState} from "react";
 import {LineChart} from "./components/LineChart.tsx";
 import Select from 'react-select';
-import {Account, Character, GameState, Goal, Loan, StockAccount, StockBond} from "./Data.tsx";
+import {Account, GameState, Loan, StockAccount, StockBond} from "./Data.tsx";
 import StockCard from "./components/StockCard.tsx";
 import {ButtonNext, CalculateTaxes, GetDateString, GetReactSelectStyle} from "./Utils.tsx";
 import {DonutChart} from "./components/DonutChart.tsx";
@@ -16,6 +16,7 @@ import BrokenLaptopEvent from "./events/BrokenLaptop.tsx";
 import {BalanceNumber, SatisfactionNumber, SavingsAccountTutorial} from "./UI.tsx";
 import {BigTicketItemsPage} from "./components/BigTicketItems.tsx";
 import {Outline} from "./components/Outline.tsx";
+import {Car, Character, Goal} from "./Character.tsx";
 
 type GameProps = {
     fname: string; lname: string; tutorial: boolean;
@@ -40,9 +41,6 @@ function GamePage({fname, lname, tutorial}: GameProps) {
         {name: "Internet", amount: 40},
         {name: "Phone Data", amount: 60},
         {name: "Groceries", amount: 150},
-        {name: "Car Gas", amount: 110},
-        {name: "Car Maintenance", amount: 70},
-        {name: "Car Insurance", amount: 236},
         {name: "Health Insurance", amount: 400},
     ], 17));
     const [gameState] = useState({s: new GameState(new Date(random.int(1940, 2010), 0), character, formatter, compactFormatter, tutorial)});
@@ -76,7 +74,8 @@ function GamePage({fname, lname, tutorial}: GameProps) {
     }
 
     const endYear = () => {
-        const livingExpenses = character.monthlyLivingExpenses.map(e => e.amount).reduce((sum, curr) => sum + curr, 0) * gameState.s.inflation * 12;
+        const livingExpenses = (character.monthlyLivingExpenses.map(e => e.amount).reduce((sum, curr) => sum + curr, 0)
+            + character.getMonthlyCarCosts()) * gameState.s.inflation * 12;
         const taxableIncome = Math.max(0, character.salary * (1 - character.pretirement / 100) - 15750);
         character.taxableIncome = taxableIncome;
         const taxes = CalculateTaxes(taxableIncome);
@@ -125,8 +124,8 @@ function GamePage({fname, lname, tutorial}: GameProps) {
 
     const taxes = CalculateTaxes(Math.max(0, character.salary * (1 - character.pretirement / 100) - 15750));
 
-    const monthlyLivingExpenses = character.monthlyLivingExpenses.map(e => e.amount)
-        .reduce((sum, curr) => sum + curr, 0) * gameState.s.inflation;
+    const monthlyLivingExpenses = (character.monthlyLivingExpenses.map(e => e.amount)
+        .reduce((sum, curr) => sum + curr, 0) + character.getMonthlyCarCosts()) * gameState.s.inflation;
     const livingExpenses = monthlyLivingExpenses * 12;
     const minLoanPayments = character.loans.reduce((sum, l) => sum + l.getPayment(), 0);
 
@@ -170,9 +169,6 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                              {name: "Rent", amount: 500},
                              {name: "Utilities", amount: 50},
                              {name: "Groceries", amount: 150},
-                             {name: "Car Gas", amount: 20},
-                             {name: "Car Maintenance", amount: 30},
-                             {name: "Car Insurance", amount: 236},
                              {name: "Health Insurance", amount: 200},
                          ];
 
@@ -210,9 +206,6 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                               {name: "Rent", amount: 500},
                                               {name: "Utilities", amount: 50},
                                               {name: "Groceries", amount: 150},
-                                              {name: "Car Gas", amount: 20},
-                                              {name: "Car Maintenance", amount: 30},
-                                              {name: "Car Insurance", amount: 236},
                                               {name: "Health Insurance", amount: 200},
                                           ];
 
@@ -246,9 +239,6 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                               {name: "Rent", amount: 500},
                                               {name: "Utilities", amount: 50},
                                               {name: "Groceries", amount: 150},
-                                              {name: "Car Gas", amount: 20},
-                                              {name: "Car Maintenance", amount: 30},
-                                              {name: "Car Insurance", amount: 236},
                                               {name: "Health Insurance", amount: 200},
                                           ];
 
@@ -285,9 +275,6 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                               {name: "Rent", amount: 500},
                                               {name: "Utilities", amount: 50},
                                               {name: "Groceries", amount: 150},
-                                              {name: "Car Gas", amount: 20},
-                                              {name: "Car Maintenance", amount: 30},
-                                              {name: "Car Insurance", amount: 236},
                                               {name: "Health Insurance", amount: 200},
                                           ];
 
@@ -346,6 +333,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                 && gameState.date.getFullYear() >= goal.targetDate.getFullYear(),
                             (gameState) => {
                                 gameState.character.satisfaction += 5;
+                                gameState.character.milesDriven = 1000;
                                 gameState.lifeEventManager!.AddEvent(new LifeEvent("First plan!", new Date(gameState.date.getFullYear(), 0, 21),
                                     <div className="flex flex-col w-full items-center">
                                         <p className="w-3/4">Congratulations on finishing your first year plan, it
@@ -368,11 +356,11 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                     It is time to decide to get a new or used car, and how decked-out it is.</p>
                 <button className="w-60 text-xl h-10 font-bold"
                         onClick={() => {
-                            character.addMoney(50000 * gameState.s.inflation)
+                            character.addMoney(30000 * gameState.s.inflation)
                             lifeEventManager.ReplaceEvent(new LifeEvent("Choosing a car", gameState.s.date,
                                 <div className="flex flex-col items-center w-full">
                                     <div className="flex flex-col items-center gap-4 w-3/4">
-                                        <p>Your parents gave you {formatter.format(50000 * gameState.s.inflation)} to
+                                        <p>Your parents gave you {formatter.format(30000 * gameState.s.inflation)} to
                                             buy a car. Choose the type of car you want to buy. The money that you don't
                                             spend on the car you are allowed to keep.</p>
                                         <div className="grid grid-cols-2 w-208 justify-center gap-4">
@@ -380,6 +368,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                                 character.satisfaction += 2;
                                                 character.payMoney(25945 * gameState.s.inflation);
                                                 gameState.s.lifeEventManager!.NextEvent();
+                                                character.car = new Car(25945 * gameState.s.inflation, new Date(gameState.s.date.getFullYear() - 3, random.int(0, 11), random.int(0, 28)), 20, 28, 120);
                                             }}>
                                                 <p className="text-gray-700">Buy a used car</p>
                                                 <p className="text-red-800">{formatter.format(25945 * gameState.s.inflation)}</p>
@@ -388,6 +377,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                                 character.satisfaction += 5;
                                                 character.payMoney(49814 * gameState.s.inflation);
                                                 gameState.s.lifeEventManager!.NextEvent();
+                                                character.car = new Car(49814 * gameState.s.inflation, new Date(gameState.s.date), 5, 32, 190);
                                             }}>
                                                 <p className="text-gray-700">Buy a new car</p>
                                                 <p className="text-red-800">{formatter.format(49814 * gameState.s.inflation)}</p>
@@ -396,14 +386,16 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                                 character.satisfaction += 6;
                                                 character.payMoney(31000 * gameState.s.inflation);
                                                 gameState.s.lifeEventManager!.NextEvent();
+                                                character.car = new Car(31000 * gameState.s.inflation, new Date(gameState.s.date.getFullYear() - 3, random.int(0, 11), random.int(0, 28)), 20, 27, 160);
                                             }}>
                                                 <p className="text-gray-700">Buy a used extravagant car</p>
                                                 <p className="text-red-800">{formatter.format(31000 * gameState.s.inflation)}</p>
                                             </div>
                                             <div className="eventButton panelButton" onClick={() => {
-                                                character.satisfaction += 10;
+                                                character.satisfaction += 12;
                                                 character.payMoney(60000 * gameState.s.inflation);
                                                 gameState.s.lifeEventManager!.NextEvent();
+                                                character.car = new Car(60000 * gameState.s.inflation, new Date(gameState.s.date), 5, 30, 320);
                                             }}>
                                                 <p className="text-gray-700">Buy a new extravagant car</p>
                                                 <p className="text-red-800">{formatter.format(60000 * gameState.s.inflation)}</p>
@@ -594,6 +586,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
 
     useEffect(() => {
         character.accounts = [character.savingsAccount, character.investmentAccount, character.retirementAccount];
+        character.car = new Car(30000, new Date(gameState.s.date.getFullYear() - 3, random.int(0, 11), random.int(1, 28)), 70, 25, 180)
         gameState.s.lifeEventScheduler = new LifeEventScheduler(lifeEventManager, gameState.s, [
             new LifeEventSchedule(new LifeEvent("Day Trading", new Date(),
                 <DayTrading gameState={gameState.s}/>, true), 99, 4, .1, () => gameState.s.investmentsUnlocked),
@@ -748,6 +741,18 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                    key={i + "3"}>{formatter.format(amount * gameState.s.inflation * 12)}</p>
                             ]);
                         })}
+
+                        <p className="text-red-800">Car maintenance cost</p>
+                        <p className="text-red-800">{Math.round(gameState.s.character.car.monthlyMaintenanceCost * 12 * gameState.s.inflation / character.salary * 100)}%</p>
+                        <p className="text-red-800">{formatter.format(gameState.s.character.car.monthlyMaintenanceCost * 12 * gameState.s.inflation)}</p>
+
+                        <p className="text-red-800">Car gas cost</p>
+                        <p className="text-red-800">{Math.round(gameState.s.character.milesDriven * 3.2 * 12 * gameState.s.inflation / gameState.s.character.car.gpm / character.salary * 100)}%</p>
+                        <p className="text-red-800">{formatter.format(gameState.s.character.milesDriven * 3.2 * 12 * gameState.s.inflation / gameState.s.character.car.gpm)}</p>
+
+                        <p className="text-red-800">Car insurance cost</p>
+                        <p className="text-red-800">{Math.round(gameState.s.character.car.monthlyInsuranceCost * 12 * gameState.s.inflation / character.salary * 100)}%</p>
+                        <p className="text-red-800">{formatter.format(gameState.s.character.car.monthlyInsuranceCost * 12 * gameState.s.inflation)}</p>
 
                         {character.loans.length > 0 ? [
                             <p className="text-red-800" key="111" id="Loans">Loans</p>,
