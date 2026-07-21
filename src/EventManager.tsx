@@ -48,10 +48,13 @@ export class LifeEventManager {
         this.lifeEvents = this.lifeEvents.splice(1);
 
         if (this.GetActiveEvent(date) == null) {
+            this.date.setMonth(0);
+            this.date.setDate(1);
             this.nextYear();
             return;
         }
 
+        this.date.setMonth(this.lifeEvents[0].date.getMonth());
         this.date.setDate(this.lifeEvents[0].date.getDate());
         this.render();
     }
@@ -63,6 +66,7 @@ export class LifeEventManager {
     }
 
     GetActiveEvent(date: Date): LifeEvent | null {
+        this.PrintEvents()
         if (this.lifeEvents.length > 0
             && this.lifeEvents[0].date.getFullYear() == date.getFullYear()
             && this.lifeEvents[0].date.getMonth() >= date.getMonth())
@@ -71,7 +75,7 @@ export class LifeEventManager {
     }
 
     PrintEvents() {
-        console.log(this.lifeEvents.map(le => le.name).join(", "));
+        console.log(this.lifeEvents.map(le => le.name + " " + le.date.getFullYear()).join(", "));
     }
 }
 

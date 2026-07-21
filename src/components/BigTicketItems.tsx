@@ -1,9 +1,10 @@
 /* eslint-disable react-hooks/immutability */
-import {Account, BigTicketItem, type GameStateProps} from "../Data.tsx";
+import {Account, type GameStateProps} from "../Data.tsx";
 import {useState} from "react";
 import Select from "react-select";
 import {GetReactSelectStyle, ReplaceYear} from "../Utils.tsx";
 import random from "random";
+import type {BigTicketItem} from "../Character.tsx";
 
 class ItemType {
     name: string;

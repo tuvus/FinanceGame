@@ -4,9 +4,9 @@ import random from "random";
 import {useEffect, useRef, useState} from "react";
 import {LineChart} from "./components/LineChart.tsx";
 import Select from 'react-select';
-import {Account, Character, GameState, Loan, StockAccount, StockBond} from "./Data.tsx";
+import {Account, GameState, Loan, StockAccount, StockBond} from "./Data.tsx";
 import StockCard from "./components/StockCard.tsx";
-import {CalculateTaxes, GetDateString, GetReactSelectStyle} from "./Utils.tsx";
+import {ButtonNext, CalculateTaxes, GetDateString, GetReactSelectStyle} from "./Utils.tsx";
 import {DonutChart} from "./components/DonutChart.tsx";
 import {LifeEvent, LifeEventManager, LifeEventSchedule, LifeEventScheduler} from "./EventManager.tsx";
 import {TutorialChain, TutorialEvent, TutorialManager} from "./TutorialManager.tsx";
@@ -16,6 +16,7 @@ import BrokenLaptopEvent from "./events/BrokenLaptop.tsx";
 import {BalanceNumber, SatisfactionNumber, SavingsAccountTutorial} from "./UI.tsx";
 import {BigTicketItemsPage} from "./components/BigTicketItems.tsx";
 import {Outline} from "./components/Outline.tsx";
+import {Car, Character, Goal} from "./Character.tsx";
 
 type GameProps = {
     fname: string; lname: string; tutorial: boolean;
@@ -40,9 +41,6 @@ function GamePage({fname, lname, tutorial}: GameProps) {
         {name: "Internet", amount: 40},
         {name: "Phone Data", amount: 60},
         {name: "Groceries", amount: 150},
-        {name: "Car Gas", amount: 110},
-        {name: "Car Maintenance", amount: 70},
-        {name: "Car Insurance", amount: 236},
         {name: "Health Insurance", amount: 400},
     ], 17));
     const [gameState] = useState({s: new GameState(new Date(random.int(1940, 2010), 0), character, formatter, compactFormatter, tutorial)});
@@ -56,10 +54,12 @@ function GamePage({fname, lname, tutorial}: GameProps) {
     const [transferFrom, setTransferFrom] = useState<TransferFundsSelectState>({selectedAccount: null});
     const [transferTo, setTransferTo] = useState<TransferFundsSelectState>({selectedAccount: null});
     const [fundsToTransfer, setFundsToTransfer] = useState(0);
+    const [selectedGoal, setSelectedGoal] = useState("");
 
     const startYear = () => {
         setPage(pages.length - 1);
         character.bigTicketItems.ScheduleBigTicketItems(gameState.s.lifeEventManager!);
+        character.checkGoals(gameState.s);
         gameState.s.lifeEventScheduler!.GenerateEvents();
         if (!lifeEventManager.GetActiveEvent(gameState.s.date)) {
             lifeEventManager.AddEvent(
@@ -69,12 +69,13 @@ function GamePage({fname, lname, tutorial}: GameProps) {
         } else {
             lifeEventManager.AddEvent(new LifeEvent("New Year", new Date(gameState.s.date.getFullYear(), 11, 31),
                 <h3>The year of {gameState.s.date.getFullYear()} flew by quickly, now its time to plan for the next
-                    year.</h3>))
+                    year.</h3>));
         }
     }
 
     const endYear = () => {
-        const livingExpenses = character.monthlyLivingExpenses.map(e => e.amount).reduce((sum, curr) => sum + curr, 0) * gameState.s.inflation * 12;
+        const livingExpenses = (character.monthlyLivingExpenses.map(e => e.amount).reduce((sum, curr) => sum + curr, 0)
+            + character.getMonthlyCarCosts()) * gameState.s.inflation * 12;
         const taxableIncome = Math.max(0, character.salary * (1 - character.pretirement / 100) - 15750);
         character.taxableIncome = taxableIncome;
         const taxes = CalculateTaxes(taxableIncome);
@@ -104,7 +105,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
         // History log
         indexFund.a.endYear(gameState.s.date);
         bond.a.endYear(gameState.s.date);
-        character.endYear(gameState.s.date, newInflation);
+        character.endYear(gameState.s, newInflation);
         gameState.s.date.setFullYear(gameState.s.date.getFullYear() + 1);
     }
 
@@ -123,12 +124,13 @@ function GamePage({fname, lname, tutorial}: GameProps) {
 
     const taxes = CalculateTaxes(Math.max(0, character.salary * (1 - character.pretirement / 100) - 15750));
 
-    const monthlyLivingExpenses = character.monthlyLivingExpenses.map(e => e.amount)
-        .reduce((sum, curr) => sum + curr, 0) * gameState.s.inflation;
+    const monthlyLivingExpenses = (character.monthlyLivingExpenses.map(e => e.amount)
+        .reduce((sum, curr) => sum + curr, 0) + character.getMonthlyCarCosts()) * gameState.s.inflation;
     const livingExpenses = monthlyLivingExpenses * 12;
     const minLoanPayments = character.loans.reduce((sum, l) => sum + l.getPayment(), 0);
 
     const newSavings = character.salary * (100 - character.pinvestments - character.pretirement - character.pleisure) / 100 - taxes - livingExpenses - minLoanPayments - character.bigTicketItems.GetYearlyAllocation(gameState.s.date);
+    character.previousYearlyBalance = newSavings;
     const ploans = character.loans.reduce((sum, l) => sum + l.getPayment(), 0) / character.salary * 100;
 
 
@@ -167,9 +169,6 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                              {name: "Rent", amount: 500},
                              {name: "Utilities", amount: 50},
                              {name: "Groceries", amount: 150},
-                             {name: "Car Gas", amount: 20},
-                             {name: "Car Maintenance", amount: 30},
-                             {name: "Car Insurance", amount: 236},
                              {name: "Health Insurance", amount: 200},
                          ];
 
@@ -207,9 +206,6 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                               {name: "Rent", amount: 500},
                                               {name: "Utilities", amount: 50},
                                               {name: "Groceries", amount: 150},
-                                              {name: "Car Gas", amount: 20},
-                                              {name: "Car Maintenance", amount: 30},
-                                              {name: "Car Insurance", amount: 236},
                                               {name: "Health Insurance", amount: 200},
                                           ];
 
@@ -243,9 +239,6 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                               {name: "Rent", amount: 500},
                                               {name: "Utilities", amount: 50},
                                               {name: "Groceries", amount: 150},
-                                              {name: "Car Gas", amount: 20},
-                                              {name: "Car Maintenance", amount: 30},
-                                              {name: "Car Insurance", amount: 236},
                                               {name: "Health Insurance", amount: 200},
                                           ];
 
@@ -282,9 +275,6 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                               {name: "Rent", amount: 500},
                                               {name: "Utilities", amount: 50},
                                               {name: "Groceries", amount: 150},
-                                              {name: "Car Gas", amount: 20},
-                                              {name: "Car Maintenance", amount: 30},
-                                              {name: "Car Insurance", amount: 236},
                                               {name: "Health Insurance", amount: 200},
                                           ];
 
@@ -327,6 +317,36 @@ function GamePage({fname, lname, tutorial}: GameProps) {
         new LifeEvent("Moving Out", gameState.s.date, <>
             <h2>Its time to start your journey!</h2>
         </>),
+        new LifeEvent("Financial Planning", gameState.s.date, <div className="flex flex-col w-full items-center">
+            <div className="flex flex-col items-center gap-2 w-3/4">
+                <h2>As an adult you need to plan your finances and how you handle your money.</h2>
+                <p>Now that you are on your own there are many things you would like to do: Buy a car, buy a house, go
+                    on vacations, and maybe even start a family. None of these come for free, you will need to
+                    efficiently allocate the money you make from your new job in order to achieve these goals. In
+                    January of each year you will sit down and plan your finances for the upcoming year. It's time to
+                    take what you have learned about money and plan your adventure! But be careful and keep some money
+                    in savings, life has its twists and turns!</p>
+                <ButtonNext action={
+                    () => {
+                        character.addGoal(new Goal("Plan Finances", "Plan your finances for the year such that you will end with a positive yearly balance.", new Date(gameState.s.date.getFullYear() + 1, 0),
+                            (gameState, goal) => character.previousYearlyBalance > 0
+                                && gameState.date.getFullYear() >= goal.targetDate.getFullYear(),
+                            (gameState) => {
+                                gameState.character.satisfaction += 5;
+                                gameState.character.milesDriven = 1000;
+                                gameState.lifeEventManager!.AddEvent(new LifeEvent("First plan!", new Date(gameState.date.getFullYear(), 0, 21),
+                                    <div className="flex flex-col w-full items-center">
+                                        <p className="w-3/4">Congratulations on finishing your first year plan, it
+                                            wasn't so hard after all! With your plan you can now enjoy your year without
+                                            having to worry about your financing. Now its time to stick to your
+                                            plan!</p>
+                                    </div>
+                                ));
+                            }));
+                        gameState.s.lifeEventManager!.NextEvent();
+                    }} style="w-50 text-xl h-10 p-1 font-bold mt-2" text="Ready to start!"/>
+            </div>
+        </div>, true),
         new LifeEvent("Event Tutorial", new Date(gameState.s.date.getFullYear() + 6, 1),
             (<div><p>During the year you will encounter events that may have a financial impact.</p></div>)),
         new LifeEvent("Buying a Car", new Date(gameState.s.date.getFullYear() + 6, 1),
@@ -336,11 +356,11 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                     It is time to decide to get a new or used car, and how decked-out it is.</p>
                 <button className="w-60 text-xl h-10 font-bold"
                         onClick={() => {
-                            character.addMoney(50000 * gameState.s.inflation)
+                            character.addMoney(30000 * gameState.s.inflation)
                             lifeEventManager.ReplaceEvent(new LifeEvent("Choosing a car", gameState.s.date,
                                 <div className="flex flex-col items-center w-full">
                                     <div className="flex flex-col items-center gap-4 w-3/4">
-                                        <p>Your parents gave you {formatter.format(50000 * gameState.s.inflation)} to
+                                        <p>Your parents gave you {formatter.format(30000 * gameState.s.inflation)} to
                                             buy a car. Choose the type of car you want to buy. The money that you don't
                                             spend on the car you are allowed to keep.</p>
                                         <div className="grid grid-cols-2 w-208 justify-center gap-4">
@@ -348,6 +368,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                                 character.satisfaction += 2;
                                                 character.payMoney(25945 * gameState.s.inflation);
                                                 gameState.s.lifeEventManager!.NextEvent();
+                                                character.car = new Car(25945 * gameState.s.inflation, new Date(gameState.s.date.getFullYear() - 3, random.int(0, 11), random.int(0, 28)), 20, 28, 120);
                                             }}>
                                                 <p className="text-gray-700">Buy a used car</p>
                                                 <p className="text-red-800">{formatter.format(25945 * gameState.s.inflation)}</p>
@@ -356,6 +377,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                                 character.satisfaction += 5;
                                                 character.payMoney(49814 * gameState.s.inflation);
                                                 gameState.s.lifeEventManager!.NextEvent();
+                                                character.car = new Car(49814 * gameState.s.inflation, new Date(gameState.s.date), 5, 32, 190);
                                             }}>
                                                 <p className="text-gray-700">Buy a new car</p>
                                                 <p className="text-red-800">{formatter.format(49814 * gameState.s.inflation)}</p>
@@ -364,14 +386,16 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                                 character.satisfaction += 6;
                                                 character.payMoney(31000 * gameState.s.inflation);
                                                 gameState.s.lifeEventManager!.NextEvent();
+                                                character.car = new Car(31000 * gameState.s.inflation, new Date(gameState.s.date.getFullYear() - 3, random.int(0, 11), random.int(0, 28)), 20, 27, 160);
                                             }}>
                                                 <p className="text-gray-700">Buy a used extravagant car</p>
                                                 <p className="text-red-800">{formatter.format(31000 * gameState.s.inflation)}</p>
                                             </div>
                                             <div className="eventButton panelButton" onClick={() => {
-                                                character.satisfaction += 10;
+                                                character.satisfaction += 12;
                                                 character.payMoney(60000 * gameState.s.inflation);
                                                 gameState.s.lifeEventManager!.NextEvent();
+                                                character.car = new Car(60000 * gameState.s.inflation, new Date(gameState.s.date), 5, 30, 320);
                                             }}>
                                                 <p className="text-gray-700">Buy a new extravagant car</p>
                                                 <p className="text-red-800">{formatter.format(60000 * gameState.s.inflation)}</p>
@@ -562,6 +586,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
 
     useEffect(() => {
         character.accounts = [character.savingsAccount, character.investmentAccount, character.retirementAccount];
+        character.car = new Car(30000, new Date(gameState.s.date.getFullYear() - 3, random.int(0, 11), random.int(1, 28)), 70, 25, 180)
         gameState.s.lifeEventScheduler = new LifeEventScheduler(lifeEventManager, gameState.s, [
             new LifeEventSchedule(new LifeEvent("Day Trading", new Date(),
                 <DayTrading gameState={gameState.s}/>, true), 99, 4, .1, () => gameState.s.investmentsUnlocked),
@@ -571,7 +596,6 @@ function GamePage({fname, lname, tutorial}: GameProps) {
             new LifeEventSchedule(new LifeEvent("Promotion", new Date(), <PromotionEvent
                 gameState={gameState.s}/>, true), 8, 4, .2, null),
         ]);
-
         document.addEventListener("keyup", (e) => {
             if (e.key == "Enter") {
                 if (document.getElementById("transfer-modal")!.style.display == "block") {
@@ -717,6 +741,18 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                    key={i + "3"}>{formatter.format(amount * gameState.s.inflation * 12)}</p>
                             ]);
                         })}
+
+                        <p className="text-red-800">Car maintenance cost</p>
+                        <p className="text-red-800">{Math.round(gameState.s.character.car.monthlyMaintenanceCost * 12 * gameState.s.inflation / character.salary * 100)}%</p>
+                        <p className="text-red-800">{formatter.format(gameState.s.character.car.monthlyMaintenanceCost * 12 * gameState.s.inflation)}</p>
+
+                        <p className="text-red-800">Car gas cost</p>
+                        <p className="text-red-800">{Math.round(gameState.s.character.milesDriven * 3.2 * 12 * gameState.s.inflation / gameState.s.character.car.gpm / character.salary * 100)}%</p>
+                        <p className="text-red-800">{formatter.format(gameState.s.character.milesDriven * 3.2 * 12 * gameState.s.inflation / gameState.s.character.car.gpm)}</p>
+
+                        <p className="text-red-800">Car insurance cost</p>
+                        <p className="text-red-800">{Math.round(gameState.s.character.car.monthlyInsuranceCost * 12 * gameState.s.inflation / character.salary * 100)}%</p>
+                        <p className="text-red-800">{formatter.format(gameState.s.character.car.monthlyInsuranceCost * 12 * gameState.s.inflation)}</p>
 
                         {character.loans.length > 0 ? [
                             <p className="text-red-800" key="111" id="Loans">Loans</p>,
@@ -1103,6 +1139,42 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                     </div>
                 </div>
             </div>
+
+            <div id="goals-modal" className="flex hmodal justify-center"
+                 onClick={() => {
+                     document.getElementById("goals-modal")!.style.display = "none";
+                     setSelectedGoal("");
+                 }}>
+                <div
+                    className="flex flex-col gap-2 ml-auto mr-auto mt-[10%] w-120 bg-amber-100 rounded-xl items-center p-4"
+                    onClick={e => e.stopPropagation()}>
+                    <h2 className="text-gray-700!">Goals</h2>
+                    {character.goals.map(goal =>
+                        (<div key={goal.name} className="eventButton w-full! bg-gray-200! cursor-pointer"
+                              onClick={() => {
+                                  setSelectedGoal(pg => pg === goal.name ? "" : goal.name);
+                              }}>
+                            <div className="grid grid-cols-2 p-1">
+                                <h3 className="text-gray-700 text-start font-bold">{goal.name}</h3>
+
+                                <p className="text-gray-700 text-end">Years until
+                                    due: {goal.targetDate.getFullYear() - gameState.s.date.getFullYear()}</p>
+                            </div>
+                            {selectedGoal === goal.name ?
+                                <p className="text-gray-700">
+                                    {goal.description}
+                                </p> : <></>}
+                        </div>))
+                    }
+                    <button
+                        onClick={() => {
+                            document.getElementById("goals-modal")!.style.display = "none";
+                            setSelectedGoal("");
+                        }}
+                        className="p-2 text-2xl w-80">Close
+                    </button>
+                </div>
+            </div>
             {/* eslint-disable-next-line react-hooks/refs */}
             {tutorialManager.current.getTutorialElement()}
             <div className="mb-20"></div>
@@ -1111,7 +1183,8 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                 <div className="grid grid-cols-4 content-center align-items-middle mx-auto h-full ml-4 mr-4">
                     <h2 className="text-gray-700! align-self-middle text-start w-100">{fname} {lname} ({character.age})</h2>
                     {(page < pages.length ? [
-                            <BalanceNumber gameState={gameState.s} amount={character.savingsAccount.balance} key="1"/>,
+                            <BalanceNumber gameState={gameState.s} amount={character.savingsAccount.balance}
+                                           key="1"/>,
                             <button className="w-50 ml-4 text-xl font-bold h-10 justify-self-left" key="2"
                                     onClick={() => {
                                         setFundsToTransfer(NaN);

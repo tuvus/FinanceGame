@@ -13,7 +13,8 @@ function SetupPage({fname, lname, startGame}: SetupProps) {
         startGame(firstName, lastName, tutorial)
     }
     return (
-        <div className="flex flex-col items-center gap-2">
+        <div className="flex flex-col items-center gap-2" onKeyUp={(e) => {console.log("fasdfasfsa");
+        e.stopPropagation()}}>
             <h1 className="p-8">Finance Game</h1>
             <div className="flex flex-col items-center gap-2 p-4 bg-amber-100 rounded-xl">
                 <h2 className="text-gray-700! p-2">Choose your character name</h2>
@@ -31,7 +32,7 @@ function SetupPage({fname, lname, startGame}: SetupProps) {
                 </label>
                 <button className="w-40 text-xl h-10 font-bold" onClick={() => setTutorial(t => !t)}>{tutorial? "Tutorials" : "No Tutorials"}</button>
                 <label className="text-gray-700">Age: 18</label>
-                <button className="w-40 text-xl h-10 font-bold mt-4" onClick={finishSetup}>Start</button>
+                <button className="w-40 text-xl h-10 font-bold" onClick={finishSetup}>Start</button>
             </div>
         </div>
     )

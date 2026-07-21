@@ -12,7 +12,7 @@ export function Outline({gameState, page, startYear}: OutlineProps) {
     return (<div
         className="flex flex-col items-center w-50 absolute left-1 top-1/2 -translate-y-1/2 align-middle bg-amber-100 rounded-2xl p-0">
         <h2 className="text-gray-700! pt-2">Finances</h2>
-        <hr className="h-px bg-black border-1 w-full"/>
+        <hr className="bg-black border w-full"/>
         {gameState.pages.filter(p => p.displayCondition())
             .map(p =>
                 <div
@@ -24,5 +24,10 @@ export function Outline({gameState, page, startYear}: OutlineProps) {
                     }}>
                     <p className={"text-gray-700! " + (currentPageName == p.name ? "font-bold" : "")}>{p.name}</p>
                 </div>)}
+        <hr className="bg-black border w-full mt-2"/>
+        <button className="m-2 w-full text-2xl font-bold" onClick={() =>
+            document.getElementById("goals-modal")!.style.display = "block"
+        }>Goals
+        </button>
     </div>);
 }

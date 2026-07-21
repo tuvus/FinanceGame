@@ -1,4 +1,5 @@
 import {type GroupBase, type StylesConfig} from "react-select";
+import {useEffect} from "react";
 
 export function CalculateTaxes(taxableAmount: number): number {
     const taxBrackets = [
@@ -23,7 +24,7 @@ export function GetDateString(date: Date): string {
 }
 
 export function GetReactSelectStyle<T>() {
-    const style:  StylesConfig<T, false, GroupBase<T>> | undefined =  {
+    const style: StylesConfig<T, false, GroupBase<T>> | undefined = {
         control: (baseStyles, state) => ({
             ...baseStyles,
             backgroundColor: "#e5e7eb",
@@ -38,13 +39,13 @@ export function GetReactSelectStyle<T>() {
             },
             boxShadow: "none"
         }),
-            placeholder: (baseStyles) => ({
+        placeholder: (baseStyles) => ({
             ...baseStyles, fontSize: 20
         }),
-            singleValue: (baseStyles) => ({
+        singleValue: (baseStyles) => ({
             ...baseStyles, fontSize: 20
         }),
-            option: (baseStyles, state) => ({
+        option: (baseStyles, state) => ({
             ...baseStyles,
             color: "#364153",
             backgroundColor: state.isFocused ? "#e5e7eb" : undefined,
@@ -54,6 +55,30 @@ export function GetReactSelectStyle<T>() {
     return style;
 }
 
-export function ReplaceYear(date: Date, year:number) {
+export function ReplaceYear(date: Date, year: number) {
     return new Date(year, date.getMonth(), date.getDay(), date.getTime());
+}
+
+export type ButtonNextProps= {
+    action: () => void; style: string; text: string;
+}
+export function ButtonNext({action, style, text} : ButtonNextProps) {
+    const keyPressed = ((e: KeyboardEvent) => {
+        if (e.key == "n") {
+            action();
+            e.stopPropagation();
+        }
+    });
+    useEffect(() => {
+        document.addEventListener("keyup", keyPressed);
+        return () => {
+            document.removeEventListener("keyup", keyPressed);
+        };
+    }, []);
+
+    return (
+        <button className={style} onClick={action}>
+            {text}
+        </button>
+    );
 }
