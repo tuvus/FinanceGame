@@ -31,13 +31,13 @@ function BrokenLaptopEvent({gameState}: GameStateProps) {
                                     nothing they could do to fix it. Unfortunately, your worranty had expired
                                     and you had to pay for a new laptop.
                                 </p>
-                                <p className="text-red-800">{gameState.formatter.format(-750 * gameState.inflation)}</p>
+                                <p className="text-red-800">{gameState.formatter.format(750 * gameState.inflation)}</p>
                             </div>
                         ));
                     }
                 }}>
                     <p className="text-gray-700">Send it to the repair shop</p>
-                    <p className="text-red-800">{gameState.formatter.format(-150 * gameState.inflation)}</p>
+                    <p className="text-red-800">{gameState.formatter.format(150 * gameState.inflation)}</p>
                 </div>
                 <div className="eventButton panelButton" onClick={() => {
                     gameState.character.satisfaction -= 5;
@@ -45,7 +45,7 @@ function BrokenLaptopEvent({gameState}: GameStateProps) {
                     gameState.lifeEventManager!.NextEvent();
                 }}>
                     <p className="text-gray-700">Buy a new cheap laptop as a replacement</p>
-                    <p className="text-red-800">{gameState.formatter.format(-600 * gameState.inflation)}</p>
+                    <p className="text-red-800">{gameState.formatter.format(600 * gameState.inflation)}</p>
                 </div>
                 <div className="eventButton panelButton" onClick={() => {
                     gameState.character.satisfaction += 7;
@@ -53,7 +53,7 @@ function BrokenLaptopEvent({gameState}: GameStateProps) {
                     gameState.lifeEventManager!.NextEvent();
                 }}>
                     <p className="text-gray-700">Buy a fancier laptop as a replacement</p>
-                    <p className="text-red-800">{gameState.formatter.format(-1200 * gameState.inflation)}</p>
+                    <p className="text-red-800">{gameState.formatter.format(1200 * gameState.inflation)}</p>
                 </div>
             </div>
         </div>
