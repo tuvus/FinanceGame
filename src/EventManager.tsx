@@ -66,7 +66,6 @@ export class LifeEventManager {
     }
 
     GetActiveEvent(date: Date): LifeEvent | null {
-        this.PrintEvents()
         if (this.lifeEvents.length > 0
             && this.lifeEvents[0].date.getFullYear() == date.getFullYear()
             && this.lifeEvents[0].date.getMonth() >= date.getMonth())
