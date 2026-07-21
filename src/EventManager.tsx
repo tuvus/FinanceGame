@@ -52,6 +52,7 @@ export class LifeEventManager {
             return;
         }
 
+        this.date.setMonth(this.lifeEvents[0].date.getMonth());
         this.date.setDate(this.lifeEvents[0].date.getDate());
         this.render();
     }

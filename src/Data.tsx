@@ -24,6 +24,7 @@ export class Character {
     investmentAccount: StockAccount;
     retirementAccount: StockAccount;
     taxableIncome: number;
+    previousYearlyBalance: number;
 
     constructor(firstName: string, lastName: string, monthlyLivingExpenses: {
         name: string,
@@ -47,6 +48,13 @@ export class Character {
         this.investmentAccount = new StockAccount("Investment Account", 0);
         this.retirementAccount = new StockAccount("Retirement Account", 0);
         this.taxableIncome = 0;
+        this.previousYearlyBalance = 0;
+    }
+
+    checkGoals(gameState: GameState) {
+        const achievedGoals = this.goals.filter(g => g.condition(gameState, g));
+        achievedGoals.forEach(g => g.onCompleted(gameState, g));
+        this.goals = this.goals.filter(g => !achievedGoals.includes(g));
     }
 
     endYear(gameState: GameState, inflation: number) {
@@ -56,9 +64,7 @@ export class Character {
         this.refreshLoans();
         this.totalLoans.endYear(gameState.date);
         this.age++;
-        const achievedGoals = this.goals.filter(g => g.condition(gameState));
-        achievedGoals.forEach(g => g.onCompleted(gameState));
-        this.goals = this.goals.filter(g => !achievedGoals.includes(g));
+        this.checkGoals(gameState);
     }
 
     addLoan(loan: Loan) {
@@ -94,6 +100,10 @@ export class Character {
     refreshLoans() {
         this.loans = this.loans.filter(l => l.balance >= 0.01);
         this.totalLoans.balance = this.loans.reduce((sum, a) => sum + a.balance, 0);
+    }
+
+    addGoal(goal: Goal) {
+        this.goals = [...this.goals, goal];
     }
 }
 
@@ -260,10 +270,10 @@ export class Goal {
     name: string;
     description: string;
     targetDate: Date;
-    condition: (gameState: GameState) => boolean;
-    onCompleted: (gameState: GameState) => void;
+    condition: (gameState: GameState, goal: Goal) => boolean;
+    onCompleted: (gameState: GameState, goal: Goal) => void;
 
-    constructor(name: string, description: string, targetDate: Date, condition: (gameState: GameState) => boolean, onCompleted: (gameState: GameState) => void) {
+    constructor(name: string, description: string, targetDate: Date, condition: (gameState: GameState, goal: Goal) => boolean, onCompleted: (gameState: GameState, goal: Goal) => void) {
         this.name = name;
         this.description = description;
         this.targetDate = targetDate;

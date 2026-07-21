@@ -4,9 +4,9 @@ import random from "random";
 import {useEffect, useRef, useState} from "react";
 import {LineChart} from "./components/LineChart.tsx";
 import Select from 'react-select';
-import {Account, Character, GameState, Loan, StockAccount, StockBond} from "./Data.tsx";
+import {Account, Character, GameState, Goal, Loan, StockAccount, StockBond} from "./Data.tsx";
 import StockCard from "./components/StockCard.tsx";
-import {CalculateTaxes, GetDateString, GetReactSelectStyle} from "./Utils.tsx";
+import {ButtonNext, CalculateTaxes, GetDateString, GetReactSelectStyle} from "./Utils.tsx";
 import {DonutChart} from "./components/DonutChart.tsx";
 import {LifeEvent, LifeEventManager, LifeEventSchedule, LifeEventScheduler} from "./EventManager.tsx";
 import {TutorialChain, TutorialEvent, TutorialManager} from "./TutorialManager.tsx";
@@ -56,11 +56,12 @@ function GamePage({fname, lname, tutorial}: GameProps) {
     const [transferFrom, setTransferFrom] = useState<TransferFundsSelectState>({selectedAccount: null});
     const [transferTo, setTransferTo] = useState<TransferFundsSelectState>({selectedAccount: null});
     const [fundsToTransfer, setFundsToTransfer] = useState(0);
-    const [selectedGoal, setSelectedGoal] = useState("")
+    const [selectedGoal, setSelectedGoal] = useState("");
 
     const startYear = () => {
         setPage(pages.length - 1);
         character.bigTicketItems.ScheduleBigTicketItems(gameState.s.lifeEventManager!);
+        character.checkGoals(gameState.s);
         gameState.s.lifeEventScheduler!.GenerateEvents();
         if (!lifeEventManager.GetActiveEvent(gameState.s.date)) {
             lifeEventManager.AddEvent(
@@ -70,7 +71,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
         } else {
             lifeEventManager.AddEvent(new LifeEvent("New Year", new Date(gameState.s.date.getFullYear(), 11, 31),
                 <h3>The year of {gameState.s.date.getFullYear()} flew by quickly, now its time to plan for the next
-                    year.</h3>))
+                    year.</h3>));
         }
     }
 
@@ -130,6 +131,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
     const minLoanPayments = character.loans.reduce((sum, l) => sum + l.getPayment(), 0);
 
     const newSavings = character.salary * (100 - character.pinvestments - character.pretirement - character.pleisure) / 100 - taxes - livingExpenses - minLoanPayments - character.bigTicketItems.GetYearlyAllocation(gameState.s.date);
+    character.previousYearlyBalance = newSavings;
     const ploans = character.loans.reduce((sum, l) => sum + l.getPayment(), 0) / character.salary * 100;
 
 
@@ -328,6 +330,36 @@ function GamePage({fname, lname, tutorial}: GameProps) {
         new LifeEvent("Moving Out", gameState.s.date, <>
             <h2>Its time to start your journey!</h2>
         </>),
+        new LifeEvent("Financial Planning", gameState.s.date, <div className="flex flex-col w-full items-center">
+            <div className="flex flex-col items-center gap-2
+             w-3/4">
+                <h2>As an adult you need to plan your finances and how you handle your money.</h2>
+                <p>Now that you are on your own there are many things you would like to do: Buy a car, buy a house, go
+                    on vacations, and maybe even start a family. None of these come for free, you will need to
+                    efficiently allocate the money you make from your new job in order to achieve these goals. In
+                    January of each year you will sit down and plan your finances for the upcoming year. It's time to
+                    take what you have learned about money and plan your adventure! But be careful and keep some money
+                    in savings, life has its twists and turns!</p>
+                <ButtonNext action={
+                    () => {
+                        character.addGoal(new Goal("Plan Finances", "Plan your finances for the year such that you will end with a positive yearly balance.", new Date(gameState.s.date.getFullYear() + 1, 0),
+                            (gameState, goal) => character.previousYearlyBalance > 0
+                                && gameState.date.getFullYear() >= goal.targetDate.getFullYear(),
+                            (gameState) => {
+                                gameState.character.satisfaction += 5;
+                                gameState.lifeEventManager!.AddEvent(new LifeEvent("First plan!", new Date(gameState.date.getFullYear(), 0, 21),
+                                    <div className="flex flex-col w-full items-center">
+                                        <p className="w-3/4">Congratulations on finishing your first year plan, it
+                                            wasn't so hard after all! With your plan you can now enjoy your year without
+                                            having to worry about your financing. Now its time to stick to your
+                                            plan!</p>
+                                    </div>
+                                ));
+                            }));
+                        gameState.s.lifeEventManager!.NextEvent();
+                    }} style="w-50 text-xl h-10 p-1 font-bold mt-2" text="Ready to start!"/>
+            </div>
+        </div>, true),
         new LifeEvent("Event Tutorial", new Date(gameState.s.date.getFullYear() + 6, 1),
             (<div><p>During the year you will encounter events that may have a financial impact.</p></div>)),
     ]));
@@ -1064,7 +1096,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                   setSelectedGoal(pg => pg === goal.name ? "" : goal.name);
                               }}>
                             <div className="grid grid-cols-2 p-1">
-                                <h3 className="text-gray-700 text-start">{goal.name}</h3>
+                                <h3 className="text-gray-700 text-start font-bold">{goal.name}</h3>
 
                                 <p className="text-gray-700 text-end">Years until
                                     due: {goal.targetDate.getFullYear() - gameState.s.date.getFullYear()}</p>
