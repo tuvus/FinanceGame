@@ -70,7 +70,6 @@ export class Character {
     }
 
     endYear(gameState: GameState, inflation: number) {
-        console.log(gameState.date.getFullYear())
         this.salary *= inflation;
         this.loans.forEach(l => l.endLoanYear(gameState.date, inflation));
         this.accounts.forEach((account) => account.endYear(gameState.date));

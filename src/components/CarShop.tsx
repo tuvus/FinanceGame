@@ -1,6 +1,5 @@
 /* eslint-disable react-hooks/immutability */
 import {GameState} from "../Data.tsx";
-import {CopyDate} from "../Utils.tsx";
 import {Car, Goal} from "../Character.tsx";
 import random from "random";
 
@@ -12,12 +11,14 @@ export type CarShopProps = {
 export function CarShop({gameState, action}: CarShopProps) {
     const addCarGoal = (buyDate: Date) => {
         const targetDate = new Date(gameState.character.car.getAvgExpirationDate().toString());
-        console.log("aaaaa")
         gameState.character.checkGoalOfName(gameState, "Buy a new car");
         gameState.character.addGoal(new Goal("Buy a new car",
             "Your current car isn't going to last forever, you should plan to buy a new one within one year of " + targetDate.getFullYear(),
             gameState.character.car.getAvgExpirationDate(),
-            (gameState) => gameState.character.car.buyDate.getFullYear()  > buyDate.getFullYear(),
+            (gameState) => {
+                console.log(gameState.character.car.buyDate.getFullYear() + " > " + buyDate.getFullYear());
+                return gameState.character.car.buyDate.getFullYear() > buyDate.getFullYear();
+            },
             (gameState) => {
                 gameState.character.satisfaction += 2;
                 action(gameState);
@@ -28,7 +29,7 @@ export function CarShop({gameState, action}: CarShopProps) {
                 gameState.character.satisfaction += 2;
                 gameState.character.payMoney(25945 * gameState.inflation);
                 gameState.character.car = new Car(25945 * gameState.inflation, new Date(gameState.date.getFullYear() - 3, random.int(0, 11), random.int(0, 28)), 20, 28, 120);
-                addCarGoal(CopyDate(gameState.date));
+                addCarGoal(gameState.character.car.buyDate);
                 action(gameState);
             }}>
                 <p className="text-gray-700">Buy a used car</p>
@@ -38,7 +39,7 @@ export function CarShop({gameState, action}: CarShopProps) {
                 gameState.character.satisfaction += 5;
                 gameState.character.payMoney(49814 * gameState.inflation);
                 gameState.character.car = new Car(49814 * gameState.inflation, new Date(gameState.date), 5, 32, 190);
-                addCarGoal(CopyDate(gameState.date));
+                addCarGoal(gameState.character.car.buyDate);
                 action(gameState);
             }}>
                 <p className="text-gray-700">Buy a new car</p>
@@ -48,7 +49,7 @@ export function CarShop({gameState, action}: CarShopProps) {
                 gameState.character.satisfaction += 6;
                 gameState.character.payMoney(31000 * gameState.inflation);
                 gameState.character.car = new Car(31000 * gameState.inflation, new Date(gameState.date.getFullYear() - 3, random.int(0, 11), random.int(0, 28)), 20, 27, 160);
-                addCarGoal(CopyDate(gameState.date));
+                addCarGoal(gameState.character.car.buyDate);
                 action(gameState);
             }}>
                 <p className="text-gray-700">Buy a used extravagant car</p>
@@ -58,7 +59,7 @@ export function CarShop({gameState, action}: CarShopProps) {
                 gameState.character.satisfaction += 12;
                 gameState.character.payMoney(60000 * gameState.inflation);
                 gameState.character.car = new Car(60000 * gameState.inflation, new Date(gameState.date), 5, 30, 320);
-                addCarGoal(CopyDate(gameState.date));
+                addCarGoal(gameState.character.car.buyDate);
                 action(gameState);
             }}>
                 <p className="text-gray-700">Buy a new extravagant car</p>
