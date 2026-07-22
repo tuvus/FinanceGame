@@ -150,7 +150,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                      onClick={() => {
                          const previousExpenses = character.monthlyLivingExpenses;
                          character.monthlyLivingExpenses = [];
-                         character.savingsAccount.balance = 30000 * random.float(.7, 1.3);
+                         character.savingsAccount.balance = 30000 * random.float(.9, 1.1);
                          endYear();
                          character.salary = 42000 * random.float(.95, 1.1);
                          character.monthlyLivingExpenses = previousExpenses;
@@ -158,7 +158,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                          endYear();
                          endYear();
                          endYear();
-                         character.salary = 48000 * random.float(.95, 1.1);
+                         character.salary = 48000 * random.float(1, 1.1);
                          character.satisfaction = 40 * random.float(.9, 1.3);
                          character.pleisure = 10;
                          lifeEventManager.NextEvent();
@@ -171,7 +171,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                      onClick={() => {
                          const previousExpenses = character.monthlyLivingExpenses;
                          character.monthlyLivingExpenses = [];
-                         character.savingsAccount.balance = 30000 * random.float(.7, 1.3);
+                         character.savingsAccount.balance = 30000 * random.float(.9, 1.1);
                          endYear();
                          character.monthlyLivingExpenses = [
                              {name: "Rent", amount: 500},
@@ -186,11 +186,11 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                          endYear();
                          character.loans[0].balance += 10000 * random.float(.9, 1.1);
                          endYear();
-                         character.salary = 48000 * random.float(.95, 1.3);
+                         character.salary = 48000 * random.float(.9, 1.1);
                          character.monthlyLivingExpenses = previousExpenses;
                          endYear();
                          endYear();
-                         character.salary = 53000 * random.float(.95, 1.3);
+                         character.salary = 53000 * random.float(1, 1.1);
                          character.satisfaction = 42 * random.float(.9, 1.3);
                          character.pleisure = 10;
                          lifeEventManager.NextEvent();
@@ -208,7 +208,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                       onClick={() => {
                                           const previousExpenses = character.monthlyLivingExpenses;
                                           character.monthlyLivingExpenses = [];
-                                          character.savingsAccount.balance = 30000 * random.float(.7, 1.3);
+                                          character.savingsAccount.balance = 30000 * random.float(.9, 1.1);
                                           endYear();
                                           character.monthlyLivingExpenses = [
                                               {name: "Rent", amount: 500},
@@ -224,10 +224,10 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                           character.loans[0].balance += 4000 * random.float(.9, 1.1);
                                           endYear();
                                           character.monthlyLivingExpenses = previousExpenses;
-                                          character.salary = 52000 * random.float(.90, 1.3);
+                                          character.salary = 52000 * random.float(.90, 1.1);
                                           endYear();
                                           endYear();
-                                          character.salary = 57000 * random.float(.9, 1.3);
+                                          character.salary = 57000 * random.float(1, 1.1);
                                           character.satisfaction = 44 * random.float(.9, 1.3);
                                           character.pleisure = 10;
                                           lifeEventManager.NextEvent();
@@ -263,7 +263,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                           character.loans[0].balance += 20000 * random.float(.9, 1.1);
                                           endYear();
                                           character.monthlyLivingExpenses = previousExpenses;
-                                          character.salary = 80000 * random.float(.85, 1.3);
+                                          character.salary = 80000 * random.float(1, 1.3);
                                           character.satisfaction = 50 * random.float(.9, 1.3);
                                           character.pleisure = 10;
                                           lifeEventManager.NextEvent();
@@ -303,7 +303,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                           character.loans[0].balance += 20000;
                                           endYear();
                                           character.monthlyLivingExpenses = previousExpenses;
-                                          character.salary = 83000 * random.float(.85, 1.3);
+                                          character.salary = 83000 * random.float(1, 1.3);
                                           character.satisfaction = 48 * random.float(.9, 1.3);
                                           character.pleisure = 10;
                                           lifeEventManager.NextEvent();
@@ -563,7 +563,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
 
     useEffect(() => {
         character.accounts = [character.savingsAccount, character.investmentAccount, character.retirementAccount];
-        character.car = new Car(30000, new Date(gameState.s.date.getFullYear() - 3, random.int(0, 11), random.int(1, 28)), 70, 25, 180)
+        character.car = new Car(30000, new Date(gameState.s.date.getFullYear() - 3, random.int(0, 11), random.int(1, 28)), 20, 25, 180)
         gameState.s.lifeEventScheduler = new LifeEventScheduler(lifeEventManager, gameState.s, [
             new LifeEventSchedule(new LifeEvent("Day Trading", new Date(),
                 <DayTrading gameState={gameState.s}/>, true), 99, 4, .1, () => gameState.s.investmentsUnlocked),
