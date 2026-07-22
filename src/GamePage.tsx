@@ -671,9 +671,12 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                         }, {
                                             name: "Loans",
                                             amount: character.totalLoans.getTotalValue()
+                                        }, {
+                                            name: "Assets",
+                                            amount: character.car.getBaseValue(gameState.s.date)
                                         }
                                     ]}
-                                    label={formatter.format(character.getNetWorth())}
+                                    label={formatter.format(character.getNetWorth(gameState.s.date))}
                                     category="name" value="amount" showLabel={true}
                                     valueFormatter={(number: number) => formatter.format(number)}/>
                     </div>
@@ -920,13 +923,16 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                     }, {
                                         name: "Loans",
                                         amount: character.totalLoans.getTotalValue()
+                                    }, {
+                                        name: "Assets",
+                                        amount: character.car.getBaseValue(gameState.s.date)
                                     }
                                 ]}
-                                label={formatter.format(character.getNetWorth())}
+                                label={formatter.format(character.getNetWorth(gameState.s.date))}
                                 category="name" value="amount" showLabel={true}
                                 valueFormatter={(number: number) => formatter.format(number)}/>
                     <h3 className="text-gray-700 p-2">
-                        Total Net Worth: {formatter.format(character.getNetWorth())}
+                        Total Net Worth: {formatter.format(character.getNetWorth(gameState.s.date))}
                     </h3>
                 </div>
             </div>,

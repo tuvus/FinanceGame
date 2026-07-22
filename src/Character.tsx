@@ -121,8 +121,11 @@ export class Character {
         return this.milesDriven * 3.2 / this.car.gpm + this.car.monthlyInsuranceCost + this.car.monthlyMaintenanceCost;
     }
 
-    getNetWorth() {
-        return this.accounts.reduce((sum, curr) => sum + curr.getTotalValue(), 0) + this.bigTicketItems.bigTicketItems.reduce((sum, curr) => sum + curr.balance, 0) - this.totalLoans.balance;
+    getNetWorth(date: Date) {
+        return this.accounts.reduce((sum, curr) => sum + curr.getTotalValue(), 0)
+            + this.bigTicketItems.bigTicketItems.reduce((sum, curr) => sum + curr.balance, 0)
+            + this.car.getBaseValue(date)
+            - this.totalLoans.balance;
     }
 }
 
@@ -232,5 +235,13 @@ export class Car {
 
     getAvgExpirationDate() {
         return new Date(this.buyDate.getFullYear() + 10, this.buyDate.getMonth(), this.buyDate.getDate());
+    }
+
+    getBaseValue(date: Date) {
+        return this.cost / ((date.getFullYear() - this.buyDate.getFullYear()) / 5 + 1)
+    }
+
+    getSellValue(date: Date) {
+        return this.getBaseValue(date) / 2;
     }
 }
