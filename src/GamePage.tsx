@@ -357,8 +357,8 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                     }} style="w-50 text-xl h-10 p-1 font-bold mt-2" text="Ready to start!"/>
             </div>
         </div>, true),
-        new LifeEvent("Event Tutorial", new Date(gameState.s.date.getFullYear() + 6, 1),
-            (<div><p>During the year you will encounter events that may have a financial impact.</p></div>)),
+        // new LifeEvent("Event Tutorial", new Date(gameState.s.date.getFullYear() + 6, 1),
+        //     (<div><p>During the year you will encounter events that may have a financial impact.</p></div>)),
         new LifeEvent("Buying a Car", new Date(gameState.s.date.getFullYear() + 6, 1),
             (<div className="flex flex-col items-center gap-4">
                 <p className="w-200">Your car is nearing the end of its lifespan, and it is about time to buy a new
