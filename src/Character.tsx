@@ -182,13 +182,14 @@ export class BigTicketItems {
     ScheduleBigTicketItems(lifeEventManager: LifeEventManager, gameState: GameState, date: Date) {
         this.bigTicketItems.forEach(bt => {
             if (bt.buyDate.getFullYear() <= date.getFullYear()) {
-                this.character.addMoney(bt.balance);
                 lifeEventManager.AddEvent(new LifeEvent(bt.name, bt.buyDate,
                     <div>
                         <p>{bt.desc}</p>
                         <div className="flex flex-col items-center w-full">
                             <CarShop gameState={gameState}
-                                     action={(gameState: GameState) => gameState.lifeEventManager!.NextEvent()}/>
+                                     action={(gameState: GameState) => gameState.lifeEventManager!.NextEvent()}
+                                     allocatedMoney={bt.balance}
+                            />
                         </div>
                     </div>, true));
             }

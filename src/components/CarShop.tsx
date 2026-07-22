@@ -6,9 +6,10 @@ import random from "random";
 export type CarShopProps = {
     gameState: GameState;
     action: (gameState: GameState) => void;
+    allocatedMoney: number;
 }
 
-export function CarShop({gameState, action}: CarShopProps) {
+export function CarShop({gameState, action, allocatedMoney}: CarShopProps) {
     const addCarGoal = (buyDate: Date) => {
         const targetDate = new Date(gameState.character.car.getAvgExpirationDate().toString());
         gameState.character.checkGoalOfName(gameState, "Buy a new car");
@@ -24,46 +25,49 @@ export function CarShop({gameState, action}: CarShopProps) {
                 action(gameState);
             }));
     }
-    return (<div className="grid grid-cols-2 w-208 jusify-center gap-4">
-            <div className="eventButton panelButton" onClick={() => {
-                gameState.character.satisfaction += 2;
-                gameState.character.payMoney(25945 * gameState.inflation);
-                gameState.character.car = new Car(25945 * gameState.inflation, new Date(gameState.date.getFullYear() - 3, random.int(0, 11), random.int(0, 28)), 20, 28, 120);
-                addCarGoal(gameState.character.car.buyDate);
-                action(gameState);
-            }}>
-                <p className="text-gray-700">Buy a used car</p>
-                <p className="text-red-800">{gameState.formatter.format(25945 * gameState.inflation)}</p>
-            </div>
-            <div className="eventButton panelButton" onClick={() => {
-                gameState.character.satisfaction += 5;
-                gameState.character.payMoney(49814 * gameState.inflation);
-                gameState.character.car = new Car(49814 * gameState.inflation, new Date(gameState.date), 5, 32, 190);
-                addCarGoal(gameState.character.car.buyDate);
-                action(gameState);
-            }}>
-                <p className="text-gray-700">Buy a new car</p>
-                <p className="text-red-800">{gameState.formatter.format(49814 * gameState.inflation)}</p>
-            </div>
-            <div className="eventButton panelButton" onClick={() => {
-                gameState.character.satisfaction += 6;
-                gameState.character.payMoney(31000 * gameState.inflation);
-                gameState.character.car = new Car(31000 * gameState.inflation, new Date(gameState.date.getFullYear() - 3, random.int(0, 11), random.int(0, 28)), 20, 27, 160);
-                addCarGoal(gameState.character.car.buyDate);
-                action(gameState);
-            }}>
-                <p className="text-gray-700">Buy a used extravagant car</p>
-                <p className="text-red-800">{gameState.formatter.format(31000 * gameState.inflation)}</p>
-            </div>
-            <div className="eventButton panelButton" onClick={() => {
-                gameState.character.satisfaction += 12;
-                gameState.character.payMoney(60000 * gameState.inflation);
-                gameState.character.car = new Car(60000 * gameState.inflation, new Date(gameState.date), 5, 30, 320);
-                addCarGoal(gameState.character.car.buyDate);
-                action(gameState);
-            }}>
-                <p className="text-gray-700">Buy a new extravagant car</p>
-                <p className="text-red-800">{gameState.formatter.format(60000 * gameState.inflation)}</p>
+    return (<div>
+            <h3>Allocated Money: {gameState.formatter.format(allocatedMoney)}</h3>
+            <div className="grid grid-cols-2 w-208 jusify-center gap-4 mt-4">
+                <div className="eventButton panelButton" onClick={() => {
+                    gameState.character.satisfaction += 2;
+                    gameState.character.payMoney(25945 * gameState.inflation - allocatedMoney);
+                    gameState.character.car = new Car(25945 * gameState.inflation, new Date(gameState.date.getFullYear() - 3, random.int(0, 11), random.int(0, 28)), 20, 28, 120);
+                    addCarGoal(gameState.character.car.buyDate);
+                    action(gameState);
+                }}>
+                    <p className="text-gray-700">Buy a used car</p>
+                    <p className="text-red-800">{gameState.formatter.format(25945 * gameState.inflation)}</p>
+                </div>
+                <div className="eventButton panelButton" onClick={() => {
+                    gameState.character.satisfaction += 5;
+                    gameState.character.payMoney(49814 * gameState.inflation - allocatedMoney);
+                    gameState.character.car = new Car(49814 * gameState.inflation, new Date(gameState.date), 5, 32, 190);
+                    addCarGoal(gameState.character.car.buyDate);
+                    action(gameState);
+                }}>
+                    <p className="text-gray-700">Buy a new car</p>
+                    <p className="text-red-800">{gameState.formatter.format(49814 * gameState.inflation)}</p>
+                </div>
+                <div className="eventButton panelButton" onClick={() => {
+                    gameState.character.satisfaction += 6;
+                    gameState.character.payMoney(31000 * gameState.inflation - allocatedMoney);
+                    gameState.character.car = new Car(31000 * gameState.inflation, new Date(gameState.date.getFullYear() - 3, random.int(0, 11), random.int(0, 28)), 20, 27, 160);
+                    addCarGoal(gameState.character.car.buyDate);
+                    action(gameState);
+                }}>
+                    <p className="text-gray-700">Buy a used extravagant car</p>
+                    <p className="text-red-800">{gameState.formatter.format(31000 * gameState.inflation)}</p>
+                </div>
+                <div className="eventButton panelButton" onClick={() => {
+                    gameState.character.satisfaction += 12;
+                    gameState.character.payMoney(60000 * gameState.inflation - allocatedMoney);
+                    gameState.character.car = new Car(60000 * gameState.inflation, new Date(gameState.date), 5, 30, 320);
+                    addCarGoal(gameState.character.car.buyDate);
+                    action(gameState);
+                }}>
+                    <p className="text-gray-700">Buy a new extravagant car</p>
+                    <p className="text-red-800">{gameState.formatter.format(60000 * gameState.inflation)}</p>
+                </div>
             </div>
         </div>
     );

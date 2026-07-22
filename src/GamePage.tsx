@@ -363,15 +363,17 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                     It is time to decide to get a new or used car, and how decked-out it is.</p>
                 <button className="w-60 text-xl h-10 font-bold"
                         onClick={() => {
-                            character.addMoney(30000 * gameState.s.inflation)
                             lifeEventManager.ReplaceEvent(new LifeEvent("Choosing a car", gameState.s.date,
                                 <div className="flex flex-col items-center w-full">
                                     <div className="flex flex-col items-center gap-4 w-3/4">
                                         <p>Your parents gave you {formatter.format(30000 * gameState.s.inflation)} to
-                                            buy a car. Choose the type of car you want to buy. The money that you don't
-                                            spend on the car you are allowed to keep.</p>
+                                            buy a car. Choose the type of car you want to buy, you may also buy a more
+                                            expensive car by using cash from your savings. You are allowed to keep the money that you don't
+                                            spend on the car.</p>
                                         <CarShop gameState={gameState.s}
-                                                 action={(gameState: GameState) => gameState.lifeEventManager!.NextEvent()}/>
+                                                 action={(gameState: GameState) => gameState.lifeEventManager!.NextEvent()}
+                                                 allocatedMoney={30000 * gameState.s.inflation}
+                                        />
                                     </div>
                                 </div>, true
                             ));
@@ -1124,7 +1126,8 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                     onClick={e => e.stopPropagation()}>
                     <h2 className="text-gray-700!">Goals</h2>
                     {character.goals.map(goal =>
-                        (<div key={goal.name + goal.targetDate.toString()} className="eventButton w-full! bg-gray-200! cursor-pointer"
+                        (<div key={goal.name + goal.targetDate.toString()}
+                              className="eventButton w-full! bg-gray-200! cursor-pointer"
                               onClick={() => {
                                   setSelectedGoal(pg => pg === goal.name ? "" : goal.name);
                               }}>
