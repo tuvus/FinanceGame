@@ -86,7 +86,7 @@ export function BigTicketItemsPage({gameState}: GameStateProps) {
                                     onClick={() => {
                                         setItemSubType("Buy used");
                                         setBigTicketBaseValue(30000 * gameState.inflation);
-                                        setPurchaseDesc("You bought a used car!");
+                                        setPurchaseDesc("Time to buy a car!");
                                     }}>
                                     <p className="text-gray-700">
                                         Buy a used car
@@ -97,7 +97,7 @@ export function BigTicketItemsPage({gameState}: GameStateProps) {
                                     onClick={() => {
                                         setItemSubType("Buy new");
                                         setBigTicketBaseValue(48000 * gameState.inflation);
-                                        setPurchaseDesc("You bought a new car!");
+                                        setPurchaseDesc("Time to buy a car!");
                                     }}>
                                     <p className="text-gray-700">
                                         Buy new car
@@ -219,17 +219,17 @@ export function BigTicketItemsPage({gameState}: GameStateProps) {
                             </input>
                             </p>
                         </div>
-                        <p className="text-gray-700">Percent financed from loans at time of
-                            purchase: <input
-                                className="w-16 bg-gray-200 rounded-lg p-1"
-                                min={0}
-                                max={80}
-                                value={pLoans}
-                                onChange={e => {
-                                    setPLoans(e.target.valueAsNumber);
-                                }}
-                                type="number">
-                            </input> %</p>
+                        <p className="text-gray-700">
+                            Percent financed from loans at time of purchase: <input
+                            className="w-16 bg-gray-200 rounded-lg p-1"
+                            min={0}
+                            max={80}
+                            value={pLoans}
+                            onChange={e => {
+                                setPLoans(e.target.valueAsNumber);
+                            }}
+                            type="number">
+                        </input> %</p>
 
 
                         {(duration > 0 ? [
