@@ -657,7 +657,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                             amount: character.accounts.reduce((sum, curr) => sum + curr.balance, 0)
                                         },
                                         {
-                                            name: "Big Ticket Item Allocations",
+                                            name: "Big-Ticket Item Allocations",
                                             amount: character.bigTicketItems.bigTicketItems.reduce((sum, curr) => sum + curr.balance, 0)
                                         },
                                         {
@@ -748,7 +748,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                         ] : []}
 
                         {gameState.s.bigTicketItemsUnlocked ? [
-                            <p className="text-gray-700" key={1}>Big Ticket Items</p>,
+                            <p className="text-gray-700" key={1}>Big-Ticket Items</p>,
                             <p className="text-gray-700" key={2}>
                                 {Math.round(character.bigTicketItems.GetYearlyAllocation(gameState.s.date) / character.salary * 100)}%</p>,
                             <p className="text-gray-700" key={3}>
@@ -909,7 +909,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                         amount: character.accounts.reduce((sum, curr) => sum + curr.balance, 0)
                                     },
                                     {
-                                        name: "Big Ticket Item Allocations",
+                                        name: "Big-Ticket Item Allocations",
                                         amount: character.bigTicketItems.bigTicketItems.reduce((sum, curr) => sum + curr.balance, 0)
                                     },
                                     {
@@ -1191,7 +1191,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                         }}>
                                     Transfer Money
                                 </button>
-                                : <div></div>)]
+                                : <div key="2"></div>)]
                         : [<div key="1"></div>, <div key="2"></div>])}
                     <h2 className="justify-self-end text-gray-700!">{GetDateString(gameState.s.date)}</h2>
                 </div>

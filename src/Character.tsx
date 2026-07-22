@@ -135,14 +135,16 @@ export class BigTicketItem {
     buyDate: Date;
     fullCost: number
     targetBalance: number;
+    loanPercent: number
     balance: number;
 
-    constructor(name: string, desc: string, buyDate: Date, fullCost: number, targetBalance: number, balance: number) {
+    constructor(name: string, desc: string, buyDate: Date, fullCost: number, targetBalance: number, loanPercent: number, balance: number) {
         this.name = name;
         this.desc = desc;
         this.buyDate = buyDate;
         this.fullCost = fullCost;
         this.targetBalance = targetBalance;
+        this.loanPercent = loanPercent;
         this.balance = balance;
     }
 }
@@ -155,13 +157,14 @@ export class BigTicketItems {
         this.character = character;
     }
 
-    AddBigTicketItem(name: string, desc: string, buyDate: Date, fullCost: number, targetBalance: number) {
+    AddBigTicketItem(name: string, desc: string, buyDate: Date, fullCost: number, targetBalance: number, loanPercent: number) {
         this.bigTicketItems = [...this.bigTicketItems, {
             name: name,
             desc: desc,
             buyDate: buyDate,
             fullCost: fullCost,
             targetBalance: targetBalance,
+            loanPercent: loanPercent,
             balance: 0
         }];
     }
