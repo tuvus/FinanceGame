@@ -14,7 +14,7 @@ function BrokenLaptopEvent({gameState}: GameStateProps) {
                 <div className="eventButton panelButton" onClick={() => {
                     const r = random.float();
                     if (r < .3) {
-                        gameState.character.satisfaction -= 2;
+                        gameState.character.satisfaction -= 1;
                         gameState.character.payMoney(150 * gameState.inflation);
                         gameState.lifeEventManager!.ReplaceEvent(new LifeEvent("Laptop Fixed", gameState.lifeEventManager!.date,
                             <div className="flex flex-col w-full items-center mt-6 gap-4">
@@ -23,12 +23,12 @@ function BrokenLaptopEvent({gameState}: GameStateProps) {
                                 </p>
                             </div>));
                     } else {
-                        gameState.character.satisfaction -= 10;
+                        gameState.character.satisfaction -= 4;
                         gameState.character.payMoney(750 * gameState.inflation);
                         gameState.lifeEventManager!.ReplaceEvent(new LifeEvent("Laptop Unrepairable", gameState.lifeEventManager!.date,
                             <div className="flex flex-col w-full items-center mt-6 gap-4">
                                 <p className="w-3/4">You sent your laptop into the repair shop but there was
-                                    nothing they could do to fix it. Unfortunately, your worranty had expired
+                                    nothing they could do to fix it. Unfortunately, your warranty had expired
                                     and you had to pay for a new laptop.
                                 </p>
                                 <p className="text-red-800">{gameState.formatter.format(750 * gameState.inflation)}</p>
@@ -40,7 +40,7 @@ function BrokenLaptopEvent({gameState}: GameStateProps) {
                     <p className="text-red-800">{gameState.formatter.format(150 * gameState.inflation)}</p>
                 </div>
                 <div className="eventButton panelButton" onClick={() => {
-                    gameState.character.satisfaction -= 5;
+                    gameState.character.satisfaction -= 2;
                     gameState.character.payMoney(600 * gameState.inflation);
                     gameState.lifeEventManager!.NextEvent();
                 }}>
@@ -48,7 +48,7 @@ function BrokenLaptopEvent({gameState}: GameStateProps) {
                     <p className="text-red-800">{gameState.formatter.format(600 * gameState.inflation)}</p>
                 </div>
                 <div className="eventButton panelButton" onClick={() => {
-                    gameState.character.satisfaction += 7;
+                    gameState.character.satisfaction += 2;
                     gameState.character.payMoney(1200 * gameState.inflation);
                     gameState.lifeEventManager!.NextEvent();
                 }}>
