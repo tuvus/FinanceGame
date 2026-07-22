@@ -35,13 +35,13 @@ export class Character {
         this.pinvestments = 0;
         this.pretirement = 0;
         this.pleisure = 0;
-        this.accounts = [];
         this.loans = [];
         this.totalLoans = new Account("Loans", 0, false);
         this.satisfaction = 0;
         this.monthlyLivingExpenses = monthlyLivingExpenses;
         this.age = age;
         this.savingsAccount = new Account("Savings Account", 0, true);
+        this.accounts = [this.savingsAccount];
         this.bigTicketItems = new BigTicketItems(this);
         this.goals = [];
         this.investmentAccount = new StockAccount("Investment Account", 0);
@@ -119,6 +119,10 @@ export class Character {
 
     getMonthlyCarCosts() {
         return this.milesDriven * 3.2 / this.car.gpm + this.car.monthlyInsuranceCost + this.car.monthlyMaintenanceCost;
+    }
+
+    getNetWorth() {
+        return this.accounts.reduce((sum, curr) => sum + curr.getTotalValue(), 0) + this.bigTicketItems.bigTicketItems.reduce((sum, curr) => sum + curr.balance, 0) - this.totalLoans.balance;
     }
 }
 

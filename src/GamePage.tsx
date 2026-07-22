@@ -118,16 +118,19 @@ function GamePage({fname, lname, tutorial}: GameProps) {
     }
 
     const nextYear = () => {
+        // Start accounts one year early to have a point on the graph
+        if (gameState.s.gameYear == 1) {
+            gameState.s.bigTicketItemsUnlocked = true;
+        } else if (gameState.s.gameYear == 2) {
+            gameState.s.investmentsUnlocked = true;
+            gameState.s.character.accounts = [...gameState.s.character.accounts, gameState.s.character.investmentAccount];
+        } else if (gameState.s.gameYear == 7) {
+            gameState.s.retirementUnlocked = true;
+            gameState.s.character.accounts = [...gameState.s.character.accounts, gameState.s.character.retirementAccount];
+        }
         endYear();
         setPage(0);
         gameState.s.gameYear++;
-        if (gameState.s.gameYear == 2) {
-            gameState.s.bigTicketItemsUnlocked = true;
-        } else if (gameState.s.gameYear == 3) {
-            gameState.s.investmentsUnlocked = true;
-        } else if (gameState.s.gameYear == 8) {
-            gameState.s.retirementUnlocked = true;
-        }
     }
 
     const taxes = CalculateTaxes(Math.max(0, character.salary * (1 - character.pretirement / 100) - 15750));
@@ -523,7 +526,8 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                 towards the investment account by using the arrows.
             </p>), null, null, "Next"),
             new TutorialEvent("Transferring Money", null, (<p className="text-gray-700">
-                Although budgeting for investments is the main way you can send money to the investment account, you can click on the
+                Although budgeting for investments is the main way you can send money to the investment account, you can
+                click on the
                 transfer money button to transfer money between different accounts at anytime in the year.
             </p>), "BottomBar", null, "Close"),
         ]),
@@ -561,7 +565,6 @@ function GamePage({fname, lname, tutorial}: GameProps) {
     ], render));
 
     useEffect(() => {
-        character.accounts = [character.savingsAccount, character.investmentAccount, character.retirementAccount];
         character.car = new Car(30000, new Date(gameState.s.date.getFullYear() - 3, random.int(0, 11), random.int(1, 28)), 20, 25, 180)
         gameState.s.lifeEventScheduler = new LifeEventScheduler(lifeEventManager, gameState.s, [
             new LifeEventSchedule(new LifeEvent("Day Trading", new Date(),
@@ -654,6 +657,10 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                             amount: character.accounts.reduce((sum, curr) => sum + curr.balance, 0)
                                         },
                                         {
+                                            name: "Big Ticket Item Allocations",
+                                            amount: character.bigTicketItems.bigTicketItems.reduce((sum, curr) => sum + curr.balance, 0)
+                                        },
+                                        {
                                             name: "Stocks",
                                             amount: character.accounts.filter(a => a instanceof StockAccount).map(a => a as StockAccount)
                                                 .reduce((sum, curr) => sum + curr.getStockValue(), 0)
@@ -666,7 +673,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                             amount: character.totalLoans.getTotalValue()
                                         }
                                     ]}
-                                    label={formatter.format(character.accounts.reduce((sum, curr) => sum + curr.getTotalValue(), 0) - character.totalLoans.balance)}
+                                    label={formatter.format(character.getNetWorth())}
                                     category="name" value="amount" showLabel={true}
                                     valueFormatter={(number: number) => formatter.format(number)}/>
                     </div>
@@ -899,6 +906,10 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                         amount: character.accounts.reduce((sum, curr) => sum + curr.balance, 0)
                                     },
                                     {
+                                        name: "Big Ticket Item Allocations",
+                                        amount: character.bigTicketItems.bigTicketItems.reduce((sum, curr) => sum + curr.balance, 0)
+                                    },
+                                    {
                                         name: "Stocks",
                                         amount: character.accounts.filter(a => a instanceof StockAccount).map(a => a as StockAccount)
                                             .reduce((sum, curr) => sum + curr.getStockValue(), 0)
@@ -911,12 +922,11 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                         amount: character.totalLoans.getTotalValue()
                                     }
                                 ]}
-                                label={formatter.format(character.accounts.reduce((sum, curr) => sum + curr.getTotalValue(), 0) - character.totalLoans.balance)}
+                                label={formatter.format(character.getNetWorth())}
                                 category="name" value="amount" showLabel={true}
                                 valueFormatter={(number: number) => formatter.format(number)}/>
                     <h3 className="text-gray-700 p-2">
-                        Total Net
-                        Worth: {formatter.format(character.accounts.reduce((sum, a) => sum + a.balance, 0) - character.totalLoans.balance)}
+                        Total Net Worth: {formatter.format(character.getNetWorth())}
                     </h3>
                 </div>
             </div>,
@@ -1163,18 +1173,19 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                 <div className="grid grid-cols-4 content-center align-items-middle mx-auto h-full ml-4 mr-4">
                     <h2 className="text-gray-700! align-self-middle text-start w-100">{fname} {lname} ({character.age})</h2>
                     {(page < pages.length ? [
-                            <BalanceNumber gameState={gameState.s} amount={character.savingsAccount.balance}
-                                           key="1"/>,
-                            <button className="w-50 ml-4 text-xl font-bold h-10 justify-self-left" key="2"
-                                    onClick={() => {
-                                        setFundsToTransfer(NaN);
-                                        setTransferFrom({selectedAccount: null});
-                                        setTransferTo({selectedAccount: null});
-                                        document.getElementById("transfer-modal")!.style.display = "block";
-                                        document.getElementById("debt-modal")!.style.display = "none";
-                                    }}>Transfer
-                                Money
-                            </button>]
+                            <BalanceNumber gameState={gameState.s} amount={character.savingsAccount.balance} key="1"/>,
+                            (gameState.s.character.accounts.length > 1 ?
+                                <button className="w-50 ml-4 text-xl font-bold h-10 justify-self-left" key="2"
+                                        onClick={() => {
+                                            setFundsToTransfer(NaN);
+                                            setTransferFrom({selectedAccount: null});
+                                            setTransferTo({selectedAccount: null});
+                                            document.getElementById("transfer-modal")!.style.display = "block";
+                                            document.getElementById("debt-modal")!.style.display = "none";
+                                        }}>
+                                    Transfer Money
+                                </button>
+                                : <div></div>)]
                         : [<div key="1"></div>, <div key="2"></div>])}
                     <h2 className="justify-self-end text-gray-700!">{GetDateString(gameState.s.date)}</h2>
                 </div>
