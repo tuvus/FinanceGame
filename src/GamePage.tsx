@@ -402,9 +402,9 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                                        target="_blank">portfolio</a>, or where your money is.
             </p>), "DonutChart", null, "Close"),
         ]),
-        new TutorialChain("Allocation Tutorial", () => gameState.s.GetCurrentPage().name == "Allocation", [
-            new TutorialEvent("Allocation Page", null, (<p className="text-gray-700">
-                Congratulations on getting your first job! This page shows you where your paycheck this year will go,
+        new TutorialChain("Budget Tutorial", () => gameState.s.GetCurrentPage().name == "Budget", [
+            new TutorialEvent("Budget Page", null, (<p className="text-gray-700">
+                Congratulations on getting your first job! This page shows your paycheck fro the year,
                 and gives you the ability to <a
                 href="https://www.investopedia.com/terms/a/assetallocation.asp" target="_blank">allocate</a> the money.
             </p>), null, null, "Next"),
@@ -439,7 +439,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
             new TutorialEvent("Savings", null, (<p className="text-gray-700">
                 This is the leftover money from your salary, which will go into your <a
                 href="https://www.investopedia.com/terms/s/savings.asp" target="_blank">savings account</a>. You may
-                also withdraw money from your savings account towards your other allocations.
+                also withdraw money from your savings account towards your other accounts.
             </p>), "Savings", null, "Next"),
             new TutorialEvent("Predicted Balance", null, (<p className="text-gray-700">
                 This is the predicted balance that you will have at the start of next year. It is calculated from your
@@ -486,11 +486,10 @@ function GamePage({fname, lname, tutorial}: GameProps) {
         ]),
         new TutorialChain("Loan Page Tutorial", () => gameState.s.page == 2, [
             new TutorialEvent("Loans", null, (<p className="text-gray-700">
-                Each loan consists of liabilities, this is the amount of money that you need to pay back to the
-                lender.
+                Each loan consists of liabilities, this is the amount of money that you need to pay back to the lender.
                 Each year the liability increases by the interest rate, meaning, the longer you take to pay off the
-                debt, the more money you have to pay.
-                Each loan has a minimum payment that must be paid periodically which will show on the allocation table.
+                debt, the more money you have to pay. Each loan has a minimum payment that must be paid periodically
+                which will show on the budget table.
             </p>), null, null, "close"),
         ]),
         new TutorialChain("Summary Tutorial", () => gameState.s.GetCurrentPage().name == "Summary", [
@@ -518,13 +517,13 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                 invest your money!
             </p>), "YIRAccountInvestment Account", null, "Close"),
         ]),
-        new TutorialChain("Investment Tutorial Allocation", () => gameState.s.GetCurrentPage().name == "Allocation" && gameState.s.gameYear >= 3, [
-            new TutorialEvent("Allocating To Investments", null, (<p className="text-gray-700">
-                The investment account now shows up in the allocation page. You can change the amount to be allocated
+        new TutorialChain("Investment Tutorial Budget", () => gameState.s.GetCurrentPage().name == "Budget" && gameState.s.gameYear >= 3, [
+            new TutorialEvent("Budgeting for Investments", null, (<p className="text-gray-700">
+                The investment account now shows up in the budget page. You can change the amount to be allocated
                 towards the investment account by using the arrows.
             </p>), null, null, "Next"),
             new TutorialEvent("Transferring Money", null, (<p className="text-gray-700">
-                Although allocation is the main way you can send money to the investment account, you can click on the
+                Although budgeting for investments is the main way you can send money to the investment account, you can click on the
                 transfer money button to transfer money between different accounts at anytime in the year.
             </p>), "BottomBar", null, "Close"),
         ]),
@@ -675,9 +674,9 @@ function GamePage({fname, lname, tutorial}: GameProps) {
             </div>,
             displayCondition: () => true,
         }, {
-            name: "Allocation",
+            name: "Budget",
             page: <div className="flex flex-col gap-2 items-center">
-                <h1>Allocation</h1>
+                <h1>Budget</h1>
                 <div className="flex flex-col gap-2 w-1/2 rounded-2xl bg-amber-100 items-center pt-2 pb-2">
                     <div className="grid grid-cols-3 w-full">
                         <p className="text-green-700 font-bold" id="Paycheck">Paycheck</p>
