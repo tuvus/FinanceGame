@@ -16,7 +16,7 @@ function BrokenLaptopEvent({gameState}: GameStateProps) {
                     if (r < .3) {
                         gameState.character.satisfaction -= 1;
                         gameState.character.payMoney(150 * gameState.inflation);
-                        gameState.lifeEventManager!.ReplaceEvent(new LifeEvent("Laptop Fixed", gameState.lifeEventManager!.date,
+                        gameState.lifeEventManager!.ReplaceEvent(new LifeEvent("Laptop Fixed", gameState.date,
                             <div className="flex flex-col w-full items-center mt-6 gap-4">
                                 <p className="w-3/4">You sent your laptop into the repair shop and they were
                                     able to fix it and send it back within a few days.
@@ -25,7 +25,7 @@ function BrokenLaptopEvent({gameState}: GameStateProps) {
                     } else {
                         gameState.character.satisfaction -= 4;
                         gameState.character.payMoney(750 * gameState.inflation);
-                        gameState.lifeEventManager!.ReplaceEvent(new LifeEvent("Laptop Unrepairable", gameState.lifeEventManager!.date,
+                        gameState.lifeEventManager!.ReplaceEvent(new LifeEvent("Laptop Unrepairable", gameState.date,
                             <div className="flex flex-col w-full items-center mt-6 gap-4">
                                 <p className="w-3/4">You sent your laptop into the repair shop but there was
                                     nothing they could do to fix it. Unfortunately, your warranty had expired
