@@ -1,5 +1,6 @@
 import {Account, GameState, Loan, StockAccount} from "./Data.tsx";
 import {LifeEvent, type LifeEventManager} from "./EventManager.tsx";
+import {CarShop} from "./components/CarShop.tsx";
 
 export class Character {
     firstName: string;
@@ -47,7 +48,7 @@ export class Character {
         this.retirementAccount = new StockAccount("Retirement Account", 0);
         this.taxableIncome = 0;
         this.previousYearlyBalance = 0;
-        this.car = new Car(30000, new Date(1,1),1,1,1);
+        this.car = new Car(30000, new Date(1, 1), 1, 1, 1);
         this.milesDriven = 300;
     }
 
@@ -55,6 +56,15 @@ export class Character {
         const achievedGoals = this.goals.filter(g => g.condition(gameState, g));
         achievedGoals.forEach(g => g.onCompleted(gameState, g));
         this.goals = this.goals.filter(g => !achievedGoals.includes(g));
+    }
+
+    checkGoalOfName(gameState: GameState, name: string) {
+        if (!this.goals.some(g => g.name == name)) return;
+        const goal = this.goals.find(g => g.name == name)!;
+        if (goal.condition(gameState, goal)) {
+            this.goals = this.goals.filter(g => g != goal);
+            goal.onCompleted(gameState, goal)
+        }
     }
 
     endYear(gameState: GameState, inflation: number) {
@@ -66,7 +76,6 @@ export class Character {
         this.car.monthlyMaintenanceCost *= 1.3;
         this.car.monthlyInsuranceCost *= 0.95;
         this.age++;
-        this.checkGoals(gameState);
     }
 
     addLoan(loan: Loan) {
@@ -117,13 +126,15 @@ export class BigTicketItem {
     name: string;
     desc: string;
     buyDate: Date;
+    fullCost: number
     targetBalance: number;
     balance: number;
 
-    constructor(name: string, desc: string, buyDate: Date, targetBalance: number, balance: number) {
+    constructor(name: string, desc: string, buyDate: Date, fullCost: number, targetBalance: number, balance: number) {
         this.name = name;
         this.desc = desc;
         this.buyDate = buyDate;
+        this.fullCost = fullCost;
         this.targetBalance = targetBalance;
         this.balance = balance;
     }
@@ -137,11 +148,12 @@ export class BigTicketItems {
         this.character = character;
     }
 
-    AddBigTicketItem(name: string, desc: string, buyDate: Date, targetBalance: number) {
+    AddBigTicketItem(name: string, desc: string, buyDate: Date, fullCost: number, targetBalance: number) {
         this.bigTicketItems = [...this.bigTicketItems, {
             name: name,
             desc: desc,
             buyDate: buyDate,
+            fullCost: fullCost,
             targetBalance: targetBalance,
             balance: 0
         }];
@@ -153,8 +165,10 @@ export class BigTicketItems {
     }
 
     GetYearlyAllocation(date: Date) {
-        return this.bigTicketItems.reduce((sum, bt) =>
-            sum + (bt.targetBalance - bt.balance) / (bt.buyDate.getFullYear() - date.getFullYear()), 0);
+        return this.bigTicketItems
+            .filter(bt => bt.buyDate.getFullYear() > date.getFullYear())
+            .reduce((sum, bt) =>
+                sum + (bt.targetBalance - bt.balance) / (bt.buyDate.getFullYear() - date.getFullYear()), 0);
     }
 
     DoYearlyAllocations(date: Date) {
@@ -162,14 +176,22 @@ export class BigTicketItems {
             bt.balance += (bt.targetBalance - bt.balance) / (bt.buyDate.getFullYear() - date.getFullYear()));
     }
 
-    ScheduleBigTicketItems(lifeEventManager: LifeEventManager) {
+    ScheduleBigTicketItems(lifeEventManager: LifeEventManager, gameState: GameState, date: Date) {
         this.bigTicketItems.forEach(bt => {
-            if (bt.balance >= bt.targetBalance) {
+            if (bt.buyDate.getFullYear() <= date.getFullYear()) {
                 lifeEventManager.AddEvent(new LifeEvent(bt.name, bt.buyDate,
-                    <div>{bt.desc}</div>, false));
+                    <div>
+                        <p>{bt.desc}</p>
+                        <div className="flex flex-col items-center w-full">
+                            <CarShop gameState={gameState}
+                                     action={(gameState: GameState) => gameState.lifeEventManager!.NextEvent()}
+                                     allocatedMoney={bt.balance}
+                            />
+                        </div>
+                    </div>, true));
             }
         });
-        this.bigTicketItems = this.bigTicketItems.filter(bt => bt.balance < bt.targetBalance);
+        this.bigTicketItems = this.bigTicketItems.filter(bt => bt.buyDate.getFullYear() > date.getFullYear());
     }
 }
 
@@ -202,5 +224,9 @@ export class Car {
         this.monthlyMaintenanceCost = monthlyMaintenanceCost;
         this.gpm = gpm;
         this.monthlyInsuranceCost = monthlyInsuranceCost;
+    }
+
+    getAvgExpirationDate() {
+        return new Date(this.buyDate.getFullYear() + 10, this.buyDate.getMonth(), this.buyDate.getDate());
     }
 }

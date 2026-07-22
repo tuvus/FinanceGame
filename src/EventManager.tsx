@@ -21,13 +21,13 @@ export class LifeEvent {
 }
 
 export class LifeEventManager {
+    gameState: GameState;
     lifeEvents: LifeEvent[];
-    date: Date;
     nextYear: () => void;
     render: () => void;
 
-    constructor(date: Date, nextYear: () => void, render: () => void, startingEvents: LifeEvent[]) {
-        this.date = date;
+    constructor(gameState: GameState, nextYear: () => void, render: () => void, startingEvents: LifeEvent[]) {
+        this.gameState = gameState;
         this.nextYear = nextYear;
         this.render = render;
         this.lifeEvents = startingEvents;
@@ -44,33 +44,34 @@ export class LifeEventManager {
     }
 
     NextEvent() {
-        const date = this.lifeEvents[0].date;
         this.lifeEvents = this.lifeEvents.splice(1);
 
-        if (this.GetActiveEvent(date) == null) {
-            this.date.setMonth(0);
-            this.date.setDate(1);
+        if (this.GetActiveEvent(this.gameState.date) == null) {
             this.nextYear();
             return;
         }
 
-        this.date.setMonth(this.lifeEvents[0].date.getMonth());
-        this.date.setDate(this.lifeEvents[0].date.getDate());
+        this.gameState.date.setMonth(this.lifeEvents[0].date.getMonth());
+        this.gameState.date.setDate(this.lifeEvents[0].date.getDate());
         this.render();
     }
 
     ReplaceEvent(lifeEvent: LifeEvent) {
         this.lifeEvents[0] = lifeEvent;
-        this.date.setDate(this.lifeEvents[0].date.getDate());
+        this.gameState.date.setMonth(this.lifeEvents[0].date.getMonth());
+        this.gameState.date.setDate(this.lifeEvents[0].date.getDate());
         this.render();
     }
 
     GetActiveEvent(date: Date): LifeEvent | null {
-        this.PrintEvents()
         if (this.lifeEvents.length > 0
             && this.lifeEvents[0].date.getFullYear() == date.getFullYear()
             && this.lifeEvents[0].date.getMonth() >= date.getMonth())
             return this.lifeEvents[0];
+        if (this.lifeEvents.length > 0 && this.lifeEvents[0].date.getFullYear() < date.getFullYear()) {
+            console.error("Found a life event that should have occurred before now! Event date: " + this.lifeEvents[0].date.toString() + " Current Date: " + date.toString());
+            this.PrintEvents();
+        }
         return null;
     }
 

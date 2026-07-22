@@ -18,18 +18,6 @@ interface ItemTypeSelectState {
     selectedType: ItemType | null;
 }
 
-class PayYear {
-    year: number;
-
-    constructor(year: number) {
-        this.year = year;
-    }
-}
-
-interface PayYearSelectState {
-    selectedYear: PayYear | null;
-}
-
 interface TransferFundsSelectState {
     selectedAccount: Account | null;
 }
@@ -42,10 +30,8 @@ export function BigTicketItemsPage({gameState}: GameStateProps) {
     const [itemSubType, setItemSubType] = useState("");
     const [purchaseDesc, setPurchaseDesc] = useState("");
     const [bigTicketBaseValue, setBigTicketBaseValue] = useState(0);
-    const [payYearOptions] = useState([new PayYear(2), new PayYear(3), new PayYear(4), new PayYear(5), new PayYear(8), new PayYear(10), new PayYear(15), new PayYear(20), new PayYear(25), new PayYear(30), new PayYear(40)]);
-    const [payYear, setPayYear] = useState<PayYearSelectState>({selectedYear: payYearOptions[3]});
     const [pLoans, setPLoans] = useState(0);
-    const [duration, setDuration] = useState(0);
+    const [duration, setDuration] = useState<number>(gameState.character.car.getAvgExpirationDate().getFullYear() - gameState.date.getFullYear());
     const [transferMoney, setTransferMoney] = useState(false);
     const [transferFrom, setTransferFrom] = useState<TransferFundsSelectState>({selectedAccount: null});
     const [fundsToTransfer, setFundsToTransfer] = useState(0);
@@ -63,17 +49,26 @@ export function BigTicketItemsPage({gameState}: GameStateProps) {
                     <h3 className="text-gray-700 font-bold">{bt.name}</h3>
                     <p className="text-gray-700">Total cost: {gameState.formatter.format(bt.targetBalance)}</p>
                     <p className="text-gray-700">Allocated: {gameState.formatter.format(bt.balance)}</p>
-                    <p className="text-gray-700">Years to
-                        purchase: {bt.buyDate.getFullYear() - gameState.date.getFullYear()}</p>
-                    <p className="text-gray-700">Yearly
-                        allocation: {gameState.formatter.format((bt.targetBalance - bt.balance) / (bt.buyDate.getFullYear() - gameState.date.getFullYear()))}</p>
+                    {bt.buyDate.getFullYear() > gameState.date.getFullYear() ? [
+                        <p className="text-gray-700" key={1}>Years to
+                            purchase: {bt.buyDate.getFullYear() - gameState.date.getFullYear()}</p>,
+                        <p className="text-gray-700" key={2}>Yearly
+                            allocation: {gameState.formatter.format((bt.targetBalance - bt.balance) / (bt.buyDate.getFullYear() - gameState.date.getFullYear()))}</p>,
+                    ] : [
+                        <p className="text-gray-700" key={1}>
+                            Buying this year
+                        </p>,
+                        <p className="text-gray-700" key={2}>
+                            Out of pocket payment: {gameState.formatter.format(bt.targetBalance - bt.balance)}
+                        </p>
+                    ]}
 
                 </div>
             )}
             {addBigTicketItem ?
                 <div className="flex modal justify-center" onClick={() => setAddBigTicketItem(false)}>
                     <div
-                        className="flex flex-col gap-2 ml-auto mr-auto mb-auto mt-[20%] bg-amber-100 rounded-xl items-center p-4"
+                        className="flex flex-col gap-2 ml-auto mr-auto mb-auto mt-[10%] bg-amber-100 rounded-xl items-center p-4"
                         onClick={e => e.stopPropagation()}>
                         <h3 className="text-gray-700">Big Ticket Item</h3>
 
@@ -91,7 +86,7 @@ export function BigTicketItemsPage({gameState}: GameStateProps) {
                                     onClick={() => {
                                         setItemSubType("Buy used");
                                         setBigTicketBaseValue(30000 * gameState.inflation);
-                                        setPurchaseDesc("You bought a used car!");
+                                        setPurchaseDesc("Time to buy a car!");
                                     }}>
                                     <p className="text-gray-700">
                                         Buy a used car
@@ -102,7 +97,7 @@ export function BigTicketItemsPage({gameState}: GameStateProps) {
                                     onClick={() => {
                                         setItemSubType("Buy new");
                                         setBigTicketBaseValue(48000 * gameState.inflation);
-                                        setPurchaseDesc("You bought a new car!");
+                                        setPurchaseDesc("Time to buy a car!");
                                     }}>
                                     <p className="text-gray-700">
                                         Buy new car
@@ -120,7 +115,7 @@ export function BigTicketItemsPage({gameState}: GameStateProps) {
                                         setPurchaseDesc("You bought a house!");
                                     }}>
                                     <p className="text-gray-700">
-                                       Buy a house
+                                        Buy a house
                                     </p>
                                 </div>
                                 <div
@@ -131,52 +126,70 @@ export function BigTicketItemsPage({gameState}: GameStateProps) {
                                         setPurchaseDesc("You built a new house!");
                                     }}>
                                     <p className="text-gray-700">
-                                       Build a house
+                                        Build a house
                                     </p>
                                 </div>
                             </div>
                             : <></>}
-                        {itemSubType != "" ?
-                            [<div className="flex gap-2" key={1}>
-                                <p className="text-gray-700 content-center">
-                                    Years until the item is bought
-                                </p>
-                                <Select className="w-28"
-                                        options={payYearOptions}
-                                        getOptionLabel={a => a.year.toString()}
-                                        value={payYear.selectedYear}
-                                        isSearchable={false}
-                                        styles={GetReactSelectStyle<PayYear>()}
-                                        onChange={(t: PayYear | null) => setPayYear({selectedYear: t})}/>
+                        {itemSubType != "" ? [
+                            <div className="flex gap-2" key={1}>
+                                <p className="text-gray-700" key={3}>
+                                    Years until the item is bought <input
+                                    className="w-16 bg-gray-200 rounded-lg p-1"
+                                    min={0}
+                                    max={80}
+                                    value={duration}
+                                    onChange={e => {
+                                        if (!isNaN(e.target.valueAsNumber) && e.target.valueAsNumber >= 0) {
+                                            setDuration(e.target.valueAsNumber);
+                                        }
+                                    }}
+                                    type="number">
+                                </input></p>
                             </div>,
-                                <p className="text-gray-700"
-                                   key={2}>Cost: {gameState.formatter.format(bigTicketBaseValue)}</p>,
-                                <p className="text-gray-700" key={3}>Percent financed from loans at time of
-                                    purchase: <input
-                                        className="w-16 bg-gray-200 rounded-lg p-1"
-                                        min={0}
-                                        max={80}
-                                        value={pLoans}
-                                        onChange={e => {
-                                            setPLoans(e.target.valueAsNumber);
-                                        }}
-                                        type="number">
-                                    </input> %</p>,
+                            <p className="text-gray-700"
+                               key={2}>Cost: {gameState.formatter.format(bigTicketBaseValue)}</p>,
+                            <p className="text-gray-700" key={3}>Percent financed from loans at time of
+                                purchase: <input
+                                    className="w-16 bg-gray-200 rounded-lg p-1"
+                                    min={0}
+                                    max={80}
+                                    value={pLoans}
+                                    onChange={e => {
+                                        setPLoans(e.target.valueAsNumber);
+                                    }}
+                                    type="number">
+                                </input> %</p>,
 
-                                <p className="text-gray-700" key={4}>Yearly
-                                    payment: {gameState.formatter.format(bigTicketBaseValue * ((100 - pLoans) / 100) / (payYear.selectedYear?.year ?? 1))}</p>,
-                                <div className="flex gap-2 justify-center" key={5}>
-                                    <button className="w-50 text-xl h-10 p-1 font-bold mt-2"
-                                            onClick={() => setAddBigTicketItem(false)}>Cancel
-                                    </button>
-                                    <button className="w-50 text-xl h-10 p-1 font-bold mt-2"
-                                            onClick={() => {
-                                                setAddBigTicketItem(false);
-                                                gameState.character.bigTicketItems.AddBigTicketItem(itemSubType + " " + itemType.selectedType!.name.toLowerCase(), purchaseDesc, new Date(gameState.date.getFullYear() + (payYear.selectedYear?.year ?? 1), random.int(0, 11), random.int(0, 28), random.int(9, 18)), bigTicketBaseValue * ((100 - pLoans) / 100));
-                                            }}>Add
-                                    </button>
-                                </div>]
-                            : <div key={-1}></div>}
+                            (duration > 0 ? [
+                                    <p className="text-gray-700" key={4}>Yearly
+                                        payment: {gameState.formatter.format(bigTicketBaseValue * ((100 - pLoans) / 100) / duration)}</p>,
+                                ] : <p className="text-gray-700" key={4}>
+                                    {gameState.formatter.format(bigTicketBaseValue * ((100 - pLoans) / 100))} out of
+                                    pocket payment
+                                </p>
+                            ),
+                            <div className="flex gap-2 justify-center" key={5}>
+                                <button className="w-50 text-xl h-10 p-1 font-bold mt-2"
+                                        onClick={() => setAddBigTicketItem(false)}>Cancel
+                                </button>
+                                <button className="w-50 text-xl h-10 p-1 font-bold mt-2"
+                                        onClick={() => {
+                                            setAddBigTicketItem(false);
+                                            const targetBalance = duration > 0 ? bigTicketBaseValue * ((100 - pLoans) / 100) : 0;
+                                            gameState.character.bigTicketItems.AddBigTicketItem(
+                                                itemSubType + " " + itemType.selectedType!.name.toLowerCase(),
+                                                purchaseDesc,
+                                                new Date(gameState.date.getFullYear() + duration,
+                                                    random.int(0, 11),
+                                                    random.int(0, 28),
+                                                    random.int(9, 18)),
+                                                bigTicketBaseValue,
+                                                targetBalance);
+                                        }}>Add
+                                </button>
+                            </div>
+                        ] : <div key={-1}></div>}
                     </div>
                 </div>
                 : <></>}
@@ -187,17 +200,17 @@ export function BigTicketItemsPage({gameState}: GameStateProps) {
                         className="flex flex-col gap-2 ml-auto mr-auto mb-auto mt-[15%] bg-amber-100 rounded-xl items-center p-4"
                         onClick={e => e.stopPropagation()}>
                         <h3 className="text-gray-700">Big Ticket Item</h3>
-                        <p className="text-gray-700">Cost: {gameState.formatter.format(selectedBigTicketItem.targetBalance)}</p>
+                        <p className="text-gray-700">Cost: {gameState.formatter.format(selectedBigTicketItem.fullCost)}</p>
                         <p className="text-gray-700">Allocated: {gameState.formatter.format(selectedBigTicketItem.balance)}</p>
                         <div className="flex gap-2">
                             <p className="text-gray-700 content-center">
                                 Years until the item is bought <input
                                 className="w-14 bg-gray-200 rounded-lg p-1"
-                                min={1}
-                                max={99}
+                                min={0}
+                                max={80}
                                 value={duration}
                                 onChange={e => {
-                                    if (!isNaN(e.target.valueAsNumber) && e.target.valueAsNumber >= 1) {
+                                    if (!isNaN(e.target.valueAsNumber) && e.target.valueAsNumber >= 0) {
                                         setDuration(e.target.valueAsNumber);
                                         selectedBigTicketItem.buyDate = ReplaceYear(selectedBigTicketItem.buyDate, gameState.date.getFullYear() + e.target.valueAsNumber);
                                     }
@@ -206,20 +219,28 @@ export function BigTicketItemsPage({gameState}: GameStateProps) {
                             </input>
                             </p>
                         </div>
-                        <p className="text-gray-700">Percent financed from loans at time of
-                            purchase: <input
-                                className="w-16 bg-gray-200 rounded-lg p-1"
-                                min={0}
-                                max={80}
-                                value={pLoans}
-                                onChange={e => {
-                                    setPLoans(e.target.valueAsNumber);
-                                }}
-                                type="number">
-                            </input> %</p>
+                        <p className="text-gray-700">
+                            Percent financed from loans at time of purchase: <input
+                            className="w-16 bg-gray-200 rounded-lg p-1"
+                            min={0}
+                            max={80}
+                            value={pLoans}
+                            onChange={e => {
+                                setPLoans(e.target.valueAsNumber);
+                            }}
+                            type="number">
+                        </input> %</p>
 
-                        <p className="text-gray-700">Yearly
-                            payment: {gameState.formatter.format((selectedBigTicketItem.targetBalance * ((100 - pLoans) / 100) - selectedBigTicketItem.balance) / duration)}</p>
+
+                        {(duration > 0 ? [
+                                <p className="text-gray-700" key={4}>Yearly
+                                    payment: {gameState.formatter.format((selectedBigTicketItem.targetBalance * ((100 - pLoans) / 100) - selectedBigTicketItem.balance) / duration)}</p>,
+                            ] : <p className="text-gray-700"
+                                   key={4}>
+                                {gameState.formatter.format(selectedBigTicketItem.fullCost * ((100 - pLoans) / 100) - selectedBigTicketItem.balance)} out
+                                of pocket payment
+                            </p>
+                        )}
                         <button className="w-50 text-xl h-10 p-1 font-bold mt-2 bg-red-700!"
                                 onClick={() => {
                                     gameState.character.bigTicketItems.RemoveBigTicketItem(selectedBigTicketItem);
@@ -261,8 +282,7 @@ export function BigTicketItemsPage({gameState}: GameStateProps) {
                             }}></Select>
                         {transferFrom.selectedAccount ?
                             <p className="text-gray-700 text-lg!">Balance: {gameState.formatter.format(transferFrom.selectedAccount!.balance)}
-                            </p>
-                            : <></>
+                            </p> : <></>
                         }
                         <div className="flex">
                             <p className="text-xl text-gray-700! p-2">$</p>
