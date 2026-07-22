@@ -78,7 +78,6 @@ export class Character {
         this.car.monthlyMaintenanceCost *= 1.3;
         this.car.monthlyInsuranceCost *= 0.95;
         this.age++;
-        this.checkGoals(gameState);
     }
 
     addLoan(loan: Loan) {

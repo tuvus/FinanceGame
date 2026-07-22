@@ -114,6 +114,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
         gameState.s.date.setMonth(0);
         gameState.s.date.setDate(1);
         gameState.s.date.setHours(9);
+        character.checkGoals(gameState.s);
     }
 
     const nextYear = () => {
@@ -341,14 +342,17 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                             (gameState) => {
                                 gameState.character.satisfaction += 5;
                                 gameState.character.milesDriven = 1000;
-                                gameState.lifeEventManager!.AddEvent(new LifeEvent("First plan!", new Date(gameState.date.getFullYear(), 0, 21),
-                                    <div className="flex flex-col w-full items-center">
-                                        <p className="w-3/4">Congratulations on finishing your first year plan, it
-                                            wasn't so hard after all! With your plan you can now enjoy your year without
-                                            having to worry about your financing. Now its time to stick to your
-                                            plan!</p>
-                                    </div>
-                                ));
+                                console.log("Added event! " + gameState.date.toString())
+                                gameState.lifeEventManager!.AddEvent(
+                                    new LifeEvent("First plan!", new Date(gameState.date.getFullYear(), 0, 21),
+                                        <div className="flex flex-col w-full items-center">
+                                            <p className="w-3/4">Congratulations on finishing your first year plan, it
+                                                wasn't so hard after all! With your plan you can now enjoy your year
+                                                without
+                                                having to worry about your financing. Now its time to stick to your
+                                                plan!</p>
+                                        </div>
+                                    ));
                             }));
                         gameState.s.lifeEventManager!.NextEvent();
                     }} style="w-50 text-xl h-10 p-1 font-bold mt-2" text="Ready to start!"/>
@@ -368,7 +372,8 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                     <div className="flex flex-col items-center gap-4 w-3/4">
                                         <p>Your parents gave you {formatter.format(30000 * gameState.s.inflation)} to
                                             buy a car. Choose the type of car you want to buy, you may also buy a more
-                                            expensive car by using cash from your savings. You are allowed to keep the money that you don't
+                                            expensive car by using cash from your savings. You are allowed to keep the
+                                            money that you don't
                                             spend on the car.</p>
                                         <CarShop gameState={gameState.s}
                                                  action={(gameState: GameState) => gameState.lifeEventManager!.NextEvent()}
