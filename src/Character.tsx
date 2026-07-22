@@ -59,9 +59,7 @@ export class Character {
     }
 
     checkGoalOfName(gameState: GameState, name: string) {
-        console.log("TESTING1")
         if (!this.goals.some(g => g.name == name)) return;
-        console.log("TESTING2")
         const goal = this.goals.find(g => g.name == name)!;
         if (goal.condition(gameState, goal)) {
             this.goals = this.goals.filter(g => g != goal);

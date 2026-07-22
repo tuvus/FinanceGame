@@ -16,10 +16,7 @@ export function CarShop({gameState, action, allocatedMoney}: CarShopProps) {
         gameState.character.addGoal(new Goal("Buy a new car",
             "Your current car isn't going to last forever, you should plan to buy a new one within one year of " + targetDate.getFullYear(),
             gameState.character.car.getAvgExpirationDate(),
-            (gameState) => {
-                console.log(gameState.character.car.buyDate.getFullYear() + " > " + buyDate.getFullYear());
-                return gameState.character.car.buyDate.getFullYear() > buyDate.getFullYear();
-            },
+            (gameState) => gameState.character.car.buyDate.getFullYear() > buyDate.getFullYear(),
             (gameState) => {
                 gameState.character.satisfaction += 2;
                 action(gameState);

@@ -342,7 +342,6 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                             (gameState) => {
                                 gameState.character.satisfaction += 5;
                                 gameState.character.milesDriven = 1000;
-                                console.log("Added event! " + gameState.date.toString())
                                 gameState.lifeEventManager!.AddEvent(
                                     new LifeEvent("First plan!", new Date(gameState.date.getFullYear(), 0, 21),
                                         <div className="flex flex-col w-full items-center">
