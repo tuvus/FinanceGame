@@ -31,7 +31,7 @@ export class Account {
     endYear(date: Date): void {
         this.history = [...this.history, {
             date: date,
-            dateString: this.getDateString(date),
+            dateString: date.getFullYear().toString(),
             balance: this.getTotalValue()
         }];
         if (this.history.length > 1)

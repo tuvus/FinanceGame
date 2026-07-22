@@ -1,5 +1,6 @@
 import {Account, GameState, Loan, StockAccount} from "./Data.tsx";
 import {LifeEvent, type LifeEventManager} from "./EventManager.tsx";
+import {CarShop} from "./components/CarShop.tsx";
 
 export class Character {
     firstName: string;
@@ -57,7 +58,19 @@ export class Character {
         this.goals = this.goals.filter(g => !achievedGoals.includes(g));
     }
 
+    checkGoalOfName(gameState: GameState, name: string) {
+        console.log("TESTING1")
+        if (!this.goals.some(g => g.name == name)) return;
+        console.log("TESTING2")
+        const goal = this.goals.find(g => g.name == name)!;
+        if (goal.condition(gameState, goal)) {
+            this.goals = this.goals.filter(g => g != goal);
+            goal.onCompleted(gameState, goal)
+        }
+    }
+
     endYear(gameState: GameState, inflation: number) {
+        console.log(gameState.date.getFullYear())
         this.salary *= inflation;
         this.loans.forEach(l => l.endLoanYear(gameState.date, inflation));
         this.accounts.forEach((account) => account.endYear(gameState.date));
@@ -167,11 +180,18 @@ export class BigTicketItems {
             bt.balance += (bt.targetBalance - bt.balance) / (bt.buyDate.getFullYear() - date.getFullYear()));
     }
 
-    ScheduleBigTicketItems(lifeEventManager: LifeEventManager, date: Date) {
+    ScheduleBigTicketItems(lifeEventManager: LifeEventManager, gameState: GameState, date: Date) {
         this.bigTicketItems.forEach(bt => {
             if (bt.buyDate.getFullYear() <= date.getFullYear()) {
+                this.character.addMoney(bt.balance);
                 lifeEventManager.AddEvent(new LifeEvent(bt.name, bt.buyDate,
-                    <div>{bt.desc}</div>, false));
+                    <div>
+                        <p>{bt.desc}</p>
+                        <div className="flex flex-col items-center w-full">
+                            <CarShop gameState={gameState}
+                                     action={(gameState: GameState) => gameState.lifeEventManager!.NextEvent()}/>
+                        </div>
+                    </div>, true));
             }
         });
         this.bigTicketItems = this.bigTicketItems.filter(bt => bt.buyDate.getFullYear() > date.getFullYear());

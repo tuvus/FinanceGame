@@ -6,7 +6,7 @@ import {LineChart} from "./components/LineChart.tsx";
 import Select from 'react-select';
 import {Account, GameState, Loan, StockAccount, StockBond} from "./Data.tsx";
 import StockCard from "./components/StockCard.tsx";
-import {ButtonNext, CalculateTaxes, CopyDate, GetDateString, GetReactSelectStyle} from "./Utils.tsx";
+import {ButtonNext, CalculateTaxes, GetDateString, GetReactSelectStyle} from "./Utils.tsx";
 import {DonutChart} from "./components/DonutChart.tsx";
 import {LifeEvent, LifeEventManager, LifeEventSchedule, LifeEventScheduler} from "./EventManager.tsx";
 import {TutorialChain, TutorialEvent, TutorialManager} from "./TutorialManager.tsx";
@@ -17,6 +17,7 @@ import {BalanceNumber, SatisfactionNumber, SavingsAccountTutorial} from "./UI.ts
 import {BigTicketItemsPage} from "./components/BigTicketItems.tsx";
 import {Outline} from "./components/Outline.tsx";
 import {Car, Character, Goal} from "./Character.tsx";
+import {CarShop} from "./components/CarShop.tsx";
 
 type GameProps = {
     fname: string; lname: string; tutorial: boolean;
@@ -43,7 +44,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
         {name: "Groceries", amount: 150},
         {name: "Health Insurance", amount: 400},
     ], 17));
-    const [gameState] = useState({s: new GameState(new Date(random.int(1940, 2010), 0), character, formatter, compactFormatter, tutorial)});
+    const [gameState] = useState({s: new GameState(new Date(2026, 0), character, formatter, compactFormatter, tutorial)});
     const [indexFund] = useState({a: new StockBond("Index Fund", random.int(7000, 50000) / 100, false)});
     const [bond] = useState({a: new StockBond("Bond", 1, true)});
     const [rerender, setRerender] = useState(0);
@@ -58,7 +59,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
 
     const startYear = () => {
         setPage(pages.length - 1);
-        character.bigTicketItems.ScheduleBigTicketItems(gameState.s.lifeEventManager!, gameState.s.date);
+        character.bigTicketItems.ScheduleBigTicketItems(gameState.s.lifeEventManager!, gameState.s, gameState.s.date);
         character.checkGoals(gameState.s);
         gameState.s.lifeEventScheduler!.GenerateEvents();
         if (!lifeEventManager.GetActiveEvent(gameState.s.date)) {
@@ -74,6 +75,9 @@ function GamePage({fname, lname, tutorial}: GameProps) {
     }
 
     const endYear = () => {
+        gameState.s.date.setMonth(11);
+        gameState.s.date.setDate(31);
+        gameState.s.date.setHours(18);
         const livingExpenses = (character.monthlyLivingExpenses.map(e => e.amount).reduce((sum, curr) => sum + curr, 0)
             + character.getMonthlyCarCosts()) * gameState.s.inflation * 12;
         const taxableIncome = Math.max(0, character.salary * (1 - character.pretirement / 100) - 15750);
@@ -107,6 +111,9 @@ function GamePage({fname, lname, tutorial}: GameProps) {
         bond.a.endYear(gameState.s.date);
         character.endYear(gameState.s, newInflation);
         gameState.s.date.setFullYear(gameState.s.date.getFullYear() + 1);
+        gameState.s.date.setMonth(0);
+        gameState.s.date.setDate(1);
+        gameState.s.date.setHours(9);
     }
 
     const nextYear = () => {
@@ -134,7 +141,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
     const ploans = character.loans.reduce((sum, l) => sum + l.getPayment(), 0) / character.salary * 100;
 
 
-    const [lifeEventManager] = useState(new LifeEventManager(gameState.s.date, nextYear, render, [
+    const [lifeEventManager] = useState(new LifeEventManager(gameState.s, nextYear, render, [
         new LifeEvent("Education", gameState.s.date, <>
             <h2>Choose your education path</h2>
             <div className="flex justify-center gap-8 mt-6">
@@ -356,21 +363,6 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                     It is time to decide to get a new or used car, and how decked-out it is.</p>
                 <button className="w-60 text-xl h-10 font-bold"
                         onClick={() => {
-                            let addCarGoal = () => {
-                            };
-                            addCarGoal = () => {
-                                const targetDate = new Date(character.car.getAvgExpirationDate().toString());
-                                const buyDate = CopyDate(gameState.s.date);
-                                character.addGoal(new Goal("Buy a new car",
-                                    "Your current car isn't going to last forever, you should prepare to buy a new one within one year of " + targetDate.getFullYear(),
-                                    character.car.getAvgExpirationDate(),
-                                    (gameState) => gameState.character.car.buyDate.getFullYear() <= targetDate.getFullYear() + 1
-                                        && gameState.character.car.buyDate.getFullYear() > buyDate.getFullYear(),
-                                    (gameState) => {
-                                        gameState.character.satisfaction += 2;
-                                        addCarGoal();
-                                    }));
-                            }
                             character.addMoney(30000 * gameState.s.inflation)
                             lifeEventManager.ReplaceEvent(new LifeEvent("Choosing a car", gameState.s.date,
                                 <div className="flex flex-col items-center w-full">
@@ -378,48 +370,8 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                         <p>Your parents gave you {formatter.format(30000 * gameState.s.inflation)} to
                                             buy a car. Choose the type of car you want to buy. The money that you don't
                                             spend on the car you are allowed to keep.</p>
-                                        <div className="grid grid-cols-2 w-208 justify-center gap-4">
-                                            <div className="eventButton panelButton" onClick={() => {
-                                                character.satisfaction += 2;
-                                                character.payMoney(25945 * gameState.s.inflation);
-                                                gameState.s.lifeEventManager!.NextEvent();
-                                                character.car = new Car(25945 * gameState.s.inflation, new Date(gameState.s.date.getFullYear() - 3, random.int(0, 11), random.int(0, 28)), 20, 28, 120);
-                                                addCarGoal();
-                                            }}>
-                                                <p className="text-gray-700">Buy a used car</p>
-                                                <p className="text-red-800">{formatter.format(25945 * gameState.s.inflation)}</p>
-                                            </div>
-                                            <div className="eventButton panelButton" onClick={() => {
-                                                character.satisfaction += 5;
-                                                character.payMoney(49814 * gameState.s.inflation);
-                                                gameState.s.lifeEventManager!.NextEvent();
-                                                character.car = new Car(49814 * gameState.s.inflation, new Date(gameState.s.date), 5, 32, 190);
-                                                addCarGoal();
-                                            }}>
-                                                <p className="text-gray-700">Buy a new car</p>
-                                                <p className="text-red-800">{formatter.format(49814 * gameState.s.inflation)}</p>
-                                            </div>
-                                            <div className="eventButton panelButton" onClick={() => {
-                                                character.satisfaction += 6;
-                                                character.payMoney(31000 * gameState.s.inflation);
-                                                gameState.s.lifeEventManager!.NextEvent();
-                                                character.car = new Car(31000 * gameState.s.inflation, new Date(gameState.s.date.getFullYear() - 3, random.int(0, 11), random.int(0, 28)), 20, 27, 160);
-                                                addCarGoal();
-                                            }}>
-                                                <p className="text-gray-700">Buy a used extravagant car</p>
-                                                <p className="text-red-800">{formatter.format(31000 * gameState.s.inflation)}</p>
-                                            </div>
-                                            <div className="eventButton panelButton" onClick={() => {
-                                                character.satisfaction += 12;
-                                                character.payMoney(60000 * gameState.s.inflation);
-                                                gameState.s.lifeEventManager!.NextEvent();
-                                                character.car = new Car(60000 * gameState.s.inflation, new Date(gameState.s.date), 5, 30, 320);
-                                                addCarGoal();
-                                            }}>
-                                                <p className="text-gray-700">Buy a new extravagant car</p>
-                                                <p className="text-red-800">{formatter.format(60000 * gameState.s.inflation)}</p>
-                                            </div>
-                                        </div>
+                                        <CarShop gameState={gameState.s}
+                                                 action={(gameState: GameState) => gameState.lifeEventManager!.NextEvent()}/>
                                     </div>
                                 </div>, true
                             ));
@@ -969,7 +921,6 @@ function GamePage({fname, lname, tutorial}: GameProps) {
             page: <div>
                 {activeEvent == null ?
                     <>
-                        {lifeEventManager.PrintEvents()}
                         <h1>Events</h1>
                         <button className="w-50 text-xl h-10 p-1 font-bold" onClick={() => nextYear()}><h3>End of
                             year</h3>
@@ -1173,7 +1124,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                     onClick={e => e.stopPropagation()}>
                     <h2 className="text-gray-700!">Goals</h2>
                     {character.goals.map(goal =>
-                        (<div key={goal.name} className="eventButton w-full! bg-gray-200! cursor-pointer"
+                        (<div key={goal.name + goal.targetDate.toString()} className="eventButton w-full! bg-gray-200! cursor-pointer"
                               onClick={() => {
                                   setSelectedGoal(pg => pg === goal.name ? "" : goal.name);
                               }}>
