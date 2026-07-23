@@ -48,7 +48,7 @@ export class Character {
         this.retirementAccount = new StockAccount("Retirement Account", 0);
         this.taxableIncome = 0;
         this.previousYearlyBalance = 0;
-        this.car = new Car(30000, new Date(1, 1), 1, 1, 1);
+        this.car = new Car(30000, new Date(1, 1), 1, 1, false, 1);
         this.milesDriven = 300;
     }
 
@@ -118,7 +118,10 @@ export class Character {
     }
 
     getMonthlyCarCosts() {
-        return this.milesDriven * 3.2 / this.car.gpm + this.car.monthlyInsuranceCost + this.car.monthlyMaintenanceCost;
+        let fuelCost: number;
+        if (this.car.electric) fuelCost = this.milesDriven * 0.183 / 3;
+        else fuelCost = this.milesDriven * 3.2 / this.car.gpm;
+        return fuelCost + this.car.monthlyInsuranceCost + this.car.monthlyMaintenanceCost;
     }
 
     getNetWorth(date: Date) {
@@ -226,13 +229,15 @@ export class Car {
     buyDate: Date;
     monthlyMaintenanceCost: number;
     gpm: number;
+    electric: boolean;
     monthlyInsuranceCost: number;
 
-    constructor(cost: number, buyDate: Date, monthlyMaintenanceCost: number, gpm: number, monthlyInsuranceCost: number) {
+    constructor(cost: number, buyDate: Date, monthlyMaintenanceCost: number, gpm: number, electric: boolean, monthlyInsuranceCost: number) {
         this.cost = cost;
         this.buyDate = buyDate;
         this.monthlyMaintenanceCost = monthlyMaintenanceCost;
         this.gpm = gpm;
+        this.electric = electric;
         this.monthlyInsuranceCost = monthlyInsuranceCost;
     }
 

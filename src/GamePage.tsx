@@ -336,7 +336,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                     efficiently allocate the money you make from your new job in order to achieve these goals. In
                     January of each year you will sit down and plan your finances for the upcoming year. It's time to
                     take what you have learned about money and plan your adventure! But be careful and keep some money
-                    in savings, life has its twists and turns!</p>
+                    in savings, life has it's twists and turns!</p>
                 <ButtonNext action={
                     () => {
                         character.addGoal(new Goal("Plan Finances", "Plan your finances for the year such that you will end with a positive yearly balance.", new Date(gameState.s.date.getFullYear() + 1, 0),
@@ -364,7 +364,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
         //     (<div><p>During the year you will encounter events that may have a financial impact.</p></div>)),
         new LifeEvent("Buying a Car", new Date(gameState.s.date.getFullYear() + 6, 1),
             (<div className="flex flex-col items-center gap-4">
-                <p className="w-200">Your car is nearing the end of its lifespan, and it is about time to buy a new
+                <p className="w-200">Your car is nearing the end of it's lifespan, and it is about time to buy a new
                     one. Luckily, your parents have offered to subsidise your purchase in celebration of your new job.
                     It is time to decide to get a new or used car, and how decked-out it is.</p>
                 <button className="w-60 text-xl h-10 font-bold"
@@ -565,7 +565,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
     ], render));
 
     useEffect(() => {
-        character.car = new Car(30000, new Date(gameState.s.date.getFullYear() - 3, random.int(0, 11), random.int(1, 28)), 20, 25, 180)
+        character.car = new Car(30000, new Date(gameState.s.date.getFullYear() - 3, random.int(0, 11), random.int(1, 28)), 20, 25, false, 180)
         gameState.s.lifeEventScheduler = new LifeEventScheduler(lifeEventManager, gameState.s, [
             new LifeEventSchedule(new LifeEvent("Day Trading", new Date(),
                 <DayTrading gameState={gameState.s}/>, true), 99, 4, .1, () => gameState.s.investmentsUnlocked),
@@ -733,9 +733,19 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                         <p className="text-red-800">{Math.round(gameState.s.character.car.monthlyMaintenanceCost * 12 * gameState.s.inflation / character.salary * 100)}%</p>
                         <p className="text-red-800">{formatter.format(gameState.s.character.car.monthlyMaintenanceCost * 12 * gameState.s.inflation)}</p>
 
-                        <p className="text-red-800">Car gas cost</p>
-                        <p className="text-red-800">{Math.round(gameState.s.character.milesDriven * 3.2 * 12 * gameState.s.inflation / gameState.s.character.car.gpm / character.salary * 100)}%</p>
-                        <p className="text-red-800">{formatter.format(gameState.s.character.milesDriven * 3.2 * 12 * gameState.s.inflation / gameState.s.character.car.gpm)}</p>
+                        {(gameState.s.character.car.electric ?
+                                [<p className="text-red-800" key={1}>Car electricity cost</p>,
+                                    <p className="text-red-800" key={2}>
+                                        {Math.round(gameState.s.character.milesDriven * 0.1833 * gameState.s.inflation * 12 / 3 / character.salary * 100)}%</p>,
+                                    <p className="text-red-800" key={3}>
+                                        {formatter.format(gameState.s.character.milesDriven * 0.1833 * gameState.s.inflation * 12 / 3 * gameState.s.inflation)}</p>
+                                ] : [
+                                    <p className="text-red-800" key={1}>Car gas cost</p>,
+                                    <p className="text-red-800" key={2}>
+                                        {Math.round(gameState.s.character.milesDriven * 3.2 * 12 * gameState.s.inflation / gameState.s.character.car.gpm / character.salary * 100)}%</p>,
+                                    <p className="text-red-800" key={3}>
+                                        {formatter.format(gameState.s.character.milesDriven * 3.2 * 12 * gameState.s.inflation / gameState.s.character.car.gpm)}</p>]
+                        )}
 
                         <p className="text-red-800">Car insurance cost</p>
                         <p className="text-red-800">{Math.round(gameState.s.character.car.monthlyInsuranceCost * 12 * gameState.s.inflation / character.salary * 100)}%</p>

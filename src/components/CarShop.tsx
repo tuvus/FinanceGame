@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/immutability */
-import {GameState} from "../Data.tsx";
+import {GameState, Loan} from "../Data.tsx";
 import {Car, Goal} from "../Character.tsx";
-import random from "random";
+import {useState} from "react";
 
 export type CarShopProps = {
     gameState: GameState;
@@ -22,55 +22,98 @@ export function CarShop({gameState, action, allocatedMoney}: CarShopProps) {
                 action(gameState);
             }));
     }
-    const payForCar = (cost: number) => {
-        gameState.character.payMoney(cost * gameState.inflation - allocatedMoney - gameState.character.car.getSellValue(gameState.date));
+    const [used, setUsed] = useState(false);
+    const [ev, setEv] = useState(false);
+    const [extravagant, setExtravagant] = useState(false);
+    const [cash, setCash] = useState(0);
+
+    let cost = 50000 * gameState.inflation;
+    let gpm = 30;
+    let monthlyInsurance = 180
+    if (used) {
+        cost /= 2;
+        gpm *= .9;
+        monthlyInsurance *= .66;
     }
-    return (<div>
-            <h3>Allocated Money: {gameState.formatter.format(allocatedMoney)}</h3>
-            <h3>Sell value of current
-                car: {gameState.formatter.format(gameState.character.car.getSellValue(gameState.date))}</h3>
-            <div className="grid grid-cols-2 w-208 jusify-center gap-4 mt-4">
-                <div className="eventButton panelButton" onClick={() => {
-                    gameState.character.satisfaction += 2;
-                    payForCar(25945 * gameState.inflation);
-                    gameState.character.car = new Car(25945 * gameState.inflation, new Date(gameState.date.getFullYear() - 3, random.int(0, 11), random.int(0, 28)), 20, 28, 120);
-                    addCarGoal(gameState.character.car.buyDate);
-                    action(gameState);
-                }}>
-                    <p className="text-gray-700">Buy a used car</p>
-                    <p className="text-red-800">{gameState.formatter.format(25945 * gameState.inflation)}</p>
+    if (ev) {
+        cost *= 1.16;
+        gpm = 0;
+    }
+    if (extravagant) {
+        cost *= 1.3;
+        gpm *= 1.15;
+        monthlyInsurance *= 1.8;
+    }
+    const sellValue = gameState.character.car.getSellValue(gameState.date);
+    const loan = cost - allocatedMoney - cash - sellValue;
+
+    return (<div className="flex flex-col gap-4 items-center">
+            <div className="flex gap-4">
+                <div
+                    className={"eventButton w-60! panelButton duration-300! " + (used ? "bg-gray-400!" : "bg-gray-200!")}
+                    onClick={() => setUsed(true)}>
+                    <p className="text-gray-700">Used</p>
                 </div>
-                <div className="eventButton panelButton" onClick={() => {
-                    gameState.character.satisfaction += 5;
-                    payForCar(49814 * gameState.inflation);
-                    gameState.character.car = new Car(49814 * gameState.inflation, new Date(gameState.date), 5, 32, 190);
-                    addCarGoal(gameState.character.car.buyDate);
-                    action(gameState);
-                }}>
-                    <p className="text-gray-700">Buy a new car</p>
-                    <p className="text-red-800">{gameState.formatter.format(49814 * gameState.inflation)}</p>
-                </div>
-                <div className="eventButton panelButton" onClick={() => {
-                    gameState.character.satisfaction += 6;
-                    payForCar(31000 * gameState.inflation);
-                    gameState.character.car = new Car(31000 * gameState.inflation, new Date(gameState.date.getFullYear() - 3, random.int(0, 11), random.int(0, 28)), 20, 27, 160);
-                    addCarGoal(gameState.character.car.buyDate);
-                    action(gameState);
-                }}>
-                    <p className="text-gray-700">Buy a used extravagant car</p>
-                    <p className="text-red-800">{gameState.formatter.format(31000 * gameState.inflation)}</p>
-                </div>
-                <div className="eventButton panelButton" onClick={() => {
-                    gameState.character.satisfaction += 12;
-                    payForCar(60000 * gameState.inflation);
-                    gameState.character.car = new Car(60000 * gameState.inflation, new Date(gameState.date), 5, 30, 320);
-                    addCarGoal(gameState.character.car.buyDate);
-                    action(gameState);
-                }}>
-                    <p className="text-gray-700">Buy a new extravagant car</p>
-                    <p className="text-red-800">{gameState.formatter.format(60000 * gameState.inflation)}</p>
+                <div
+                    className={"eventButton w-60! panelButton duration-300! " + (!used ? "bg-gray-400!" : "bg-gray-200!")}
+                    onClick={() => setUsed(false)}>
+                    <p className="text-gray-700">New</p>
                 </div>
             </div>
+            <div className="flex gap-4">
+                <div
+                    className={"eventButton w-60! panelButton duration-300! " + (!ev ? "bg-gray-400!" : "bg-gray-200!")}
+                    onClick={() => setEv(false)}>
+                    <p className="text-gray-700">Gas</p>
+                </div>
+                <div
+                    className={"eventButton w-60! panelButton duration-300! " + (ev ? "bg-gray-400!" : "bg-gray-200!")}
+                    onClick={() => setEv(true)}>
+                    <p className="text-gray-700">Electric</p>
+                </div>
+            </div>
+            <div
+                className={"eventButton w-60! panelButton duration-300! " + (extravagant ? "bg-gray-400!" : "bg-gray-200!")}
+                onClick={() => setExtravagant(e => !e)}>
+                <p className="text-gray-700">{extravagant ? "Extravagant" : "Normal"}</p>
+            </div>
+            <h3>Cost: {gameState.formatter.format(cost)}</h3>
+            <h3>Allocated money: {gameState.formatter.format(allocatedMoney)}</h3>
+            <h3>Sell value of current car: {gameState.formatter.format(sellValue)}</h3>
+            <div className="flex">
+                <h3>Cash: $
+                    <input name="transfer-funds" className="w-40 bg-gray-200 rounded-xl p-1 text-gray-700"
+                           min={0}
+                           max={gameState.character.savingsAccount.balance}
+                           value={cash}
+                           onChange={e => {
+                               if (isNaN(e.target.valueAsNumber)) {
+                                   setCash(0);
+                                   return;
+                               }
+                               setCash(Math.min(Math.min(Math.max(e.target.valueAsNumber, 0), gameState.character.savingsAccount.balance), loan));
+                           }}
+                           type="number">
+                    </input>
+                </h3>
+            </div>
+            {loan > 0.001 ?
+                <h3>Loan: {gameState.formatter.format(loan)}</h3>
+                : <></>}
+            <button className="w-50 text-xl h-10 p-1 font-bold mt-2"
+                    onClick={() => {
+                        gameState.character.satisfaction += 12;
+                        gameState.character.payMoney(cash);
+                        if (loan > 0.001)
+                            gameState.character.addLoan(
+                                new Loan("Car Loan", loan, gameState.character.savingsAccount, (used ? 1.1403 : 1.0967), true))
+                        if (cost - allocatedMoney - sellValue < 0.001)
+                            gameState.character.addMoney(allocatedMoney + sellValue - cost);
+                        gameState.character.car = new Car(cost, new Date(gameState.date), used ? 33 : 50, gpm, ev, monthlyInsurance);
+                        addCarGoal(gameState.character.car.buyDate);
+                        action(gameState);
+                    }}>Buy
+            </button>
         </div>
     );
 }

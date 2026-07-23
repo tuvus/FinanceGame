@@ -31,7 +31,7 @@ function SetupPage({fname, lname, startGame}: SetupProps) {
                                       type="text"></input>
                 </label>
                 <button className="w-40 text-xl h-10 font-bold" onClick={() => setTutorial(t => !t)}>{tutorial? "Tutorials" : "No Tutorials"}</button>
-                <label className="text-gray-700">Age: 18</label>
+                <label className="text-gray-700">Age: 17</label>
                 <button className="w-40 text-xl h-10 font-bold" onClick={finishSetup}>Start</button>
             </div>
         </div>
