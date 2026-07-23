@@ -1051,7 +1051,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                     disabled={transferFrom.selectedAccount == null}
                                     value={fundsToTransfer}
                                     onChange={e =>
-                                        setFundsToTransfer(Math.min(Math.min(Math.ceil(100 * (transferTo.selectedAccount?.balance ?? 0)) / 100, Math.ceil(100 * (transferFrom.selectedAccount?.balance ?? 0)) / 100), e.target.valueAsNumber))}>
+                                        setFundsToTransfer(Math.min(Math.ceil(100 * Math.min(transferTo.selectedAccount?.balance ?? 0, transferFrom.selectedAccount?.balance ?? 0)) / 100, e.target.valueAsNumber))}>
                                 </NumberInputAutoSelect>
                             </p>
                         </div>

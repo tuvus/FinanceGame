@@ -2,7 +2,7 @@
 import {Account, type GameStateProps} from "../Data.tsx";
 import {useState} from "react";
 import Select from "react-select";
-import {GetReactSelectStyle, ReplaceYear} from "../Utils.tsx";
+import {GetReactSelectStyle, NumberInputAutoSelect, ReplaceYear} from "../Utils.tsx";
 import random from "random";
 import type {BigTicketItem} from "../Character.tsx";
 
@@ -295,16 +295,20 @@ export function BigTicketItemsPage({gameState}: GameStateProps) {
                             <p className="text-gray-700 text-lg!">Balance: {gameState.formatter.format(transferFrom.selectedAccount!.balance)}
                             </p> : <></>
                         }
-                        <div className="flex">
-                            <p className="text-xl text-gray-700! p-2">$</p>
-                            <input name="transfer-funds" className="w-80 bg-gray-200 rounded-xl p-1 text-gray-700"
-                                   min={-selectedBigTicketItem.balance}
-                                   max={Math.min(transferFrom.selectedAccount?.balance ?? 0, selectedBigTicketItem.targetBalance - selectedBigTicketItem.balance)}
-                                   disabled={transferFrom.selectedAccount == null}
-                                   value={fundsToTransfer}
-                                   onChange={e => setFundsToTransfer(Math.min(Math.min(transferFrom.selectedAccount?.balance ?? 0, e.target.valueAsNumber), selectedBigTicketItem.targetBalance - selectedBigTicketItem.balance))}
-                                   type="number">
-                            </input>
+                        <div className="flex flex-col items-center">
+                            <div className="w-fit bg-gray-200 rounded-xl p-1 ">
+                                <p className="text-xl text-gray-700! pl-1">$
+                                    <NumberInputAutoSelect
+                                        className="w-40 text-gray-700"
+                                        min={-selectedBigTicketItem.balance}
+                                        max={Math.min(transferFrom.selectedAccount?.balance ?? 0, selectedBigTicketItem.targetBalance - selectedBigTicketItem.balance)}
+                                        disabled={transferFrom.selectedAccount == null}
+                                        value={fundsToTransfer}
+                                        onChange={e =>
+                                            setFundsToTransfer(Math.min(Math.ceil(100 * Math.min(transferFrom.selectedAccount?.balance ?? 0, selectedBigTicketItem.targetBalance - selectedBigTicketItem.balance)) / 100, e.target.valueAsNumber))}>
+                                    </NumberInputAutoSelect>
+                                </p>
+                            </div>
                         </div>
 
                         <div className="flex gap-2 justify-center">
@@ -315,7 +319,7 @@ export function BigTicketItemsPage({gameState}: GameStateProps) {
                             </button>
                             <button
                                 id="transfer-confirm"
-                                disabled={transferFrom.selectedAccount == null || isNaN(fundsToTransfer) || fundsToTransfer > (Math.min(transferFrom?.selectedAccount.balance ?? 0, selectedBigTicketItem.targetBalance - selectedBigTicketItem.balance)) || -fundsToTransfer > selectedBigTicketItem.balance}
+                                disabled={transferFrom.selectedAccount == null || isNaN(fundsToTransfer)}
                                 onClick={() => {
                                     if (transferFrom.selectedAccount != null) {
                                         const toTransfer = Math.max(Math.min(Math.min(fundsToTransfer, transferFrom.selectedAccount.balance), selectedBigTicketItem.targetBalance - selectedBigTicketItem.balance), -selectedBigTicketItem.balance);
