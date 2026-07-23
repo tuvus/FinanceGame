@@ -6,7 +6,7 @@ import {LineChart} from "./components/LineChart.tsx";
 import Select from 'react-select';
 import {Account, GameState, Loan, StockAccount, StockBond} from "./Data.tsx";
 import StockCard from "./components/StockCard.tsx";
-import {ButtonNext, CalculateTaxes, GetDateString, GetReactSelectStyle} from "./Utils.tsx";
+import {ButtonNext, CalculateTaxes, GetDateString, GetReactSelectStyle, NumberInputAutoSelect} from "./Utils.tsx";
 import {DonutChart} from "./components/DonutChart.tsx";
 import {LifeEvent, LifeEventManager, LifeEventSchedule, LifeEventScheduler} from "./EventManager.tsx";
 import {TutorialChain, TutorialEvent, TutorialManager} from "./TutorialManager.tsx";
@@ -722,10 +722,10 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                         {character.monthlyLivingExpenses.map(({name, amount}, i) => {
                             return ([
                                 <p className="text-red-800" key={i + "1"} id="ItemizedLivingExpenses">{name}</p>,
-                                <p className="text-red-800"
-                                   key={i + "2"}>{Math.round(amount * 12 * gameState.s.inflation / character.salary * 100)}%</p>,
-                                <p className="text-red-800"
-                                   key={i + "3"}>{formatter.format(amount * gameState.s.inflation * 12)}</p>
+                                <p className="text-red-800" key={i + "2"}>
+                                    {Math.round(amount * 12 * gameState.s.inflation / character.salary * 100)}%</p>,
+                                <p className="text-red-800" key={i + "3"}>
+                                    {formatter.format(amount * gameState.s.inflation * 12)}</p>
                             ]);
                         })}
 
@@ -1111,14 +1111,13 @@ function GamePage({fname, lname, tutorial}: GameProps) {
 
                     <div className="flex">
                         <p className="text-xl text-gray-700! p-2">$</p>
-                        <input name="transfer-funds" className="w-80 bg-gray-200 rounded-xl p-1 text-gray-700"
+                        <NumberInputAutoSelect className="w-80 bg-gray-200 rounded-xl p-1 text-gray-700"
                                min=""
                                max={transferFrom.selectedAccount?.balance ?? 0}
                                disabled={transferFrom.selectedAccount == null}
                                value={fundsToTransfer}
-                               onChange={e => setFundsToTransfer(Math.min(transferFrom.selectedAccount?.balance ?? 0, e.target.valueAsNumber))}
-                               type="number">
-                        </input>
+                               onChange={e => setFundsToTransfer(Math.min(transferFrom.selectedAccount?.balance ?? 0, e.target.valueAsNumber))}>
+                        </NumberInputAutoSelect>
                     </div>
 
                     <div className="flex gap-2 justify-center">
