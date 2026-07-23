@@ -1041,17 +1041,20 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                     <p className="text-red-800 text-lg!">Liabilities:
                         -{formatter.format(transferTo.selectedAccount?.balance ?? 0)}</p>
 
-                    <div className="flex">
-                        <p className="text-xl text-gray-700! p-2">$</p>
-                        <input name="transfer-funds" className="w-80 bg-gray-200 rounded-xl p-1 text-gray-700"
-                               autoFocus={true}
-                               min=""
-                               max={Math.min(transferFrom.selectedAccount?.balance ?? 0, transferTo.selectedAccount?.balance ?? 0)}
-                               value={fundsToTransfer}
-                               onChange={e =>
-                                   setFundsToTransfer(Math.min(transferFrom.selectedAccount?.balance ?? 0, Math.min(transferTo.selectedAccount?.balance ?? 0, e.target.valueAsNumber)))}
-                               type="number">
-                        </input>
+                    <div className="flex flex-col items-center">
+                        <div className="w-fit bg-gray-200 rounded-xl p-1 ">
+                            <p className="text-xl text-gray-700! pl-1">$
+                                <NumberInputAutoSelect
+                                    className="w-40 text-gray-700"
+                                    min={0}
+                                    max={Math.min(transferTo.selectedAccount?.balance ?? 0, transferFrom.selectedAccount?.balance ?? 0)}
+                                    disabled={transferFrom.selectedAccount == null}
+                                    value={fundsToTransfer}
+                                    onChange={e =>
+                                        setFundsToTransfer(Math.min(Math.min(Math.ceil(100 * (transferTo.selectedAccount?.balance ?? 0)) / 100, Math.ceil(100 * (transferFrom.selectedAccount?.balance ?? 0)) / 100), e.target.valueAsNumber))}>
+                                </NumberInputAutoSelect>
+                            </p>
+                        </div>
                     </div>
 
                     <div className="flex gap-2 justify-center">
@@ -1109,15 +1112,20 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                         styles={GetReactSelectStyle<Account>()}
                         onChange={(a: Account | null) => setTransferTo({selectedAccount: a})}></Select>
 
-                    <div className="flex">
-                        <p className="text-xl text-gray-700! p-2">$</p>
-                        <NumberInputAutoSelect className="w-80 bg-gray-200 rounded-xl p-1 text-gray-700"
-                               min=""
-                               max={transferFrom.selectedAccount?.balance ?? 0}
-                               disabled={transferFrom.selectedAccount == null}
-                               value={fundsToTransfer}
-                               onChange={e => setFundsToTransfer(Math.min(transferFrom.selectedAccount?.balance ?? 0, e.target.valueAsNumber))}>
-                        </NumberInputAutoSelect>
+                    <div className="flex flex-col items-center">
+                        <div className="w-fit bg-gray-200 rounded-xl p-1 ">
+                            <p className="text-xl text-gray-700! pl-1">$
+                                <NumberInputAutoSelect
+                                    className="w-40 text-gray-700"
+                                    min={0}
+                                    max={transferFrom.selectedAccount?.balance ?? 0}
+                                    disabled={transferFrom.selectedAccount == null}
+                                    value={fundsToTransfer}
+                                    onChange={e =>
+                                        setFundsToTransfer(Math.min(Math.ceil(100 * (transferFrom.selectedAccount?.balance ?? 0)) / 100, e.target.valueAsNumber))}>
+                                </NumberInputAutoSelect>
+                            </p>
+                        </div>
                     </div>
 
                     <div className="flex gap-2 justify-center">

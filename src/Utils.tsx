@@ -96,6 +96,7 @@ export function NumberInputAutoSelect(props: React.DetailedHTMLProps<React.Input
         <input {...props}
                name="transfer-funds"
                id={"numberinputautoselect" + id}
+               max={Math.ceil(100 * (props.max === null || props.max === undefined ? Number.MAX_SAFE_INTEGER : props.max as number)) / 100}
                onFocus={(e) => {
                    (document.getElementById("numberinputautoselect" + id) as HTMLInputElement)!.select();
                    e.stopPropagation();
