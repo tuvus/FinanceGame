@@ -2,6 +2,7 @@
 import {GameState, Loan} from "../Data.tsx";
 import {Car, Goal} from "../Character.tsx";
 import {useState} from "react";
+import {NumberInputAutoSelect} from "../Utils.tsx";
 
 export type CarShopProps = {
     gameState: GameState;
@@ -80,22 +81,25 @@ export function CarShop({gameState, action, allocatedMoney}: CarShopProps) {
             <h3>Cost: {gameState.formatter.format(cost)}</h3>
             <h3>Allocated money: {gameState.formatter.format(allocatedMoney)}</h3>
             <h3>Sell value of current car: {gameState.formatter.format(sellValue)}</h3>
-            <div className="flex">
-                <h3>Cash: $
-                    <input name="transfer-funds" className="w-40 bg-gray-200 rounded-xl p-1 text-gray-700"
-                           min={0}
-                           max={gameState.character.savingsAccount.balance}
-                           value={cash}
-                           onChange={e => {
-                               if (isNaN(e.target.valueAsNumber)) {
-                                   setCash(0);
-                                   return;
-                               }
-                               setCash(Math.min(Math.min(Math.max(e.target.valueAsNumber, 0), gameState.character.savingsAccount.balance), loan));
-                           }}
-                           type="number">
-                    </input>
-                </h3>
+
+            <div className="flex flex-col items-center">
+                <div className="w-fit bg-gray-200 rounded-xl p-1 ">
+                    <p className="text-xl text-gray-700! pl-1">$
+                        <NumberInputAutoSelect
+                            className="w-40 text-gray-700"
+                            min={0}
+                            max={gameState.character.savingsAccount.balance}
+                            value={cash}
+                            onChange={e => {
+                                if (isNaN(e.target.valueAsNumber)) {
+                                    setCash(0);
+                                    return;
+                                }
+                                setCash(Math.min(Math.max(e.target.valueAsNumber, 0), Math.ceil(100 * Math.min(gameState.character.savingsAccount.balance, cost - allocatedMoney - sellValue)) / 100));
+                            }}>
+                        </NumberInputAutoSelect>
+                    </p>
+                </div>
             </div>
             {loan > 0.001 ?
                 <h3>Loan: {gameState.formatter.format(loan)}</h3>
@@ -103,7 +107,7 @@ export function CarShop({gameState, action, allocatedMoney}: CarShopProps) {
             <button className="w-50 text-xl h-10 p-1 font-bold mt-2"
                     onClick={() => {
                         gameState.character.satisfaction += 12;
-                        gameState.character.payMoney(cash);
+                        gameState.character.payMoney(Math.min(cash, cost - allocatedMoney - sellValue));
                         if (loan > 0.001)
                             gameState.character.addLoan(
                                 new Loan("Car Loan", loan, gameState.character.savingsAccount, (used ? 1.1403 : 1.0967), true))

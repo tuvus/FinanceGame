@@ -1134,8 +1134,10 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                     max={transferFrom.selectedAccount?.balance ?? 0}
                                     disabled={transferFrom.selectedAccount == null}
                                     value={fundsToTransfer}
-                                    onChange={e =>
-                                        setFundsToTransfer(Math.min(Math.ceil(100 * (transferFrom.selectedAccount?.balance ?? 0)) / 100, e.target.valueAsNumber))}>
+                                    onChange={e => {
+                                        if (isNaN(e.target.valueAsNumber)) return;
+                                        setFundsToTransfer(Math.min(Math.ceil(100 * (transferFrom.selectedAccount?.balance ?? 0)) / 100, e.target.valueAsNumber))
+                                    }}>
                                 </NumberInputAutoSelect>
                             </p>
                         </div>
@@ -1213,7 +1215,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                             (gameState.s.character.accounts.length > 1 ?
                                 <button className="w-50 ml-4 text-xl font-bold h-10 justify-self-left" key="2"
                                         onClick={() => {
-                                            setFundsToTransfer(NaN);
+                                            setFundsToTransfer(0);
                                             setTransferFrom({selectedAccount: null});
                                             setTransferTo({selectedAccount: null});
                                             document.getElementById("transfer-modal")!.style.display = "block";

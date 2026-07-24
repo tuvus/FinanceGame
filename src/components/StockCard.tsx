@@ -95,8 +95,10 @@ function StockCard({stock, investmentAccount, formatter, compactFormatter, rende
                                         min={0}
                                         max={investmentAccount.balance}
                                         value={dollarBuySell}
-                                        onChange={e =>
-                                            setdollarBuySell(Math.min(Math.ceil(100 * investmentAccount.balance) / 100, e.target.valueAsNumber))}>
+                                        onChange={e => {
+                                            if (isNaN(e.target.valueAsNumber)) return;
+                                            setdollarBuySell(Math.min(Math.ceil(100 * investmentAccount.balance) / 100, e.target.valueAsNumber));
+                                        }}>
                                     </NumberInputAutoSelect>
                                 </p>
                             </div>
@@ -139,8 +141,10 @@ function StockCard({stock, investmentAccount, formatter, compactFormatter, rende
                                         min={0}
                                         max={investmentAccount.getStock(stock).amount * stock.balance}
                                         value={dollarBuySell}
-                                        onChange={e =>
-                                            setdollarBuySell(Math.min(Math.ceil(100 * investmentAccount.getStock(stock).amount * stock.balance) / 100, e.target.valueAsNumber))}>
+                                        onChange={e => {
+                                            if (isNaN(e.target.valueAsNumber)) return;
+                                            setdollarBuySell(Math.min(Math.ceil(100 * investmentAccount.getStock(stock).amount * stock.balance) / 100, e.target.valueAsNumber));
+                                        }}>
                                     </NumberInputAutoSelect>
                                 </p>
                             </div>
