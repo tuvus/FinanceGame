@@ -891,10 +891,10 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                 <h1>Summary</h1>
                 <div className="flex flex-col gap-2 w-1/2 rounded-2xl bg-amber-100 items-center pt-2 pb-2" id="summary">
                     <div className="grid grid-cols-2 gap-2 w-full">
-                        <p className="text-green-700" id="takeHomeIncomeText">Take home income</p>
-                        <p className="text-green-700">{formatter.format(character.salary - taxes)}</p>
-                        <p className="text-red-800" id="expensesText">Expenses</p>
-                        <p className="text-red-800">{formatter.format(livingExpenses + minLoanPayments)}</p>
+                        <p className="text-gray-700" id="takeHomeIncomeText">Take home income</p>
+                        <p className="text-gray-700">{formatter.format(character.salary - taxes)}</p>
+                        <p className="text-gray-800" id="expensesText">Expenses</p>
+                        <p className="text-gray-800">{formatter.format(livingExpenses + minLoanPayments)}</p>
                         <p className="text-red-800">Loans</p>
                         <p className="text-red-800">{formatter.format(character.totalLoans.balance)}</p>
                         {gameState.s.investmentsUnlocked ?
@@ -909,38 +909,51 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                 <p className="text-gray-700">{formatter.format(character.retirementAccount.balance)}</p>
                             </>
                             : <></>}
-                        <p className="text-green-700">Predicted Balance</p>
-                        <p className="text-green-700">{formatter.format(character.savingsAccount.balance + newSavings)}</p>
+                        <p className="text-gray-700">Predicted Balance</p>
+                        <p className="text-gray-700">{formatter.format(character.savingsAccount.balance + newSavings)}</p>
                     </div>
-                    <DonutChart className="w-60 h-60 m-auto" variant="pie"
-                                data={[
-                                    {
-                                        name: "Cash",
-                                        amount: character.accounts.reduce((sum, curr) => sum + curr.balance, 0)
-                                    },
-                                    {
-                                        name: "Big-Ticket Item Allocations",
-                                        amount: character.bigTicketItems.bigTicketItems.reduce((sum, curr) => sum + curr.balance, 0)
-                                    },
-                                    {
-                                        name: "Stocks",
-                                        amount: character.accounts.filter(a => a instanceof StockAccount).map(a => a as StockAccount)
-                                            .reduce((sum, curr) => sum + curr.getStockValue(), 0)
-                                    }, {
-                                        name: "Bonds",
-                                        amount: character.accounts.filter(a => a instanceof StockAccount).map(a => a as StockAccount)
-                                            .reduce((sum, curr) => sum + curr.getBondValue(), 0)
-                                    }, {
-                                        name: "Loans",
-                                        amount: character.totalLoans.getTotalValue()
-                                    }, {
-                                        name: "Assets",
-                                        amount: character.car.getBaseValue(gameState.s.date)
-                                    }
-                                ]}
-                                label={formatter.format(character.getNetWorth(gameState.s.date))}
-                                category="name" value="amount" showLabel={true}
-                                valueFormatter={(number: number) => formatter.format(number)}/>
+                    <div className="flex w-full p-3">
+                        <DonutChart
+                            className="w-120 h-60 m-auto"
+                            variant="pie"
+                            data={[
+                                {
+                                    name: "Cash",
+                                    amount: character.accounts.reduce((sum, curr) => sum + curr.balance, 0)
+                                },
+                                {
+                                    name: "Big-Ticket Item Allocations",
+                                    amount: character.bigTicketItems.bigTicketItems.reduce((sum, curr) => sum + curr.balance, 0)
+                                },
+                                {
+                                    name: "Stocks",
+                                    amount: character.accounts.filter(a => a instanceof StockAccount).map(a => a as StockAccount)
+                                        .reduce((sum, curr) => sum + curr.getStockValue(), 0)
+                                }, {
+                                    name: "Bonds",
+                                    amount: character.accounts.filter(a => a instanceof StockAccount).map(a => a as StockAccount)
+                                        .reduce((sum, curr) => sum + curr.getBondValue(), 0)
+                                }, {
+                                    name: "Loans",
+                                    amount: character.totalLoans.getTotalValue()
+                                }, {
+                                    name: "Assets",
+                                    amount: character.car.getBaseValue(gameState.s.date)
+                                }
+                            ]}
+                            label={formatter.format(character.getNetWorth(gameState.s.date))}
+                            category="name" value="amount" showLabel={true}
+                            valueFormatter={(number: number) => formatter.format(number)}/>
+                        <LineChart
+                            className="h-60 text-gray-700"
+                            data={gameState.s.character.wealthHistory}
+                            index="dateString"
+                            minValue={Math.min(0, Math.min(...gameState.s.character.wealthHistory.map(h => Math.min(h.Assets, h.Debt, h.NetWorth))))}
+                            maxValue={Math.max(...gameState.s.character.wealthHistory.map(h => Math.max(h.Assets, h.Debt, h.NetWorth)))}
+                            aria-hidden="true"
+                            categories={["NetWorth", "Assets", "Debt"]}
+                            valueFormatter={(number: number) => compactFormatter.format(number)}/>
+                    </div>
                     <h3 className="text-gray-700 p-2">
                         Total Net Worth: {formatter.format(character.getNetWorth(gameState.s.date))}
                     </h3>
