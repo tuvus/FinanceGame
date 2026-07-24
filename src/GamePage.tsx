@@ -568,7 +568,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
         character.car = new Car(30000, new Date(gameState.s.date.getFullYear() - 3, random.int(0, 11), random.int(1, 28)), 20, 25, false, 180)
         gameState.s.lifeEventScheduler = new LifeEventScheduler(lifeEventManager, gameState.s, [
             new LifeEventSchedule(new LifeEvent("Day Trading", new Date(),
-                <DayTrading gameState={gameState.s}/>, true), 99, 4, .1, () => gameState.s.investmentsUnlocked),
+                <DayTrading gameState={gameState.s}/>, true), 99, 0, 1, () => gameState.s.investmentsUnlocked),
             new LifeEventSchedule(new LifeEvent("Broken Laptop", new Date(),
                 <BrokenLaptopEvent gameState={gameState.s}/>, true), 5, 4, .1, null
             ),

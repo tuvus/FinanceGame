@@ -2,7 +2,7 @@
 import {useEffect, useState} from "react";
 import {LineChart} from "../components/LineChart.tsx";
 import random from "random";
-import {CalculateTaxes} from "../Utils.tsx";
+import {CalculateTaxes, NumberInputAutoSelect} from "../Utils.tsx";
 import type {GameStateProps} from "../Data.tsx";
 
 function DayTradingGame({gameState}: GameStateProps) {
@@ -25,8 +25,8 @@ function DayTradingGame({gameState}: GameStateProps) {
         }
         return h;
     });
-    const [investmentAmount, setInvestmentAmount] = useState(500);
-    const [currentAmount, setCurrentAmount] = useState(500);
+    const [investmentAmount, setInvestmentAmount] = useState(Math.min(500, gameState.character.investmentAccount.balance));
+    const [currentAmount, setCurrentAmount] = useState(Math.min(500, gameState.character.investmentAccount.balance));
     const [buyIndex, setBuyIndex] = useState<number | null>(null);
     const taxes = currentAmount > investmentAmount ? CalculateTaxes(gameState.character.taxableIncome + currentAmount - investmentAmount) - CalculateTaxes(gameState.character.taxableIncome) : 0;
     const [companyName, setCompanyName] = useState("DefaultCompany")
@@ -88,16 +88,24 @@ function DayTradingGame({gameState}: GameStateProps) {
                     </p>
                     <h3 className="mt-4 text-gray-700">How much would you like to invest from your investment account?</h3>
                     <p className="text-yellow-600">Available: {gameState.formatter.format(gameState.character.investmentAccount.balance)}</p>
-                    <p className="text-gray-700">$
-                        <input className="w-80 bg-gray-200 rounded-xl p-1 text-gray-700 mt-2"
-                               min={1}
-                               value={investmentAmount}
-                               onChange={(e) => {
-                                   setInvestmentAmount(e.target.valueAsNumber);
-                                   setCurrentAmount(e.target.valueAsNumber);
-                               }}
-                               type="number">
-                        </input></p>
+                    <div className="flex flex-col items-center">
+                        <div className="w-fit bg-gray-200 rounded-xl p-1 ">
+                            <p className="text-xl text-gray-700! pl-1">$
+                                <NumberInputAutoSelect
+                                    className="w-40 text-gray-700"
+                                    min={0}
+                                    max={gameState.character.investmentAccount.balance}
+                                    value={investmentAmount}
+                                    onChange={e => {
+                                        if (isNaN(e.target.valueAsNumber)) return;
+                                        const amount = Math.min(Math.max(e.target.valueAsNumber, 0), Math.ceil(100 * Math.min(gameState.character.investmentAccount.balance)) / 100);
+                                        setInvestmentAmount(amount);
+                                        setCurrentAmount(amount);
+                                    }}>
+                                </NumberInputAutoSelect>
+                            </p>
+                        </div>
+                    </div>
                     <div className="flex gap-2 justify-center">
                         <button className="w-50 text-xl h-10 p-1 font-bold mt-2"
                                 onClick={() => gameState.lifeEventManager!.NextEvent()}>Cancel
