@@ -3,6 +3,7 @@ import "../App.css";
 import {StockAccount, StockBond} from "../Data.tsx";
 import {LineChart} from "./LineChart.tsx";
 import {useState} from "react";
+import {NumberInputAutoSelect} from "../Utils.tsx";
 
 type StockProps = {
     stock: StockBond,
@@ -13,7 +14,7 @@ type StockProps = {
 }
 
 function StockCard({stock, investmentAccount, formatter, compactFormatter, render}: StockProps) {
-    const [stocksToBuySell, setStocksToBuySell] = useState(0);
+    const [dollarBuySell, setdollarBuySell] = useState(0);
     const [buySellState, setBuySellState] = useState<boolean | null>(null);
     const [minimized, setMinimized] = useState(true)
 
@@ -58,14 +59,14 @@ function StockCard({stock, investmentAccount, formatter, compactFormatter, rende
                     : <></>}
                 <div className="flex gap-2">
                     <button className="w-40 text-xl h-10 font-bold" onClick={(e) => {
-                        e.stopPropagation()
-                        setStocksToBuySell(Math.floor(investmentAccount.balance * 100 / stock.balance) / 100);
+                        e.stopPropagation();
+                        setdollarBuySell(Math.ceil(investmentAccount.balance * 100) / 100);
                         setBuySellState(true);
                     }}><h3>Buy</h3></button>
                     {investmentAccount.getStock(stock).amount > 0 ?
                         <button className="w-40 text-xl h-10 font-bold" onClick={(e) => {
-                            e.stopPropagation()
-                            setStocksToBuySell(Math.floor(investmentAccount.getStock(stock).amount * 100) / 100);
+                            e.stopPropagation();
+                            setdollarBuySell(Math.floor(investmentAccount.getStock(stock).amount * stock.balance * 100) / 100);
                             setBuySellState(false);
                         }}><h3>Sell</h3></button> : <></>}
                 </div>
@@ -85,17 +86,22 @@ function StockCard({stock, investmentAccount, formatter, compactFormatter, rende
                         className="flex flex-col gap-2 ml-auto mr-auto mb-auto mt-[20%] w-100 bg-amber-100 rounded-xl justify-center p-4"
                         onClick={e => e.stopPropagation()}>
                         <h3 className="text-gray-700">How many shares would you like to buy?</h3>
-                        <div className="flex">
-                            <p className="text-xl text-gray-700! p-2">$</p>
-                            <input name="buy-shares" className="w-80 bg-gray-200 rounded-xl p-1 text-gray-700"
-                                   min={0}
-                                   max={investmentAccount.balance / stock.balance}
-                                   value={stocksToBuySell}
-                                   onChange={(e) =>
-                                       setStocksToBuySell(Math.min(investmentAccount.balance / stock.balance, e.target.valueAsNumber))}
-                                   type="number">
-                            </input>
+                        <p className="text-gray-700 text-lg!">Available: {formatter.format(investmentAccount.balance)}</p>
+                        <div className="flex flex-col items-center">
+                            <div className="w-fit bg-gray-200 rounded-xl p-1 ">
+                                <p className="text-xl text-gray-700! pl-1">$
+                                    <NumberInputAutoSelect
+                                        className="w-40 text-gray-700"
+                                        min={0}
+                                        max={investmentAccount.balance}
+                                        value={dollarBuySell}
+                                        onChange={e =>
+                                            setdollarBuySell(Math.min(Math.ceil(100 * investmentAccount.balance) / 100, e.target.valueAsNumber))}>
+                                    </NumberInputAutoSelect>
+                                </p>
+                            </div>
                         </div>
+                        <p className="text-gray-700 text-lg!">Shares: {isNaN(dollarBuySell) ? 0 : Math.floor(100 * dollarBuySell / stock.balance) / 100}</p>
 
                         <div className="flex gap-2 justify-center">
                             <button
@@ -106,12 +112,12 @@ function StockCard({stock, investmentAccount, formatter, compactFormatter, rende
                                 className="p-2 w-25">Cancel
                             </button>
                             <button
-                                disabled={stocksToBuySell == 0}
+                                disabled={isNaN(dollarBuySell) || dollarBuySell == 0}
                                 onClick={(e) => {
                                     e.stopPropagation()
-                                    if (stocksToBuySell.valueOf() <= 0 || isNaN(stocksToBuySell)) return;
-                                    investmentAccount.addStock(stock, stocksToBuySell);
-                                    investmentAccount.balance -= stocksToBuySell * stock.balance;
+                                    if (dollarBuySell.valueOf() <= 0 || isNaN(dollarBuySell)) return;
+                                    investmentAccount.addStock(stock, Math.min(investmentAccount.balance, dollarBuySell) / stock.balance);
+                                    investmentAccount.balance -= Math.min(investmentAccount.balance, dollarBuySell);
                                     render();
                                     setBuySellState(null);
                                 }}
@@ -124,16 +130,22 @@ function StockCard({stock, investmentAccount, formatter, compactFormatter, rende
                     <div
                         className="flex flex-col gap-2 ml-auto mr-auto mb-auto mt-[20%] w-100 bg-amber-100 rounded-xl justify-center p-4">
                         <h3 className="text-gray-700">How many shares would you like to sell?</h3>
-                        <div className="flex">
-                            <p className="text-xl text-gray-700! p-2">$</p>
-                            <input name="sell-shares" className="w-80 bg-gray-200 rounded-xl p-1 text-gray-700"
-                                   min={0}
-                                   max={investmentAccount.getStock(stock).amount}
-                                   value={stocksToBuySell}
-                                   onChange={(e) => setStocksToBuySell(Math.min(investmentAccount.getStock(stock).amount, e.target.valueAsNumber))}
-                                   type="number">
-                            </input>
+                        <p className="text-gray-700 text-lg!">Available: {formatter.format(investmentAccount.getStock(stock).amount * stock.balance)}</p>
+                        <div className="flex flex-col items-center">
+                            <div className="w-fit bg-gray-200 rounded-xl p-1 ">
+                                <p className="text-xl text-gray-700! pl-1">$
+                                    <NumberInputAutoSelect
+                                        className="w-40 text-gray-700"
+                                        min={0}
+                                        max={investmentAccount.getStock(stock).amount * stock.balance}
+                                        value={dollarBuySell}
+                                        onChange={e =>
+                                            setdollarBuySell(Math.min(Math.ceil(100 * investmentAccount.getStock(stock).amount * stock.balance) / 100, e.target.valueAsNumber))}>
+                                    </NumberInputAutoSelect>
+                                </p>
+                            </div>
                         </div>
+                        <p className="text-gray-700 text-lg!">Shares: {isNaN(dollarBuySell) ? 0 : Math.floor(100 * dollarBuySell / stock.balance) / 100}</p>
 
                         <div className="flex gap-2 justify-center">
                             <button
@@ -141,11 +153,11 @@ function StockCard({stock, investmentAccount, formatter, compactFormatter, rende
                                 className="p-2 w-25">Cancel
                             </button>
                             <button
-                                disabled={stocksToBuySell == 0}
+                                disabled={isNaN(dollarBuySell) || dollarBuySell == 0}
                                 onClick={() => {
-                                    if (stocksToBuySell.valueOf() <= 0 || isNaN(stocksToBuySell)) return;
-                                    investmentAccount.removeStock(stock, stocksToBuySell);
-                                    investmentAccount.balance += stocksToBuySell * stock.balance;
+                                    if (dollarBuySell.valueOf() <= 0 || isNaN(dollarBuySell)) return;
+                                    investmentAccount.balance += Math.min(dollarBuySell, investmentAccount.getStock(stock).amount * stock.balance);
+                                    investmentAccount.removeStock(stock, dollarBuySell);
                                     render();
                                     setBuySellState(null);
                                 }}
