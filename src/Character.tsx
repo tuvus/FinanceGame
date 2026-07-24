@@ -1,6 +1,6 @@
 import {Account, GameState, Loan, StockAccount} from "./Data.tsx";
 import {LifeEvent, type LifeEventManager} from "./EventManager.tsx";
-import {CarShop} from "./components/CarShop.tsx";
+import {CarShop} from "./events/CarShop.tsx";
 
 export class Character {
     firstName: string;

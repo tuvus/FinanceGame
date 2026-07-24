@@ -17,7 +17,7 @@ import {BalanceNumber, SatisfactionNumber, SavingsAccountTutorial} from "./UI.ts
 import {BigTicketItemsPage} from "./components/BigTicketItems.tsx";
 import {Outline} from "./components/Outline.tsx";
 import {Car, Character, Goal} from "./Character.tsx";
-import {CarShop} from "./components/CarShop.tsx";
+import {CarShop} from "./events/CarShop.tsx";
 
 type GameProps = {
     fname: string; lname: string; tutorial: boolean;
