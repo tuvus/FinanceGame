@@ -1,6 +1,6 @@
 import {Account, GameState, Loan, StockAccount} from "./Data.tsx";
 import {LifeEvent, type LifeEventManager} from "./EventManager.tsx";
-import {CarShop} from "./components/CarShop.tsx";
+import {CarShop} from "./events/CarShop.tsx";
 
 export class Character {
     firstName: string;
@@ -24,6 +24,7 @@ export class Character {
     previousYearlyBalance: number;
     car: Car;
     milesDriven: number;
+    wealthHistory: { date: Date, dateString: string, NetWorth: number, Assets:number, Debt:number }[];
 
     constructor(firstName: string, lastName: string, monthlyLivingExpenses: {
         name: string,
@@ -35,21 +36,22 @@ export class Character {
         this.pinvestments = 0;
         this.pretirement = 0;
         this.pleisure = 0;
-        this.accounts = [];
         this.loans = [];
         this.totalLoans = new Account("Loans", 0, false);
         this.satisfaction = 0;
         this.monthlyLivingExpenses = monthlyLivingExpenses;
         this.age = age;
         this.savingsAccount = new Account("Savings Account", 0, true);
+        this.accounts = [this.savingsAccount];
         this.bigTicketItems = new BigTicketItems(this);
         this.goals = [];
         this.investmentAccount = new StockAccount("Investment Account", 0);
         this.retirementAccount = new StockAccount("Retirement Account", 0);
         this.taxableIncome = 0;
         this.previousYearlyBalance = 0;
-        this.car = new Car(30000, new Date(1, 1), 1, 1, 1);
+        this.car = new Car(30000, new Date(1, 1), 1, 1, false, 1);
         this.milesDriven = 300;
+        this.wealthHistory = [];
     }
 
     checkGoals(gameState: GameState) {
@@ -76,6 +78,8 @@ export class Character {
         this.car.monthlyMaintenanceCost *= 1.3;
         this.car.monthlyInsuranceCost *= 0.95;
         this.age++;
+        this.wealthHistory = [...this.wealthHistory,
+            {date: gameState.date, dateString: gameState.date.getFullYear().toString(), NetWorth: this.getNetWorth(gameState.date), Assets: this.getAssetValue(gameState.date), Debt: this.totalLoans.balance}];
     }
 
     addLoan(loan: Loan) {
@@ -118,7 +122,20 @@ export class Character {
     }
 
     getMonthlyCarCosts() {
-        return this.milesDriven * 3.2 / this.car.gpm + this.car.monthlyInsuranceCost + this.car.monthlyMaintenanceCost;
+        let fuelCost: number;
+        if (this.car.electric) fuelCost = this.milesDriven * 0.183 / 3;
+        else fuelCost = this.milesDriven * 3.2 / this.car.gpm;
+        return fuelCost + this.car.monthlyInsuranceCost + this.car.monthlyMaintenanceCost;
+    }
+
+    getAssetValue(date: Date) {
+        return this.accounts.reduce((sum, curr) => sum + curr.getTotalValue(), 0)
+            + this.bigTicketItems.bigTicketItems.reduce((sum, curr) => sum + curr.balance, 0)
+            + this.car.getBaseValue(date);
+    }
+
+    getNetWorth(date: Date) {
+        return this.getAssetValue(date) - this.totalLoans.balance;
     }
 }
 
@@ -128,14 +145,16 @@ export class BigTicketItem {
     buyDate: Date;
     fullCost: number
     targetBalance: number;
+    loanPercent: number
     balance: number;
 
-    constructor(name: string, desc: string, buyDate: Date, fullCost: number, targetBalance: number, balance: number) {
+    constructor(name: string, desc: string, buyDate: Date, fullCost: number, targetBalance: number, loanPercent: number, balance: number) {
         this.name = name;
         this.desc = desc;
         this.buyDate = buyDate;
         this.fullCost = fullCost;
         this.targetBalance = targetBalance;
+        this.loanPercent = loanPercent;
         this.balance = balance;
     }
 }
@@ -148,13 +167,14 @@ export class BigTicketItems {
         this.character = character;
     }
 
-    AddBigTicketItem(name: string, desc: string, buyDate: Date, fullCost: number, targetBalance: number) {
+    AddBigTicketItem(name: string, desc: string, buyDate: Date, fullCost: number, targetBalance: number, loanPercent: number) {
         this.bigTicketItems = [...this.bigTicketItems, {
             name: name,
             desc: desc,
             buyDate: buyDate,
             fullCost: fullCost,
             targetBalance: targetBalance,
+            loanPercent: loanPercent,
             balance: 0
         }];
     }
@@ -216,17 +236,27 @@ export class Car {
     buyDate: Date;
     monthlyMaintenanceCost: number;
     gpm: number;
+    electric: boolean;
     monthlyInsuranceCost: number;
 
-    constructor(cost: number, buyDate: Date, monthlyMaintenanceCost: number, gpm: number, monthlyInsuranceCost: number) {
+    constructor(cost: number, buyDate: Date, monthlyMaintenanceCost: number, gpm: number, electric: boolean, monthlyInsuranceCost: number) {
         this.cost = cost;
         this.buyDate = buyDate;
         this.monthlyMaintenanceCost = monthlyMaintenanceCost;
         this.gpm = gpm;
+        this.electric = electric;
         this.monthlyInsuranceCost = monthlyInsuranceCost;
     }
 
     getAvgExpirationDate() {
         return new Date(this.buyDate.getFullYear() + 10, this.buyDate.getMonth(), this.buyDate.getDate());
+    }
+
+    getBaseValue(date: Date) {
+        return this.cost / ((date.getFullYear() - this.buyDate.getFullYear()) / 5 + 1)
+    }
+
+    getSellValue(date: Date) {
+        return this.getBaseValue(date) / 2;
     }
 }

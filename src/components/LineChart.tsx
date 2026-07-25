@@ -73,7 +73,7 @@ const LegendItem = ({
                     // base
                     "truncate text-xs whitespace-nowrap",
                     // text color
-                    "text-gray-700 dark:text-gray-300",
+                    "text-gray-700",
                     hasOnValueChange &&
                     "group-hover:text-gray-900 dark:group-hover:text-gray-50",
                     activeLegend && activeLegend !== name ? "opacity-40" : "opacity-100",
@@ -694,6 +694,28 @@ const LineChart = React.forwardRef<HTMLDivElement, LineChartProps>(
                                 </Label>
                             )}
                         </YAxis>
+
+                        {showLegend ? (
+                            <RechartsLegend
+                                verticalAlign="top"
+                                height={legendHeight}
+                                content={({ payload }) =>
+                                    ChartLegend(
+                                        { payload },
+                                        categoryColors,
+                                        setLegendHeight,
+                                        activeLegend,
+                                        hasOnValueChange
+                                            ? (clickedLegendItem: string) =>
+                                                onCategoryClick(clickedLegendItem)
+                                            : undefined,
+                                        enableLegendSlider,
+                                        legendPosition,
+                                        yAxisWidth,
+                                    )
+                                }
+                            />
+                        ) : null}
                         <Tooltip
                             wrapperStyle={{ outline: "none" }}
                             isAnimationActive={true}
@@ -743,28 +765,6 @@ const LineChart = React.forwardRef<HTMLDivElement, LineChartProps>(
                                 ) : null
                             }}
                         />
-
-                        {showLegend ? (
-                            <RechartsLegend
-                                verticalAlign="top"
-                                height={legendHeight}
-                                content={({ payload }) =>
-                                    ChartLegend(
-                                        { payload },
-                                        categoryColors,
-                                        setLegendHeight,
-                                        activeLegend,
-                                        hasOnValueChange
-                                            ? (clickedLegendItem: string) =>
-                                                onCategoryClick(clickedLegendItem)
-                                            : undefined,
-                                        enableLegendSlider,
-                                        legendPosition,
-                                        yAxisWidth,
-                                    )
-                                }
-                            />
-                        ) : null}
                         {categories.map((category) => (
                             <Line
                                 className={cx(

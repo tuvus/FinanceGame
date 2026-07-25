@@ -1,5 +1,5 @@
 import {type GroupBase, type StylesConfig} from "react-select";
-import {useEffect} from "react";
+import React, {useEffect, useState} from "react";
 
 export function CalculateTaxes(taxableAmount: number): number {
     const taxBrackets = [
@@ -86,4 +86,24 @@ export function ButtonNext({action, style, text}: ButtonNextProps) {
             {text}
         </button>
     );
+}
+
+let inputId = 0;
+
+export function NumberInputAutoSelect(props: React.DetailedHTMLProps<React.InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>) {
+    const [id] = useState(inputId++);
+    return (
+        <input {...props}
+               name="transfer-funds"
+               id={"numberinputautoselect" + id}
+               min={Math.floor(100 * (props.min === null || props.min === undefined ? Number.MIN_SAFE_INTEGER : props.min as number)) / 100}
+               max={Math.ceil(100 * (props.max === null || props.max === undefined ? Number.MAX_SAFE_INTEGER : props.max as number)) / 100}
+               onFocus={(e) => {
+                   (document.getElementById("numberinputautoselect" + id) as HTMLInputElement)!.select();
+                   e.stopPropagation();
+               }}
+               type="number">
+        </input>
+
+    )
 }
