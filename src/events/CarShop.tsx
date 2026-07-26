@@ -106,7 +106,7 @@ export function CarShop({gameState, action, allocatedMoney}: CarShopProps) {
                 : <></>}
             <button className="w-50 text-xl h-10 p-1 font-bold mt-2"
                     onClick={() => {
-                        gameState.character.satisfaction += 12;
+                        gameState.character.satisfaction += (extravagant ? 3 : 1) * (used ? 1 : 2);
                         gameState.character.payMoney(Math.min(cash, cost - allocatedMoney - sellValue));
                         if (loan > 0.001)
                             gameState.character.addLoan(

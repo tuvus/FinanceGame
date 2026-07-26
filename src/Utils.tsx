@@ -64,10 +64,10 @@ export function CopyDate(date: Date) {
 }
 
 export type ButtonNextProps = {
-    action: () => void; style: string; text: string;
+    style: string; text: string; action: () => void;
 }
 
-export function ButtonNext({action, style, text}: ButtonNextProps) {
+export function ButtonNext({style, text, action}: ButtonNextProps) {
     const keyPressed = ((e: KeyboardEvent) => {
         if (e.key == "n") {
             action();

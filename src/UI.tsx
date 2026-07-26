@@ -78,13 +78,14 @@ export function SatisfactionNumber({amount}: NumberAnimationProps) {
                             : <div><h2 className="relative text-red-400! left-0 top-2"
                             >{Math.floor(amount - previousSatisfaction)}</h2></div>
                     ) : <></>
-            }</div>)
-        ;
+            }
+        </div>);
 }
 
 export type SavingsAccountTutorialProps = {
     gameState: GameState;
 }
+
 export function SavingsAccountTutorial({gameState}: SavingsAccountTutorialProps) {
     return (<p className="text-gray-700">
         Here is your savings account, currently you have a balance

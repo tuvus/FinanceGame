@@ -1,6 +1,8 @@
 import {Account, GameState, Loan, StockAccount} from "./Data.tsx";
 import {LifeEvent, type LifeEventManager} from "./EventManager.tsx";
 import {CarShop} from "./events/CarShop.tsx";
+import random from "random";
+import {ButtonNext} from "./Utils.tsx";
 
 export class Character {
     firstName: string;
@@ -8,7 +10,8 @@ export class Character {
     salary: number;
     pinvestments: number;
     pretirement: number;
-    pleisure: number;
+    pdiscretionary: number;
+    ptrips: number;
     accounts: Account[];
     loans: Loan[];
     totalLoans: Account;
@@ -20,11 +23,12 @@ export class Character {
     goals: Goal[];
     investmentAccount: StockAccount;
     retirementAccount: StockAccount;
+    tripBalance: number;
     taxableIncome: number;
     previousYearlyBalance: number;
     car: Car;
     milesDriven: number;
-    wealthHistory: { date: Date, dateString: string, NetWorth: number, Assets:number, Debt:number }[];
+    wealthHistory: { date: Date, dateString: string, NetWorth: number, Assets: number, Debt: number }[];
 
     constructor(firstName: string, lastName: string, monthlyLivingExpenses: {
         name: string,
@@ -35,7 +39,8 @@ export class Character {
         this.salary = 0;
         this.pinvestments = 0;
         this.pretirement = 0;
-        this.pleisure = 0;
+        this.pdiscretionary = 0;
+        this.ptrips = 0;
         this.loans = [];
         this.totalLoans = new Account("Loans", 0, false);
         this.satisfaction = 0;
@@ -47,6 +52,7 @@ export class Character {
         this.goals = [];
         this.investmentAccount = new StockAccount("Investment Account", 0);
         this.retirementAccount = new StockAccount("Retirement Account", 0);
+        this.tripBalance = 0;
         this.taxableIncome = 0;
         this.previousYearlyBalance = 0;
         this.car = new Car(30000, new Date(1, 1), 1, 1, false, 1);
@@ -75,11 +81,17 @@ export class Character {
         this.accounts.forEach((account) => account.endYear(gameState.date));
         this.refreshLoans();
         this.totalLoans.endYear(gameState.date);
-        this.car.monthlyMaintenanceCost *= 1.3;
+        this.car.monthlyMaintenanceCost *= 1.1;
         this.car.monthlyInsuranceCost *= 0.95;
         this.age++;
         this.wealthHistory = [...this.wealthHistory,
-            {date: gameState.date, dateString: gameState.date.getFullYear().toString(), NetWorth: this.getNetWorth(gameState.date), Assets: this.getAssetValue(gameState.date), Debt: this.totalLoans.balance}];
+            {
+                date: gameState.date,
+                dateString: gameState.date.getFullYear().toString(),
+                NetWorth: this.getNetWorth(gameState.date),
+                Assets: this.getAssetValue(gameState.date),
+                Debt: this.totalLoans.balance
+            }];
     }
 
     addLoan(loan: Loan) {
@@ -136,6 +148,56 @@ export class Character {
 
     getNetWorth(date: Date) {
         return this.getAssetValue(date) - this.totalLoans.balance;
+    }
+
+    scheduleTrips(gameState: GameState) {
+        let expensiveTrips = 0;
+        let cheapTrips = 0;
+        while (this.tripBalance >= 800 * gameState.inflation) {
+            if (this.tripBalance >= 2000 * gameState.inflation) {
+                expensiveTrips++;
+                this.tripBalance -= 2000 * gameState.inflation;
+                continue;
+            }
+            cheapTrips++;
+            this.tripBalance -= 800 * gameState.inflation;
+        }
+        let locations = ["Rome", "Tokyo", "Prague", "Swiss Alps", "Mauritius", "Machu Picchu", "Palawan", "Bora Bora", "Tanzania", "Sydney", "Paris", "Chiang Mai", "Maui", "Barcelona", "London", " England", "Great Barrier Reef", "Cappadocia", "Istanbul", "Glacier National Park", "Saint Lucia", "Yellowstone National Park", "South Island", " New Zealand", "Maldives", "Quebec City", "Banff", "Turks & Caicos"];
+
+        for (let i = 0; i < expensiveTrips; i++) {
+            const location = random.int(0, locations.length - 1);
+            gameState.lifeEventManager!.AddEvent(new LifeEvent("Expensive Trip",
+                new Date(gameState.date.getFullYear(), random.int(0, 11), random.int(1, 28), 12),
+                <div>
+                    <h3>You flew to {locations[location]} for your vacation!</h3>
+                    <ButtonNext
+                        style="w-50 text-xl h-10 p-1 font-bold mt-2"
+                        text="Relaxing!"
+                        action={() => {
+                            gameState.character.satisfaction += random.int(2, 4);
+                            gameState.lifeEventManager!.NextEvent();
+                        }}/>
+                </div>, true))
+            locations = locations.filter((_, i) => i != location);
+        }
+
+        let activities = ["camping", "kayaking", "canoeing", "sightseeing", "hiking", "biking"];
+        for (let i = 0; i < cheapTrips; i++) {
+            const activity = random.int(0, activities.length - 1);
+            gameState.lifeEventManager!.AddEvent(new LifeEvent("Road Trip",
+                new Date(gameState.date.getFullYear(), random.int(0, 11), random.int(1, 28), 12),
+                <div>
+                    <h3>You went {activities[activity]}!</h3>
+                    <ButtonNext
+                        style="w-50 text-xl h-10 p-1 font-bold mt-2"
+                        text="That was fun!"
+                        action={() => {
+                            gameState.character.satisfaction += Math.round(Math.sqrt(random.float(.4, 3)));
+                            gameState.lifeEventManager!.NextEvent();
+                        }}/>
+                </div>, true))
+            activities = activities.filter((_, i) => i != activity);
+        }
     }
 }
 

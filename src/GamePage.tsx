@@ -37,7 +37,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
     });
     const [page, setPage] = useState(999);
     const [character] = useState(new Character(fname, lname, [
-        {name: "Rent", amount: 1650},
+        {name: "Rent", amount: 1400},
         {name: "Utilities", amount: 410},
         {name: "Internet", amount: 40},
         {name: "Phone Data", amount: 60},
@@ -60,6 +60,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
     const startYear = () => {
         setPage(pages.length - 1);
         character.bigTicketItems.ScheduleBigTicketItems(gameState.s.lifeEventManager!, gameState.s, gameState.s.date);
+        character.scheduleTrips(gameState.s);
         character.checkGoals(gameState.s);
         gameState.s.lifeEventScheduler!.GenerateEvents();
         if (!lifeEventManager.GetActiveEvent(gameState.s.date)) {
@@ -83,10 +84,14 @@ function GamePage({fname, lname, tutorial}: GameProps) {
         const taxableIncome = Math.max(0, character.salary * (1 - character.pretirement / 100) - 15750);
         character.taxableIncome = taxableIncome;
         const taxes = CalculateTaxes(taxableIncome);
-        const newSavings = character.salary * (100 - character.pinvestments - character.pretirement - character.pleisure) / 100 - taxes - livingExpenses;
+        const newSavings = character.salary * (100 - character.pinvestments - character.pretirement - character.pdiscretionary - character.ptrips) / 100 - taxes - livingExpenses;
 
-        // Go on trips!
-        character.satisfaction += (character.loans.length > 0 ? 5 : 8) + character.satisfaction * character.pleisure / 100 / gameState.s.inflation;
+        // Pay for wants
+        const discretionarySpending = character.salary * character.pdiscretionary / 100 / gameState.s.inflation;
+        character.satisfaction += ((1.2 * discretionarySpending - 3500) / (Math.abs(discretionarySpending / 20) + 210)) * (character.loans.length > 0 ? .8 : 1);
+
+        // Allocate money for trips
+        character.tripBalance += character.salary * character.ptrips / 100;
 
         // Income and interest
         character.addMoney(newSavings);
@@ -140,7 +145,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
     const livingExpenses = monthlyLivingExpenses * 12;
     const minLoanPayments = character.loans.reduce((sum, l) => sum + l.getPayment(), 0);
 
-    const newSavings = character.salary * (100 - character.pinvestments - character.pretirement - character.pleisure) / 100 - taxes - livingExpenses - minLoanPayments - character.bigTicketItems.GetYearlyAllocation(gameState.s.date);
+    const newSavings = character.salary * (100 - character.pinvestments - character.pretirement - character.pdiscretionary - character.ptrips) / 100 - taxes - livingExpenses - minLoanPayments - character.bigTicketItems.GetYearlyAllocation(gameState.s.date);
     character.previousYearlyBalance = newSavings;
     const ploans = character.loans.reduce((sum, l) => sum + l.getPayment(), 0) / character.salary * 100;
 
@@ -162,8 +167,9 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                          endYear();
                          endYear();
                          character.salary = 48000 * random.float(1, 1.1);
-                         character.satisfaction = 40 * random.float(.9, 1.3);
-                         character.pleisure = 10;
+                         character.satisfaction = 35 * random.float(.9, 1.3);
+                         character.pdiscretionary = 10;
+                         character.ptrips = 2;
                          lifeEventManager.NextEvent();
                      }}>
                     <h3 className="text-gray-700 font-bold">High School</h3>
@@ -194,8 +200,9 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                          endYear();
                          endYear();
                          character.salary = 53000 * random.float(1, 1.1);
-                         character.satisfaction = 42 * random.float(.9, 1.3);
-                         character.pleisure = 10;
+                         character.satisfaction = 37 * random.float(.9, 1.3);
+                         character.pdiscretionary = 10;
+                         character.ptrips = 2;
                          lifeEventManager.NextEvent();
                      }}>
                     <h3 className="text-gray-700 font-bold">Trade School</h3>
@@ -231,8 +238,9 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                           endYear();
                                           endYear();
                                           character.salary = 57000 * random.float(1, 1.1);
-                                          character.satisfaction = 44 * random.float(.9, 1.3);
-                                          character.pleisure = 10;
+                                          character.satisfaction = 38 * random.float(.9, 1.3);
+                                          character.pdiscretionary = 10;
+                                          character.ptrips = 2;
                                           lifeEventManager.NextEvent();
                                       }}>
                                      <h3 className="text-gray-700 font-bold">Community College</h3>
@@ -267,8 +275,9 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                           endYear();
                                           character.monthlyLivingExpenses = previousExpenses;
                                           character.salary = 80000 * random.float(1, 1.3);
-                                          character.satisfaction = 50 * random.float(.9, 1.3);
-                                          character.pleisure = 10;
+                                          character.satisfaction = 42 * random.float(.9, 1.3);
+                                          character.pdiscretionary = 10;
+                                          character.ptrips = 2;
                                           lifeEventManager.NextEvent();
                                       }}>
                                      <h3 className="text-gray-700 font-bold">Public University</h3>
@@ -307,8 +316,9 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                           endYear();
                                           character.monthlyLivingExpenses = previousExpenses;
                                           character.salary = 83000 * random.float(1, 1.3);
-                                          character.satisfaction = 48 * random.float(.9, 1.3);
-                                          character.pleisure = 10;
+                                          character.satisfaction = 44 * random.float(.9, 1.3);
+                                          character.pdiscretionary = 10;
+                                          character.ptrips = 2;
                                           lifeEventManager.NextEvent();
                                       }}>
                                      <h3 className="text-gray-700 font-bold">Private University</h3>
@@ -337,13 +347,15 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                     January of each year you will sit down and plan your finances for the upcoming year. It's time to
                     take what you have learned about money and plan your adventure! But be careful and keep some money
                     in savings, life has it's twists and turns!</p>
-                <ButtonNext action={
+                <ButtonNext
+                    style="w-50 text-xl h-10 p-1 font-bold mt-2"
+                    text="Ready to start!" action={
                     () => {
                         character.addGoal(new Goal("Plan Finances", "Plan your finances for the year such that you will end with a positive yearly balance.", new Date(gameState.s.date.getFullYear() + 1, 0),
                             (gameState, goal) => character.previousYearlyBalance > 0
                                 && gameState.date.getFullYear() >= goal.targetDate.getFullYear(),
                             (gameState) => {
-                                gameState.character.satisfaction += 5;
+                                gameState.character.satisfaction += 1;
                                 gameState.character.milesDriven = 1000;
                                 gameState.lifeEventManager!.AddEvent(
                                     new LifeEvent("First plan!", new Date(gameState.date.getFullYear(), 0, 21),
@@ -357,36 +369,31 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                     ));
                             }));
                         gameState.s.lifeEventManager!.NextEvent();
-                    }} style="w-50 text-xl h-10 p-1 font-bold mt-2" text="Ready to start!"/>
+                    }}/>
             </div>
         </div>, true),
-        // new LifeEvent("Event Tutorial", new Date(gameState.s.date.getFullYear() + 6, 1),
-        //     (<div><p>During the year you will encounter events that may have a financial impact.</p></div>)),
         new LifeEvent("Buying a Car", new Date(gameState.s.date.getFullYear() + 6, 1),
             (<div className="flex flex-col items-center gap-4">
                 <p className="w-200">Your car is nearing the end of it's lifespan, and it is about time to buy a new
                     one. Luckily, your parents have offered to subsidise your purchase in celebration of your new job.
                     It is time to decide to get a new or used car, and how decked-out it is.</p>
-                <button className="w-60 text-xl h-10 font-bold"
-                        onClick={() => {
-                            lifeEventManager.ReplaceEvent(new LifeEvent("Choosing a car", gameState.s.date,
-                                <div className="flex flex-col items-center w-full">
-                                    <div className="flex flex-col items-center gap-4 w-3/4">
-                                        <p>Your parents gave you {formatter.format(30000 * gameState.s.inflation)} to
-                                            buy a car. Choose the type of car you want to buy, you may also buy a more
-                                            expensive car by using cash from your savings. You are allowed to keep the
-                                            money that you don't
-                                            spend on the car.</p>
-                                        <CarShop gameState={gameState.s}
-                                                 action={(gameState: GameState) => gameState.lifeEventManager!.NextEvent()}
-                                                 allocatedMoney={30000 * gameState.s.inflation}
-                                        />
-                                    </div>
-                                </div>, true
-                            ));
-                        }}>
-                    <p>Choose a car</p>
-                </button>
+                <ButtonNext style="w-60 text-xl h-10 font-bold" text="Choose a car" action={() => {
+                    lifeEventManager.ReplaceEvent(new LifeEvent("Choosing a car", gameState.s.date,
+                        <div className="flex flex-col items-center w-full">
+                            <div className="flex flex-col items-center gap-4 w-3/4">
+                                <p>Your parents gave you {formatter.format(30000 * gameState.s.inflation)} to
+                                    buy a car. Choose the type of car you want to buy, you may also buy a more
+                                    expensive car by using cash from your savings. You are allowed to keep the
+                                    money that you don't
+                                    spend on the car.</p>
+                                <CarShop gameState={gameState.s}
+                                         action={(gameState: GameState) => gameState.lifeEventManager!.NextEvent()}
+                                         allocatedMoney={30000 * gameState.s.inflation}
+                                />
+                            </div>
+                        </div>, true
+                    ));
+                }}/>
             </div>), true),
     ]));
     const activeEvent = lifeEventManager.GetActiveEvent(gameState.s.date);
@@ -434,11 +441,16 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                 for schooling. Loans have a minimum payment, which you have to pay monthly. For simplicity, these
                 payments are aggregated into yearly installments.
             </p>), "Loans", null, "Next"),
-            new TutorialEvent("Leisure", null, (<p className="text-gray-700">
-                The leisure category is for money allocated to things like shopping and trips. You can press
-                the up and down arrows to change the percentage of your paycheck that is allocated towards this
-                category.
-            </p>), "Leisure", null, "Next"),
+            new TutorialEvent("Discretionary Spending", null, (<p className="text-gray-700">
+                Discretionary spending is money that you have allocated towards your wants. This includes things like
+                shopping, subscriptions, etc. You can press the up and down arrows to change the percentage of your
+                paycheck that is allocated towards this category.
+            </p>), "Discretionary", null, "Next"),
+            new TutorialEvent("Vacation", null, (<p className="text-gray-700">
+                Vacations are a great way to see the world, money budgeted for vacations will be pooled together to go
+                on trips the following year. The type and amount of trips that you can go on depend on how much money is
+                budgeted.
+            </p>), "Vacation", null, "Next"),
             new TutorialEvent("Savings", null, (<p className="text-gray-700">
                 This is the leftover money from your salary, which will go into your <a
                 href="https://www.investopedia.com/terms/s/savings.asp" target="_blank">savings account</a>. You may
@@ -782,19 +794,33 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                key={3}>{formatter.format(character.salary * character.pinvestments / 100)}</p>,
                         ] : []}
 
-                        <p className="text-gray-700" id="Leisure">Leisure</p>
+                        <p className="text-gray-700" id="Discretionary">Discretionary</p>
                         <p className="text-gray-700">
-                            <input name="character.pleisure" className="w-12 text-end"
+                            <input name="character.discretionary" className="w-12 text-end"
                                    min="0"
-                                   defaultValue={character.pleisure}
+                                   defaultValue={character.pdiscretionary}
                                    onChange={e => {
                                        if (isNaN(e.target.valueAsNumber)) return;
-                                       character.pleisure = Math.min(1000, Math.max(0, e.target.valueAsNumber));
+                                       character.pdiscretionary = Math.min(1000, Math.max(0, e.target.valueAsNumber));
                                        render()
                                    }}
                                    type="number">
                             </input>%</p>
-                        <p className="text-gray-700">{formatter.format(character.salary * character.pleisure / 100)}</p>
+                        <p className="text-gray-700">{formatter.format(character.salary * character.pdiscretionary / 100)}</p>
+
+                        <p className="text-gray-700" id="Vacation">Vacation</p>
+                        <p className="text-gray-700">
+                            <input name="character.ptrips" className="w-12 text-end"
+                                   min="0"
+                                   defaultValue={character.ptrips}
+                                   onChange={e => {
+                                       if (isNaN(e.target.valueAsNumber)) return;
+                                       character.ptrips = Math.min(1000, Math.max(0, e.target.valueAsNumber));
+                                       render()
+                                   }}
+                                   type="number">
+                            </input>%</p>
+                        <p className="text-gray-700">{formatter.format(character.salary * character.ptrips / 100)}</p>
 
                         <hr/>
                         <hr/>
