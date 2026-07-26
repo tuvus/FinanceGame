@@ -1246,11 +1246,12 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                     className="flex flex-col gap-2 ml-auto mr-auto mt-[10%] w-180 bg-amber-100 rounded-xl items-center p-4"
                     onClick={e => e.stopPropagation()}>
                     <h2 className="text-gray-700!">Taxable Income <InfoButtonTooltip
-                        action={() => () => window.open("https://www.irs.gov/credits-and-deductions", "_blank")}
+                        action={() => window.open("https://www.irs.gov/credits-and-deductions", "_blank")}
                         text="Your taxable income is your salary minus: any money put into a traditional retirement account, any credits and deductions"/></h2>
                     <p className="text-gray-700">{formatter.format(taxableIncome)}</p>
-                    <h2 className="text-gray-700!">Tax Brackets <InfoButton
-                        action={() => window.open("https://www.irs.gov/filing/federal-income-tax-rates-and-brackets", "_blank")}/>
+                    <h2 className="text-gray-700!">Tax Brackets <InfoButtonTooltip
+                        action={() => window.open("https://www.irs.gov/filing/federal-income-tax-rates-and-brackets", "_blank")}
+                    text="See actual tax brackets at the IRS webpage"/>
                     </h2>
                     <div className="grid grid-cols-4 w-full">
                         <p className="text-gray-700">Percent</p>
