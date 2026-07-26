@@ -6,7 +6,14 @@ import {LineChart} from "./components/LineChart.tsx";
 import Select from 'react-select';
 import {Account, GameState, Loan, StockAccount, StockBond} from "./Data.tsx";
 import StockCard from "./components/StockCard.tsx";
-import {ButtonNext, CalculateTaxes, GetDateString, GetReactSelectStyle, NumberInputAutoSelect} from "./Utils.tsx";
+import {
+    ButtonNext,
+    CalculateTaxes,
+    GetDateString,
+    GetReactSelectStyle,
+    InfoButton, InfoButtonTooltip,
+    NumberInputAutoSelect
+} from "./Utils.tsx";
 import {DonutChart} from "./components/DonutChart.tsx";
 import {LifeEvent, LifeEventManager, LifeEventSchedule, LifeEventScheduler} from "./EventManager.tsx";
 import {TutorialChain, TutorialEvent, TutorialManager} from "./TutorialManager.tsx";
@@ -139,7 +146,8 @@ function GamePage({fname, lname, tutorial}: GameProps) {
         gameState.s.gameYear++;
     }
 
-    const taxes = CalculateTaxes(Math.max(0, character.salary * (1 - character.pretirement / 100) - 15750));
+    const taxableIncome = Math.max(0, character.salary * (1 - character.pretirement / 100) - 15750);
+    const taxes = CalculateTaxes(taxableIncome);
 
     const monthlyLivingExpenses = (character.monthlyLivingExpenses.map(e => e.amount)
         .reduce((sum, curr) => sum + curr, 0) + character.getMonthlyCarCosts()) * gameState.s.inflation;
@@ -728,9 +736,8 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                         ] : []}
 
 
-                        <p className="text-red-800" id="IncomeTaxes">Taxes <button
-                            className="pl-1 pr-1 text-sm align-middle m-auto"
-                            onClick={() => document.getElementById("tax-modal")!.style.display = "block"}>i</button>
+                        <p className="text-red-800" id="IncomeTaxes">Taxes <InfoButton
+                            action={() => document.getElementById("tax-modal")!.style.display = "block"}/>
                         </p>
                         <p className="text-red-800">{Math.round(taxes / character.salary * 100)}%</p>
                         <p className="text-red-800">{formatter.format(taxes)}</p>
@@ -1236,15 +1243,21 @@ function GamePage({fname, lname, tutorial}: GameProps) {
             <div id="tax-modal" className="flex hmodal justify-center"
                  onClick={() => document.getElementById("tax-modal")!.style.display = "none"}>
                 <div
-                    className="flex flex-col gap-2 ml-auto mr-auto mt-[10%] w-160 bg-amber-100 rounded-xl items-center p-4"
+                    className="flex flex-col gap-2 ml-auto mr-auto mt-[10%] w-180 bg-amber-100 rounded-xl items-center p-4"
                     onClick={e => e.stopPropagation()}>
-                    <h2 className="text-gray-700!">Taxable Income</h2>
-                    <p className="text-gray-700">{formatter.format(character.salary * (1 - character.pretirement / 100) - 15750)}</p>
-                    <h2 className="text-gray-700!">Tax Brackets</h2>
-                    <div className="grid grid-cols-3 w-full">
+                    <h2 className="text-gray-700!">Taxable Income <InfoButtonTooltip
+                        action={() => () => window.open("https://www.irs.gov/credits-and-deductions", "_blank")}
+                        text="Your taxable income is your salary minus: any money put into a traditional retirement account, any credits and deductions"/></h2>
+                    <p className="text-gray-700">{formatter.format(taxableIncome)}</p>
+                    <h2 className="text-gray-700!">Tax Brackets <InfoButton
+                        action={() => window.open("https://www.irs.gov/filing/federal-income-tax-rates-and-brackets", "_blank")}/>
+                    </h2>
+                    <div className="grid grid-cols-4 w-full">
                         <p className="text-gray-700">Percent</p>
                         <p className="text-gray-700">From</p>
                         <p className="text-gray-700">To</p>
+                        <p className="text-gray-700">Taxed</p>
+                        <hr/>
                         <hr/>
                         <hr/>
                         <hr/>
@@ -1252,13 +1265,15 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                 <p className="text-gray-700" key={i + "1"}>{b.percent}%</p>,
                                 <p className="text-gray-700"
                                    key={i + "2"}>{formatter.format(i == 0 ? 0 : taxBrackets[i - 1].to * gameState.s.inflation + 1)}</p>,
-                                <p className="text-gray-700" key={i + "3"}>{b.to > 700350 ? "" : formatter.format(b.to * gameState.s.inflation)}</p>
+                                <p className="text-gray-700"
+                                   key={i + "3"}>{b.to > 700350 ? "" : formatter.format(b.to * gameState.s.inflation)}</p>,
+                                <p className="text-gray-700"
+                                   key={i + "4"}>{formatter.format(Math.max(0, (Math.min(taxableIncome, b.to * gameState.s.inflation) - (i == 0 ? 0 : taxBrackets[i - 1].to * gameState.s.inflation + 1)) * b.percent / 100))}</p>
                             ]
                         )}
                     </div>
+                    <p className="text-gray-700">Total: {formatter.format(taxes)}</p>
                     <p className="text-gray-700 italic">(number are adjusted to in-game inflation)</p>
-                    <h2 className="text-gray-700!">Taxes</h2>
-                    <p className="text-gray-700">{formatter.format(taxes)}</p>
                     <button
                         onClick={() => document.getElementById("tax-modal")!.style.display = "none"}
                         className="p-2 text-2xl w-80">Close
