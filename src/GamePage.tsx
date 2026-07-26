@@ -708,7 +708,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
             name: "Budget",
             page: <div className="flex flex-col gap-2 items-center">
                 <h1>Budget</h1>
-                <div className="flex flex-col gap-2 w-1/2 rounded-2xl bg-amber-100 items-center pt-2 pb-2">
+                <div className="flex flex-col gap-2 w-3/5 rounded-2xl bg-amber-100 items-center p-2 pb-2">
                     <div className="grid grid-cols-3 w-full">
                         <p className="text-green-700 font-bold" id="Paycheck">Paycheck</p>
                         <p></p>
@@ -1273,7 +1273,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                             ]
                         )}
                     </div>
-                    <p className="text-gray-700">Total: {formatter.format(taxes)}</p>
+                    <p className="text-gray-700">Total Taxes: {formatter.format(taxes)}</p>
                     <p className="text-gray-700 italic">(number are adjusted to in-game inflation)</p>
                     <button
                         onClick={() => document.getElementById("tax-modal")!.style.display = "none"}
