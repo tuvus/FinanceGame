@@ -60,6 +60,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
     const startYear = () => {
         setPage(pages.length - 1);
         character.bigTicketItems.ScheduleBigTicketItems(gameState.s.lifeEventManager!, gameState.s, gameState.s.date);
+        character.scheduleTrips(gameState.s);
         character.checkGoals(gameState.s);
         gameState.s.lifeEventScheduler!.GenerateEvents();
         if (!lifeEventManager.GetActiveEvent(gameState.s.date)) {
@@ -87,11 +88,10 @@ function GamePage({fname, lname, tutorial}: GameProps) {
 
         // Pay for wants
         const discretionarySpending = character.salary * character.pdiscretionary / 100 / gameState.s.inflation;
-        character.satisfaction += ((1.2 * discretionarySpending - 3500) / Math.abs(discretionarySpending / 20) + 210) * (character.loans.length > 0 ? .8 : 1);
+        character.satisfaction += ((1.2 * discretionarySpending - 3500) / (Math.abs(discretionarySpending / 20) + 210)) * (character.loans.length > 0 ? .8 : 1);
 
         // Allocate money for trips
         character.tripBalance += character.salary * character.ptrips / 100;
-        character.scheduleTrips(gameState.s);
 
         // Income and interest
         character.addMoney(newSavings);
@@ -167,8 +167,9 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                          endYear();
                          endYear();
                          character.salary = 48000 * random.float(1, 1.1);
-                         character.satisfaction = 40 * random.float(.9, 1.3);
+                         character.satisfaction = 35 * random.float(.9, 1.3);
                          character.pdiscretionary = 10;
+                         character.ptrips = 2;
                          lifeEventManager.NextEvent();
                      }}>
                     <h3 className="text-gray-700 font-bold">High School</h3>
@@ -199,8 +200,9 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                          endYear();
                          endYear();
                          character.salary = 53000 * random.float(1, 1.1);
-                         character.satisfaction = 42 * random.float(.9, 1.3);
+                         character.satisfaction = 37 * random.float(.9, 1.3);
                          character.pdiscretionary = 10;
+                         character.ptrips = 2;
                          lifeEventManager.NextEvent();
                      }}>
                     <h3 className="text-gray-700 font-bold">Trade School</h3>
@@ -236,8 +238,9 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                           endYear();
                                           endYear();
                                           character.salary = 57000 * random.float(1, 1.1);
-                                          character.satisfaction = 44 * random.float(.9, 1.3);
+                                          character.satisfaction = 38 * random.float(.9, 1.3);
                                           character.pdiscretionary = 10;
+                                          character.ptrips = 2;
                                           lifeEventManager.NextEvent();
                                       }}>
                                      <h3 className="text-gray-700 font-bold">Community College</h3>
@@ -272,8 +275,9 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                           endYear();
                                           character.monthlyLivingExpenses = previousExpenses;
                                           character.salary = 80000 * random.float(1, 1.3);
-                                          character.satisfaction = 50 * random.float(.9, 1.3);
+                                          character.satisfaction = 42 * random.float(.9, 1.3);
                                           character.pdiscretionary = 10;
+                                          character.ptrips = 2;
                                           lifeEventManager.NextEvent();
                                       }}>
                                      <h3 className="text-gray-700 font-bold">Public University</h3>
@@ -312,8 +316,9 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                           endYear();
                                           character.monthlyLivingExpenses = previousExpenses;
                                           character.salary = 83000 * random.float(1, 1.3);
-                                          character.satisfaction = 48 * random.float(.9, 1.3);
+                                          character.satisfaction = 44 * random.float(.9, 1.3);
                                           character.pdiscretionary = 10;
+                                          character.ptrips = 2;
                                           lifeEventManager.NextEvent();
                                       }}>
                                      <h3 className="text-gray-700 font-bold">Private University</h3>
@@ -342,13 +347,15 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                     January of each year you will sit down and plan your finances for the upcoming year. It's time to
                     take what you have learned about money and plan your adventure! But be careful and keep some money
                     in savings, life has it's twists and turns!</p>
-                <ButtonNext action={
+                <ButtonNext
+                    style="w-50 text-xl h-10 p-1 font-bold mt-2"
+                    text="Ready to start!" action={
                     () => {
                         character.addGoal(new Goal("Plan Finances", "Plan your finances for the year such that you will end with a positive yearly balance.", new Date(gameState.s.date.getFullYear() + 1, 0),
                             (gameState, goal) => character.previousYearlyBalance > 0
                                 && gameState.date.getFullYear() >= goal.targetDate.getFullYear(),
                             (gameState) => {
-                                gameState.character.satisfaction += 5;
+                                gameState.character.satisfaction += 1;
                                 gameState.character.milesDriven = 1000;
                                 gameState.lifeEventManager!.AddEvent(
                                     new LifeEvent("First plan!", new Date(gameState.date.getFullYear(), 0, 21),
@@ -362,7 +369,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                     ));
                             }));
                         gameState.s.lifeEventManager!.NextEvent();
-                    }} style="w-50 text-xl h-10 p-1 font-bold mt-2" text="Ready to start!"/>
+                    }}/>
             </div>
         </div>, true),
         // new LifeEvent("Event Tutorial", new Date(gameState.s.date.getFullYear() + 6, 1),
@@ -439,11 +446,11 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                 for schooling. Loans have a minimum payment, which you have to pay monthly. For simplicity, these
                 payments are aggregated into yearly installments.
             </p>), "Loans", null, "Next"),
-            new TutorialEvent("Leisure", null, (<p className="text-gray-700">
-                The leisure category is for money allocated to things like shopping and trips. You can press
-                the up and down arrows to change the percentage of your paycheck that is allocated towards this
-                category.
-            </p>), "Leisure", null, "Next"),
+            new TutorialEvent("Discretionary Spending", null, (<p className="text-gray-700">
+                Discretionary spending is money that you have allocated towards your wants. This includes things like
+                shopping, subscriptions, etc. You can press the up and down arrows to change the percentage of your
+                paycheck that is allocated towards this category.
+            </p>), "Discretionary", null, "Next"),
             new TutorialEvent("Savings", null, (<p className="text-gray-700">
                 This is the leftover money from your salary, which will go into your <a
                 href="https://www.investopedia.com/terms/s/savings.asp" target="_blank">savings account</a>. You may

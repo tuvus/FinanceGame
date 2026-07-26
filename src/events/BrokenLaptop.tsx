@@ -14,7 +14,6 @@ function BrokenLaptopEvent({gameState}: GameStateProps) {
                 <div className="eventButton panelButton" onClick={() => {
                     const r = random.float();
                     if (r < .3) {
-                        gameState.character.satisfaction -= 1;
                         gameState.character.payMoney(150 * gameState.inflation);
                         gameState.lifeEventManager!.ReplaceEvent(new LifeEvent("Laptop Fixed", gameState.date,
                             <div className="flex flex-col w-full items-center mt-6 gap-4">
@@ -23,7 +22,7 @@ function BrokenLaptopEvent({gameState}: GameStateProps) {
                                 </p>
                             </div>));
                     } else {
-                        gameState.character.satisfaction -= 4;
+                        gameState.character.satisfaction -= 2;
                         gameState.character.payMoney(750 * gameState.inflation);
                         gameState.lifeEventManager!.ReplaceEvent(new LifeEvent("Laptop Unrepairable", gameState.date,
                             <div className="flex flex-col w-full items-center mt-6 gap-4">
@@ -40,7 +39,7 @@ function BrokenLaptopEvent({gameState}: GameStateProps) {
                     <p className="text-red-800">{gameState.formatter.format(150 * gameState.inflation)}</p>
                 </div>
                 <div className="eventButton panelButton" onClick={() => {
-                    gameState.character.satisfaction -= 2;
+                    gameState.character.satisfaction -= 1;
                     gameState.character.payMoney(600 * gameState.inflation);
                     gameState.lifeEventManager!.NextEvent();
                 }}>
@@ -48,7 +47,7 @@ function BrokenLaptopEvent({gameState}: GameStateProps) {
                     <p className="text-red-800">{gameState.formatter.format(600 * gameState.inflation)}</p>
                 </div>
                 <div className="eventButton panelButton" onClick={() => {
-                    gameState.character.satisfaction += 2;
+                    gameState.character.satisfaction += 1;
                     gameState.character.payMoney(1200 * gameState.inflation);
                     gameState.lifeEventManager!.NextEvent();
                 }}>

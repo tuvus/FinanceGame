@@ -153,7 +153,7 @@ export class Character {
     scheduleTrips(gameState: GameState) {
         let expensiveTrips = 0;
         let cheapTrips = 0;
-        while (this.tripBalance >= cheapTrips * gameState.inflation) {
+        while (this.tripBalance >= 800 * gameState.inflation) {
             if (this.tripBalance >= 2000 * gameState.inflation) {
                 expensiveTrips++;
                 this.tripBalance -= 2000 * gameState.inflation;
@@ -170,27 +170,33 @@ export class Character {
                 new Date(gameState.date.getFullYear(), random.int(0, 11), random.int(1, 28), 12),
                 <div>
                     <h3>You flew to {locations[location]} for your vacation!</h3>
-                    <ButtonNext action={() => {
-                        gameState.character.satisfaction += random.int(2, 4);
-                        gameState.lifeEventManager!.NextEvent();
-                    }} style="w-50 text-xl h-10 p-1 font-bold mt-2" text="Relaxing!"/>
+                    <ButtonNext
+                        style="w-50 text-xl h-10 p-1 font-bold mt-2"
+                        text="Relaxing!"
+                        action={() => {
+                            gameState.character.satisfaction += random.int(2, 4);
+                            gameState.lifeEventManager!.NextEvent();
+                        }}/>
                 </div>, true))
             locations = locations.filter((_, i) => i != location);
         }
 
-        let activities= ["camping", "kayaking", "canoeing", "sightseeing", "hiking", "biking"];
+        let activities = ["camping", "kayaking", "canoeing", "sightseeing", "hiking", "biking"];
         for (let i = 0; i < cheapTrips; i++) {
             const activity = random.int(0, activities.length - 1);
             gameState.lifeEventManager!.AddEvent(new LifeEvent("Road Trip",
                 new Date(gameState.date.getFullYear(), random.int(0, 11), random.int(1, 28), 12),
                 <div>
                     <h3>You went {activities[activity]}!</h3>
-                    <ButtonNext action={() => {
-                        gameState.character.satisfaction += random.int(1, 2);
-                        gameState.lifeEventManager!.NextEvent();
-                    }} style="w-50 text-xl h-10 p-1 font-bold mt-2" text="That was fun!"/>
+                    <ButtonNext
+                        style="w-50 text-xl h-10 p-1 font-bold mt-2"
+                        text="That was fun!"
+                        action={() => {
+                            gameState.character.satisfaction += Math.round(Math.sqrt(random.float(.4, 3)));
+                            gameState.lifeEventManager!.NextEvent();
+                        }}/>
                 </div>, true))
-            activities= activities.filter((_, i) => i != activity);
+            activities = activities.filter((_, i) => i != activity);
         }
     }
 }
