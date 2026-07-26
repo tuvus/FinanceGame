@@ -451,6 +451,11 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                 shopping, subscriptions, etc. You can press the up and down arrows to change the percentage of your
                 paycheck that is allocated towards this category.
             </p>), "Discretionary", null, "Next"),
+            new TutorialEvent("Vacation", null, (<p className="text-gray-700">
+                Vacations are a great way to see the world, money budgeted for vacations will be pooled together to go
+                on trips the following year. The type and amount of trips that you can go on depend on how much money is
+                budgeted.
+            </p>), "Vacation", null, "Next"),
             new TutorialEvent("Savings", null, (<p className="text-gray-700">
                 This is the leftover money from your salary, which will go into your <a
                 href="https://www.investopedia.com/terms/s/savings.asp" target="_blank">savings account</a>. You may
