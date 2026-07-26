@@ -37,7 +37,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
     });
     const [page, setPage] = useState(999);
     const [character] = useState(new Character(fname, lname, [
-        {name: "Rent", amount: 1650},
+        {name: "Rent", amount: 1400},
         {name: "Utilities", amount: 410},
         {name: "Internet", amount: 40},
         {name: "Phone Data", amount: 60},
@@ -83,10 +83,15 @@ function GamePage({fname, lname, tutorial}: GameProps) {
         const taxableIncome = Math.max(0, character.salary * (1 - character.pretirement / 100) - 15750);
         character.taxableIncome = taxableIncome;
         const taxes = CalculateTaxes(taxableIncome);
-        const newSavings = character.salary * (100 - character.pinvestments - character.pretirement - character.pleisure) / 100 - taxes - livingExpenses;
+        const newSavings = character.salary * (100 - character.pinvestments - character.pretirement - character.pdiscretionary - character.ptrips) / 100 - taxes - livingExpenses;
 
-        // Go on trips!
-        character.satisfaction += (character.loans.length > 0 ? 5 : 8) + character.satisfaction * character.pleisure / 100 / gameState.s.inflation;
+        // Pay for wants
+        const discretionarySpending = character.salary * character.pdiscretionary / 100 / gameState.s.inflation;
+        character.satisfaction += ((1.2 * discretionarySpending - 3500) / Math.abs(discretionarySpending / 20) + 210) * (character.loans.length > 0 ? .8 : 1);
+
+        // Allocate money for trips
+        character.tripBalance += character.salary * character.ptrips / 100;
+        character.scheduleTrips(gameState.s);
 
         // Income and interest
         character.addMoney(newSavings);
@@ -140,7 +145,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
     const livingExpenses = monthlyLivingExpenses * 12;
     const minLoanPayments = character.loans.reduce((sum, l) => sum + l.getPayment(), 0);
 
-    const newSavings = character.salary * (100 - character.pinvestments - character.pretirement - character.pleisure) / 100 - taxes - livingExpenses - minLoanPayments - character.bigTicketItems.GetYearlyAllocation(gameState.s.date);
+    const newSavings = character.salary * (100 - character.pinvestments - character.pretirement - character.pdiscretionary - character.ptrips) / 100 - taxes - livingExpenses - minLoanPayments - character.bigTicketItems.GetYearlyAllocation(gameState.s.date);
     character.previousYearlyBalance = newSavings;
     const ploans = character.loans.reduce((sum, l) => sum + l.getPayment(), 0) / character.salary * 100;
 
@@ -163,7 +168,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                          endYear();
                          character.salary = 48000 * random.float(1, 1.1);
                          character.satisfaction = 40 * random.float(.9, 1.3);
-                         character.pleisure = 10;
+                         character.pdiscretionary = 10;
                          lifeEventManager.NextEvent();
                      }}>
                     <h3 className="text-gray-700 font-bold">High School</h3>
@@ -195,7 +200,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                          endYear();
                          character.salary = 53000 * random.float(1, 1.1);
                          character.satisfaction = 42 * random.float(.9, 1.3);
-                         character.pleisure = 10;
+                         character.pdiscretionary = 10;
                          lifeEventManager.NextEvent();
                      }}>
                     <h3 className="text-gray-700 font-bold">Trade School</h3>
@@ -232,7 +237,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                           endYear();
                                           character.salary = 57000 * random.float(1, 1.1);
                                           character.satisfaction = 44 * random.float(.9, 1.3);
-                                          character.pleisure = 10;
+                                          character.pdiscretionary = 10;
                                           lifeEventManager.NextEvent();
                                       }}>
                                      <h3 className="text-gray-700 font-bold">Community College</h3>
@@ -268,7 +273,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                           character.monthlyLivingExpenses = previousExpenses;
                                           character.salary = 80000 * random.float(1, 1.3);
                                           character.satisfaction = 50 * random.float(.9, 1.3);
-                                          character.pleisure = 10;
+                                          character.pdiscretionary = 10;
                                           lifeEventManager.NextEvent();
                                       }}>
                                      <h3 className="text-gray-700 font-bold">Public University</h3>
@@ -308,7 +313,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                           character.monthlyLivingExpenses = previousExpenses;
                                           character.salary = 83000 * random.float(1, 1.3);
                                           character.satisfaction = 48 * random.float(.9, 1.3);
-                                          character.pleisure = 10;
+                                          character.pdiscretionary = 10;
                                           lifeEventManager.NextEvent();
                                       }}>
                                      <h3 className="text-gray-700 font-bold">Private University</h3>
@@ -782,19 +787,33 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                key={3}>{formatter.format(character.salary * character.pinvestments / 100)}</p>,
                         ] : []}
 
-                        <p className="text-gray-700" id="Leisure">Leisure</p>
+                        <p className="text-gray-700" id="Discretionary">Discretionary</p>
                         <p className="text-gray-700">
-                            <input name="character.pleisure" className="w-12 text-end"
+                            <input name="character.discretionary" className="w-12 text-end"
                                    min="0"
-                                   defaultValue={character.pleisure}
+                                   defaultValue={character.pdiscretionary}
                                    onChange={e => {
                                        if (isNaN(e.target.valueAsNumber)) return;
-                                       character.pleisure = Math.min(1000, Math.max(0, e.target.valueAsNumber));
+                                       character.pdiscretionary = Math.min(1000, Math.max(0, e.target.valueAsNumber));
                                        render()
                                    }}
                                    type="number">
                             </input>%</p>
-                        <p className="text-gray-700">{formatter.format(character.salary * character.pleisure / 100)}</p>
+                        <p className="text-gray-700">{formatter.format(character.salary * character.pdiscretionary / 100)}</p>
+
+                        <p className="text-gray-700" id="Vacation">Vacation</p>
+                        <p className="text-gray-700">
+                            <input name="character.ptrips" className="w-12 text-end"
+                                   min="0"
+                                   defaultValue={character.ptrips}
+                                   onChange={e => {
+                                       if (isNaN(e.target.valueAsNumber)) return;
+                                       character.ptrips = Math.min(1000, Math.max(0, e.target.valueAsNumber));
+                                       render()
+                                   }}
+                                   type="number">
+                            </input>%</p>
+                        <p className="text-gray-700">{formatter.format(character.salary * character.ptrips / 100)}</p>
 
                         <hr/>
                         <hr/>
