@@ -372,33 +372,28 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                     }}/>
             </div>
         </div>, true),
-        // new LifeEvent("Event Tutorial", new Date(gameState.s.date.getFullYear() + 6, 1),
-        //     (<div><p>During the year you will encounter events that may have a financial impact.</p></div>)),
         new LifeEvent("Buying a Car", new Date(gameState.s.date.getFullYear() + 6, 1),
             (<div className="flex flex-col items-center gap-4">
                 <p className="w-200">Your car is nearing the end of it's lifespan, and it is about time to buy a new
                     one. Luckily, your parents have offered to subsidise your purchase in celebration of your new job.
                     It is time to decide to get a new or used car, and how decked-out it is.</p>
-                <button className="w-60 text-xl h-10 font-bold"
-                        onClick={() => {
-                            lifeEventManager.ReplaceEvent(new LifeEvent("Choosing a car", gameState.s.date,
-                                <div className="flex flex-col items-center w-full">
-                                    <div className="flex flex-col items-center gap-4 w-3/4">
-                                        <p>Your parents gave you {formatter.format(30000 * gameState.s.inflation)} to
-                                            buy a car. Choose the type of car you want to buy, you may also buy a more
-                                            expensive car by using cash from your savings. You are allowed to keep the
-                                            money that you don't
-                                            spend on the car.</p>
-                                        <CarShop gameState={gameState.s}
-                                                 action={(gameState: GameState) => gameState.lifeEventManager!.NextEvent()}
-                                                 allocatedMoney={30000 * gameState.s.inflation}
-                                        />
-                                    </div>
-                                </div>, true
-                            ));
-                        }}>
-                    <p>Choose a car</p>
-                </button>
+                <ButtonNext style="w-60 text-xl h-10 font-bold" text="Choose a car" action={() => {
+                    lifeEventManager.ReplaceEvent(new LifeEvent("Choosing a car", gameState.s.date,
+                        <div className="flex flex-col items-center w-full">
+                            <div className="flex flex-col items-center gap-4 w-3/4">
+                                <p>Your parents gave you {formatter.format(30000 * gameState.s.inflation)} to
+                                    buy a car. Choose the type of car you want to buy, you may also buy a more
+                                    expensive car by using cash from your savings. You are allowed to keep the
+                                    money that you don't
+                                    spend on the car.</p>
+                                <CarShop gameState={gameState.s}
+                                         action={(gameState: GameState) => gameState.lifeEventManager!.NextEvent()}
+                                         allocatedMoney={30000 * gameState.s.inflation}
+                                />
+                            </div>
+                        </div>, true
+                    ));
+                }}/>
             </div>), true),
     ]));
     const activeEvent = lifeEventManager.GetActiveEvent(gameState.s.date);
