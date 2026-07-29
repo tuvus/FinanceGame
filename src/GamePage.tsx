@@ -26,6 +26,7 @@ import {Outline} from "./components/Outline.tsx";
 import {Car, Character, Goal} from "./Character.tsx";
 import {CarShop} from "./events/CarShop.tsx";
 import {taxBrackets} from "./Constants.tsx";
+import PartnerMatch from "./events/PartnerMatch.tsx";
 
 type GameProps = {
     fname: string; lname: string; tutorial: boolean;
@@ -404,6 +405,61 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                     ));
                 }}/>
             </div>), true),
+        new LifeEvent("Finding a partner", new Date(gameState.s.date.getFullYear() + 6, random.int(0, 11), random.int(1, 28)),
+            <div className="flex flex-col w-full items-center">
+                <div className="flex flex-col justify-center gap-2 w-3/4">
+                    <p>Now that you have settled in its time to focus on your life goals: finding a partner. You've had
+                        some experience search in the past but now that you are settled, its time to get real. Who are
+                        you searching for?</p>
+                    <div className="flex justify-center gap-8 mt-6">
+                        <div
+                            className="eventButton panelButton"
+                            onClick={() => {
+                                gameState.s.character.partnerAspiration = "Boyfriend";
+                                gameState.s.character.satisfaction += 1;
+                                lifeEventManager.ReplaceEvent(new LifeEvent("Searching for a boyfriend", gameState.s.date,
+                                    <div className="flex flex-col w-full items-center">
+                                        <div className="flex flex-col items-center gap-2 w-3/4">
+                                            <p>You double your efforts searching for the right match, partaking in more
+                                                social gatherings and go to local events. You might not have found him
+                                                yet, but at least you can enjoying your time searching.</p>
+                                        </div>
+                                    </div>, false))
+                                lifeEventManager.AddEvent(new LifeEvent("Its a match!", new Date(gameState.s.date.getFullYear() + 1, random.int(0, 11), random.int(0, 28)),
+                                    <PartnerMatch gameState={gameState.s}/>, true));
+                            }}>
+                            <p className="text-gray-700">Boyfriend</p>
+                        </div>
+                        <div
+                            className="eventButton panelButton"
+                            onClick={() => {
+                                gameState.s.character.partnerAspiration = "Girlfriend";
+                                gameState.s.character.satisfaction += 1;
+                                lifeEventManager.ReplaceEvent(new LifeEvent("Searching for a girlfriend", gameState.s.date,
+                                    <div className="flex flex-col w-full items-center">
+                                        <div className="flex flex-col items-center gap-2 w-3/4">
+                                            <p>You double your efforts searching for the right match, partaking in more
+                                                social gatherings and go to local events. You might not have found her
+                                                yet, but at least you can enjoying your time searching.</p>
+                                        </div>
+                                    </div>, false))
+                                lifeEventManager.AddEvent(new LifeEvent("Its a match!", new Date(gameState.s.date.getFullYear() + 1, random.int(0, 11), random.int(0, 28)),
+                                    <PartnerMatch gameState={gameState.s}/>, true));
+                            }}>
+                            <p className="text-gray-700">Girlfriend</p>
+                        </div>
+                        <div
+                            className="eventButton panelButton"
+                            onClick={() => {
+                                gameState.s.character.partnerAspiration = "Pet";
+                                gameState.s.character.satisfaction += 3;
+                            }}>
+                            <p className="text-gray-700">Pet</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>, true),
     ]));
     const activeEvent = lifeEventManager.GetActiveEvent(gameState.s.date);
 
@@ -1247,11 +1303,12 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                     onClick={e => e.stopPropagation()}>
                     <h2 className="text-gray-700!">Taxable Income <InfoButtonTooltip
                         action={() => window.open("https://www.irs.gov/credits-and-deductions", "_blank")}
-                        text="Your taxable income is your salary minus any money put into a traditional retirement account, any credits and deductions"/></h2>
+                        text="Your taxable income is your salary minus any money put into a traditional retirement account, any credits and deductions"/>
+                    </h2>
                     <p className="text-gray-700">{formatter.format(taxableIncome)}</p>
                     <h2 className="text-gray-700!">Tax Brackets <InfoButtonTooltip
                         action={() => window.open("https://www.irs.gov/filing/federal-income-tax-rates-and-brackets", "_blank")}
-                    text="See actual tax brackets at the IRS webpage"/>
+                        text="See actual tax brackets at the IRS webpage"/>
                     </h2>
                     <div className="grid grid-cols-4 w-full">
                         <p className="text-gray-700">Percent</p>

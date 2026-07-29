@@ -29,6 +29,9 @@ export class Character {
     car: Car;
     milesDriven: number;
     wealthHistory: { date: Date, dateString: string, NetWorth: number, Assets: number, Debt: number }[];
+    partnerAspiration: string;
+    partnerFirstName: string | null;
+    partnerLastName: string | null;
 
     constructor(firstName: string, lastName: string, monthlyLivingExpenses: {
         name: string,
@@ -58,6 +61,9 @@ export class Character {
         this.car = new Car(30000, new Date(1, 1), 1, 1, false, 1);
         this.milesDriven = 300;
         this.wealthHistory = [];
+        this.partnerAspiration = "";
+        this.partnerFirstName = null;
+        this.partnerLastName = null;
     }
 
     checkGoals(gameState: GameState) {
