@@ -37,10 +37,9 @@ export default function PartnerMatch({gameState}: GameStateProps) {
                 <ButtonNext style="w-50 text-xl h-10 p-1 font-bold mt-2" text="Awsome!" action={() => {
                     gameState.character.partnerFirstName = firstName;
                     gameState.character.partnerLastName = lastName;
-                    gameState.lifeEventManager!.NextEvent();
+                    gameState.lifeEventManager!.nextEvent();
                 }}></ButtonNext>
             </div>
         </div>
     );
-
 }

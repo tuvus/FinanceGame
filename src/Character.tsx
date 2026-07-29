@@ -172,7 +172,7 @@ export class Character {
 
         for (let i = 0; i < expensiveTrips; i++) {
             const location = random.int(0, locations.length - 1);
-            gameState.lifeEventManager!.AddEvent(new LifeEvent("Expensive Trip",
+            gameState.lifeEventManager!.addEvent(new LifeEvent("Expensive Trip",
                 new Date(gameState.date.getFullYear(), random.int(0, 11), random.int(1, 28), 12),
                 <div>
                     <h3>You flew to {locations[location]} for your vacation!</h3>
@@ -181,7 +181,7 @@ export class Character {
                         text="Relaxing!"
                         action={() => {
                             gameState.character.satisfaction += random.int(2, 4);
-                            gameState.lifeEventManager!.NextEvent();
+                            gameState.lifeEventManager!.nextEvent();
                         }}/>
                 </div>, true))
             locations = locations.filter((_, i) => i != location);
@@ -190,7 +190,7 @@ export class Character {
         let activities = ["camping", "kayaking", "canoeing", "sightseeing", "hiking", "biking"];
         for (let i = 0; i < cheapTrips; i++) {
             const activity = random.int(0, activities.length - 1);
-            gameState.lifeEventManager!.AddEvent(new LifeEvent("Road Trip",
+            gameState.lifeEventManager!.addEvent(new LifeEvent("Road Trip",
                 new Date(gameState.date.getFullYear(), random.int(0, 11), random.int(1, 28), 12),
                 <div>
                     <h3>You went {activities[activity]}!</h3>
@@ -199,7 +199,7 @@ export class Character {
                         text="That was fun!"
                         action={() => {
                             gameState.character.satisfaction += Math.round(Math.sqrt(random.float(.4, 3)));
-                            gameState.lifeEventManager!.NextEvent();
+                            gameState.lifeEventManager!.nextEvent();
                         }}/>
                 </div>, true))
             activities = activities.filter((_, i) => i != activity);
@@ -235,7 +235,7 @@ export class BigTicketItems {
         this.character = character;
     }
 
-    AddBigTicketItem(name: string, desc: string, buyDate: Date, fullCost: number, targetBalance: number, loanPercent: number) {
+    addBigTicketItem(name: string, desc: string, buyDate: Date, fullCost: number, targetBalance: number, loanPercent: number) {
         this.bigTicketItems = [...this.bigTicketItems, {
             name: name,
             desc: desc,
@@ -247,19 +247,19 @@ export class BigTicketItems {
         }];
     }
 
-    RemoveBigTicketItem(bigTicketItem: BigTicketItem) {
+    removeBigTicketItem(bigTicketItem: BigTicketItem) {
         this.character.addMoney(bigTicketItem.balance);
         this.bigTicketItems = this.bigTicketItems.filter(bt => bt != bigTicketItem);
     }
 
-    GetYearlyAllocation(date: Date) {
+    getYearlyAllocation(date: Date) {
         return this.bigTicketItems
             .filter(bt => bt.buyDate.getFullYear() > date.getFullYear())
             .reduce((sum, bt) =>
                 sum + (bt.targetBalance - bt.balance) / (bt.buyDate.getFullYear() - date.getFullYear()), 0);
     }
 
-    DoYearlyAllocations(date: Date) {
+    doYearlyAllocations(date: Date) {
         this.bigTicketItems.forEach(bt =>
             bt.balance += (bt.targetBalance - bt.balance) / (bt.buyDate.getFullYear() - date.getFullYear()));
     }
@@ -267,12 +267,12 @@ export class BigTicketItems {
     ScheduleBigTicketItems(lifeEventManager: LifeEventManager, gameState: GameState, date: Date) {
         this.bigTicketItems.forEach(bt => {
             if (bt.buyDate.getFullYear() <= date.getFullYear()) {
-                lifeEventManager.AddEvent(new LifeEvent(bt.name, bt.buyDate,
+                lifeEventManager.addEvent(new LifeEvent(bt.name, bt.buyDate,
                     <div>
                         <p>{bt.desc}</p>
                         <div className="flex flex-col items-center w-full">
                             <CarShop gameState={gameState}
-                                     action={(gameState: GameState) => gameState.lifeEventManager!.NextEvent()}
+                                     action={(gameState: GameState) => gameState.lifeEventManager!.nextEvent()}
                                      allocatedMoney={bt.balance}
                             />
                         </div>

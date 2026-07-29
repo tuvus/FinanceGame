@@ -15,7 +15,7 @@ function BrokenLaptopEvent({gameState}: GameStateProps) {
                     const r = random.float();
                     if (r < .3) {
                         gameState.character.payMoney(150 * gameState.inflation);
-                        gameState.lifeEventManager!.ReplaceEvent(new LifeEvent("Laptop Fixed", gameState.date,
+                        gameState.lifeEventManager!.replaceEvent(new LifeEvent("Laptop Fixed", gameState.date,
                             <div className="flex flex-col w-full items-center mt-6 gap-4">
                                 <p className="w-3/4">You sent your laptop into the repair shop and they were
                                     able to fix it and send it back within a few days.
@@ -24,7 +24,7 @@ function BrokenLaptopEvent({gameState}: GameStateProps) {
                     } else {
                         gameState.character.satisfaction -= 2;
                         gameState.character.payMoney(750 * gameState.inflation);
-                        gameState.lifeEventManager!.ReplaceEvent(new LifeEvent("Laptop Unrepairable", gameState.date,
+                        gameState.lifeEventManager!.replaceEvent(new LifeEvent("Laptop Unrepairable", gameState.date,
                             <div className="flex flex-col w-full items-center mt-6 gap-4">
                                 <p className="w-3/4">You sent your laptop into the repair shop but there was
                                     nothing they could do to fix it. Unfortunately, your warranty had expired
@@ -41,7 +41,7 @@ function BrokenLaptopEvent({gameState}: GameStateProps) {
                 <div className="eventButton panelButton" onClick={() => {
                     gameState.character.satisfaction -= 1;
                     gameState.character.payMoney(600 * gameState.inflation);
-                    gameState.lifeEventManager!.NextEvent();
+                    gameState.lifeEventManager!.nextEvent();
                 }}>
                     <p className="text-gray-700">Buy a new cheap laptop as a replacement</p>
                     <p className="text-red-800">{gameState.formatter.format(600 * gameState.inflation)}</p>
@@ -49,7 +49,7 @@ function BrokenLaptopEvent({gameState}: GameStateProps) {
                 <div className="eventButton panelButton" onClick={() => {
                     gameState.character.satisfaction += 1;
                     gameState.character.payMoney(1200 * gameState.inflation);
-                    gameState.lifeEventManager!.NextEvent();
+                    gameState.lifeEventManager!.nextEvent();
                 }}>
                     <p className="text-gray-700">Buy a fancier laptop as a replacement</p>
                     <p className="text-red-800">{gameState.formatter.format(1200 * gameState.inflation)}</p>

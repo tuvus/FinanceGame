@@ -15,7 +15,7 @@ export class LifeEvent {
         this.customContinue = customContinue;
     }
 
-    CopyWithDate(date: Date) {
+    copyWithDate(date: Date) {
         return new LifeEvent(this.name, date, this.element, this.customContinue);
     }
 }
@@ -33,20 +33,20 @@ export class LifeEventManager {
         this.lifeEvents = startingEvents;
     }
 
-    AddEvent(lifeEvent: LifeEvent) {
+    addEvent(lifeEvent: LifeEvent) {
         this.lifeEvents = [...this.lifeEvents, lifeEvent];
         this.lifeEvents.sort((a, b) => a.date.getTime() - b.date.getTime());
     }
 
-    RemoveFirstEvent() {
+    removeFirstEvent() {
         this.lifeEvents = this.lifeEvents.splice(1);
         this.render();
     }
 
-    NextEvent() {
+    nextEvent() {
         this.lifeEvents = this.lifeEvents.splice(1);
 
-        if (this.GetActiveEvent(this.gameState.date) == null) {
+        if (this.getActiveEvent(this.gameState.date) == null) {
             this.nextYear();
             return;
         }
@@ -56,26 +56,26 @@ export class LifeEventManager {
         this.render();
     }
 
-    ReplaceEvent(lifeEvent: LifeEvent) {
+    replaceEvent(lifeEvent: LifeEvent) {
         this.lifeEvents[0] = lifeEvent;
         this.gameState.date.setMonth(this.lifeEvents[0].date.getMonth());
         this.gameState.date.setDate(this.lifeEvents[0].date.getDate());
         this.render();
     }
 
-    GetActiveEvent(date: Date): LifeEvent | null {
+    getActiveEvent(date: Date): LifeEvent | null {
         if (this.lifeEvents.length > 0
             && this.lifeEvents[0].date.getFullYear() == date.getFullYear()
             && this.lifeEvents[0].date.getMonth() >= date.getMonth())
             return this.lifeEvents[0];
         if (this.lifeEvents.length > 0 && this.lifeEvents[0].date.getFullYear() < date.getFullYear()) {
             console.error("Found a life event that should have occurred before now! Event date: " + this.lifeEvents[0].date.toString() + " Current Date: " + date.toString());
-            this.PrintEvents();
+            this.printEvents();
         }
         return null;
     }
 
-    PrintEvents() {
+    printEvents() {
         console.log(this.lifeEvents.map(le => le.name + " " + le.date.getFullYear()).join(", "));
     }
 }
@@ -109,7 +109,7 @@ export class LifeEventScheduler {
         this.eventSchedules = eventSchedules;
     }
 
-    GenerateEvents() {
+    generateEvents() {
         const eventsToDo = this.eventSchedules
             .filter((e) => (!e.condition || e.condition())
                 && e.maxOccurrences > 0
@@ -118,7 +118,7 @@ export class LifeEventScheduler {
             .filter(e => e.p <= e.e.probability)
             .toSorted().slice(0, 5);
         eventsToDo.forEach(e => {
-            this.lifeEventManager.AddEvent(e.e.event.CopyWithDate(new Date(this.gameState.date.getFullYear(), random.int(0, 11), random.int(1, 28))));
+            this.lifeEventManager.addEvent(e.e.event.copyWithDate(new Date(this.gameState.date.getFullYear(), random.int(0, 11), random.int(1, 28))));
             e.e.lastOccurrence = this.gameState.gameYear;
             e.e.maxOccurrences--;
         })

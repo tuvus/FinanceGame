@@ -71,14 +71,14 @@ function GamePage({fname, lname, tutorial}: GameProps) {
         character.bigTicketItems.ScheduleBigTicketItems(gameState.s.lifeEventManager!, gameState.s, gameState.s.date);
         character.scheduleTrips(gameState.s);
         character.checkGoals(gameState.s);
-        gameState.s.lifeEventScheduler!.GenerateEvents();
-        if (!lifeEventManager.GetActiveEvent(gameState.s.date)) {
-            lifeEventManager.AddEvent(
+        gameState.s.lifeEventScheduler!.generateEvents();
+        if (!lifeEventManager.getActiveEvent(gameState.s.date)) {
+            lifeEventManager.addEvent(
                 new LifeEvent("Another year passes", gameState.s.date,
                     (<div><h3 className="m-4">There were no special events this year.</h3></div>))
             );
         } else {
-            lifeEventManager.AddEvent(new LifeEvent("New Year", new Date(gameState.s.date.getFullYear(), 11, 31),
+            lifeEventManager.addEvent(new LifeEvent("New Year", new Date(gameState.s.date.getFullYear(), 11, 31),
                 <h3>The year of {gameState.s.date.getFullYear()} flew by quickly, now its time to plan for the next
                     year.</h3>));
         }
@@ -108,8 +108,8 @@ function GamePage({fname, lname, tutorial}: GameProps) {
         character.retirementAccount.balance += character.salary * character.pretirement / 100;
 
         // Big ticket items
-        character.payMoney(character.bigTicketItems.GetYearlyAllocation(gameState.s.date));
-        character.bigTicketItems.DoYearlyAllocations(gameState.s.date);
+        character.payMoney(character.bigTicketItems.getYearlyAllocation(gameState.s.date));
+        character.bigTicketItems.doYearlyAllocations(gameState.s.date);
 
         //Stocks and bonds
         indexFund.a.balance *= random.float(.85, 1.2);
@@ -155,7 +155,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
     const livingExpenses = monthlyLivingExpenses * 12;
     const minLoanPayments = character.loans.reduce((sum, l) => sum + l.getPayment(), 0);
 
-    const newSavings = character.salary * (100 - character.pinvestments - character.pretirement - character.pdiscretionary - character.ptrips) / 100 - taxes - livingExpenses - minLoanPayments - character.bigTicketItems.GetYearlyAllocation(gameState.s.date);
+    const newSavings = character.salary * (100 - character.pinvestments - character.pretirement - character.pdiscretionary - character.ptrips) / 100 - taxes - livingExpenses - minLoanPayments - character.bigTicketItems.getYearlyAllocation(gameState.s.date);
     character.previousYearlyBalance = newSavings;
     const ploans = character.loans.reduce((sum, l) => sum + l.getPayment(), 0) / character.salary * 100;
 
@@ -180,7 +180,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                          character.satisfaction = 35 * random.float(.9, 1.3);
                          character.pdiscretionary = 10;
                          character.ptrips = 2;
-                         lifeEventManager.NextEvent();
+                         lifeEventManager.nextEvent();
                      }}>
                     <h3 className="text-gray-700 font-bold">High School</h3>
                     <p className="text-gray-700">Graduates that go straight into the workforce start building their
@@ -213,7 +213,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                          character.satisfaction = 37 * random.float(.9, 1.3);
                          character.pdiscretionary = 10;
                          character.ptrips = 2;
-                         lifeEventManager.NextEvent();
+                         lifeEventManager.nextEvent();
                      }}>
                     <h3 className="text-gray-700 font-bold">Trade School</h3>
                     <p className="text-gray-700">Trade school is around a one year program that emphasizes going into
@@ -222,7 +222,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                 </div>
                 <div className="eventButton panelButton"
                      onClick={() => {
-                         lifeEventManager.ReplaceEvent(new LifeEvent("Choosing a College", gameState.s.date, <>
+                         lifeEventManager.replaceEvent(new LifeEvent("Choosing a College", gameState.s.date, <>
                              <div className="flex justify-center gap-8">
                                  <div className="eventButton panelButton"
                                       onClick={() => {
@@ -251,7 +251,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                           character.satisfaction = 38 * random.float(.9, 1.3);
                                           character.pdiscretionary = 10;
                                           character.ptrips = 2;
-                                          lifeEventManager.NextEvent();
+                                          lifeEventManager.nextEvent();
                                       }}>
                                      <h3 className="text-gray-700 font-bold">Community College</h3>
                                      <p className="text-gray-700">An associates degree is a two year program that
@@ -288,7 +288,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                           character.satisfaction = 42 * random.float(.9, 1.3);
                                           character.pdiscretionary = 10;
                                           character.ptrips = 2;
-                                          lifeEventManager.NextEvent();
+                                          lifeEventManager.nextEvent();
                                       }}>
                                      <h3 className="text-gray-700 font-bold">Public University</h3>
                                      <p className="text-gray-700">A bachelors degree is a four year program that focuses
@@ -329,7 +329,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                           character.satisfaction = 44 * random.float(.9, 1.3);
                                           character.pdiscretionary = 10;
                                           character.ptrips = 2;
-                                          lifeEventManager.NextEvent();
+                                          lifeEventManager.nextEvent();
                                       }}>
                                      <h3 className="text-gray-700 font-bold">Private University</h3>
                                      <p className="text-gray-700">A bachelors degree is a four year program that focuses
@@ -367,7 +367,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                             (gameState) => {
                                 gameState.character.satisfaction += 1;
                                 gameState.character.milesDriven = 1000;
-                                gameState.lifeEventManager!.AddEvent(
+                                gameState.lifeEventManager!.addEvent(
                                     new LifeEvent("First plan!", new Date(gameState.date.getFullYear(), 0, 21),
                                         <div className="flex flex-col w-full items-center">
                                             <p className="w-3/4">Congratulations on finishing your first year plan, it
@@ -378,7 +378,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                         </div>
                                     ));
                             }));
-                        gameState.s.lifeEventManager!.NextEvent();
+                        gameState.s.lifeEventManager!.nextEvent();
                     }}/>
             </div>
         </div>, true),
@@ -388,7 +388,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                     one. Luckily, your parents have offered to subsidise your purchase in celebration of your new job.
                     It is time to decide to get a new or used car, and how decked-out it is.</p>
                 <ButtonNext style="w-60 text-xl h-10 font-bold" text="Choose a car" action={() => {
-                    lifeEventManager.ReplaceEvent(new LifeEvent("Choosing a car", gameState.s.date,
+                    lifeEventManager.replaceEvent(new LifeEvent("Choosing a car", gameState.s.date,
                         <div className="flex flex-col items-center w-full">
                             <div className="flex flex-col items-center gap-4 w-3/4">
                                 <p>Your parents gave you {formatter.format(30000 * gameState.s.inflation)} to
@@ -397,7 +397,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                     money that you don't
                                     spend on the car.</p>
                                 <CarShop gameState={gameState.s}
-                                         action={(gameState: GameState) => gameState.lifeEventManager!.NextEvent()}
+                                         action={(gameState: GameState) => gameState.lifeEventManager!.nextEvent()}
                                          allocatedMoney={30000 * gameState.s.inflation}
                                 />
                             </div>
@@ -417,7 +417,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                             onClick={() => {
                                 gameState.s.character.partnerAspiration = "Boyfriend";
                                 gameState.s.character.satisfaction += 1;
-                                lifeEventManager.ReplaceEvent(new LifeEvent("Searching for a boyfriend", gameState.s.date,
+                                lifeEventManager.replaceEvent(new LifeEvent("Searching for a boyfriend", gameState.s.date,
                                     <div className="flex flex-col w-full items-center">
                                         <div className="flex flex-col items-center gap-2 w-3/4">
                                             <p>You double your efforts searching for the right match, partaking in more
@@ -425,7 +425,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                                 yet, but at least you can enjoying your time searching.</p>
                                         </div>
                                     </div>, false))
-                                lifeEventManager.AddEvent(new LifeEvent("Its a match!", new Date(gameState.s.date.getFullYear() + 1, random.int(0, 11), random.int(0, 28)),
+                                lifeEventManager.addEvent(new LifeEvent("Its a match!", new Date(gameState.s.date.getFullYear() + 1, random.int(0, 11), random.int(0, 28)),
                                     <PartnerMatch gameState={gameState.s}/>, true));
                             }}>
                             <p className="text-gray-700">Boyfriend</p>
@@ -435,7 +435,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                             onClick={() => {
                                 gameState.s.character.partnerAspiration = "Girlfriend";
                                 gameState.s.character.satisfaction += 1;
-                                lifeEventManager.ReplaceEvent(new LifeEvent("Searching for a girlfriend", gameState.s.date,
+                                lifeEventManager.replaceEvent(new LifeEvent("Searching for a girlfriend", gameState.s.date,
                                     <div className="flex flex-col w-full items-center">
                                         <div className="flex flex-col items-center gap-2 w-3/4">
                                             <p>You double your efforts searching for the right match, partaking in more
@@ -443,7 +443,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                                 yet, but at least you can enjoying your time searching.</p>
                                         </div>
                                     </div>, false))
-                                lifeEventManager.AddEvent(new LifeEvent("Its a match!", new Date(gameState.s.date.getFullYear() + 1, random.int(0, 11), random.int(0, 28)),
+                                lifeEventManager.addEvent(new LifeEvent("Its a match!", new Date(gameState.s.date.getFullYear() + 1, random.int(0, 11), random.int(0, 28)),
                                     <PartnerMatch gameState={gameState.s}/>, true));
                             }}>
                             <p className="text-gray-700">Girlfriend</p>
@@ -461,7 +461,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
 
             </div>, true),
     ]));
-    const activeEvent = lifeEventManager.GetActiveEvent(gameState.s.date);
+    const activeEvent = lifeEventManager.getActiveEvent(gameState.s.date);
 
     const tutorialManager = useRef(new TutorialManager(gameState.s, [
         new TutorialChain("Year In Review Tutorial", () => gameState.s.GetCurrentPage().name == "Year in review", [
@@ -674,8 +674,8 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                 } else if (gameState.s.page < pages.length - 1) {
                     gameState.s.nextPage();
                     e.stopImmediatePropagation();
-                } else if (lifeEventManager.GetActiveEvent(gameState.s.date) != null && !lifeEventManager.GetActiveEvent(gameState.s.date)!.customContinue) {
-                    lifeEventManager.NextEvent();
+                } else if (lifeEventManager.getActiveEvent(gameState.s.date) != null && !lifeEventManager.getActiveEvent(gameState.s.date)!.customContinue) {
+                    lifeEventManager.nextEvent();
                     e.stopImmediatePropagation();
                 }
             } else if (e.key == "b") {
@@ -839,9 +839,9 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                         {gameState.s.bigTicketItemsUnlocked ? [
                             <p className="text-gray-700" key={1}>Big-Ticket Items</p>,
                             <p className="text-gray-700" key={2}>
-                                {Math.round(character.bigTicketItems.GetYearlyAllocation(gameState.s.date) / character.salary * 100)}%</p>,
+                                {Math.round(character.bigTicketItems.getYearlyAllocation(gameState.s.date) / character.salary * 100)}%</p>,
                             <p className="text-gray-700" key={3}>
-                                {formatter.format(character.bigTicketItems.GetYearlyAllocation(gameState.s.date))}</p>,
+                                {formatter.format(character.bigTicketItems.getYearlyAllocation(gameState.s.date))}</p>,
                         ] : []}
 
                         {gameState.s.investmentsUnlocked ? [
@@ -1067,7 +1067,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                         {activeEvent.element}
                         {!activeEvent.customContinue ?
                             <button className="w-50 text-xl h-10 p-1 font-bold mt-2"
-                                    onClick={() => lifeEventManager.NextEvent()}>
+                                    onClick={() => lifeEventManager.nextEvent()}>
                                 <h3>Continue</h3>
                             </button> : <></>}
                     </>
