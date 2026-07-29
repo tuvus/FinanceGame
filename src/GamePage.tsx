@@ -6,7 +6,14 @@ import {LineChart} from "./components/LineChart.tsx";
 import Select from 'react-select';
 import {Account, GameState, Loan, StockAccount, StockBond} from "./Data.tsx";
 import StockCard from "./components/StockCard.tsx";
-import {ButtonNext, CalculateTaxes, GetDateString, GetReactSelectStyle, NumberInputAutoSelect} from "./Utils.tsx";
+import {
+    ButtonNext,
+    CalculateTaxes,
+    GetDateString,
+    GetReactSelectStyle,
+    InfoButton, InfoButtonTooltip,
+    NumberInputAutoSelect
+} from "./Utils.tsx";
 import {DonutChart} from "./components/DonutChart.tsx";
 import {LifeEvent, LifeEventManager, LifeEventSchedule, LifeEventScheduler} from "./EventManager.tsx";
 import {TutorialChain, TutorialEvent, TutorialManager} from "./TutorialManager.tsx";
@@ -18,6 +25,7 @@ import {BigTicketItemsPage} from "./components/BigTicketItems.tsx";
 import {Outline} from "./components/Outline.tsx";
 import {Car, Character, Goal} from "./Character.tsx";
 import {CarShop} from "./events/CarShop.tsx";
+import {taxBrackets} from "./Constants.tsx";
 
 type GameProps = {
     fname: string; lname: string; tutorial: boolean;
@@ -138,7 +146,8 @@ function GamePage({fname, lname, tutorial}: GameProps) {
         gameState.s.gameYear++;
     }
 
-    const taxes = CalculateTaxes(Math.max(0, character.salary * (1 - character.pretirement / 100) - 15750));
+    const taxableIncome = Math.max(0, character.salary * (1 - character.pretirement / 100) - 15750);
+    const taxes = CalculateTaxes(taxableIncome);
 
     const monthlyLivingExpenses = (character.monthlyLivingExpenses.map(e => e.amount)
         .reduce((sum, curr) => sum + curr, 0) + character.getMonthlyCarCosts()) * gameState.s.inflation;
@@ -722,7 +731,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
             name: "Budget",
             page: <div className="flex flex-col gap-2 items-center">
                 <h1>Budget</h1>
-                <div className="flex flex-col gap-2 w-1/2 rounded-2xl bg-amber-100 items-center pt-2 pb-2">
+                <div className="flex flex-col gap-2 w-3/5 rounded-2xl bg-amber-100 items-center p-2 pb-2">
                     <div className="grid grid-cols-3 w-full">
                         <p className="text-green-700 font-bold" id="Paycheck">Paycheck</p>
                         <p></p>
@@ -750,7 +759,9 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                         ] : []}
 
 
-                        <p className="text-red-800" id="IncomeTaxes">Taxes</p>
+                        <p className="text-red-800" id="IncomeTaxes">Taxes <InfoButton
+                            action={() => document.getElementById("tax-modal")!.style.display = "block"}/>
+                        </p>
                         <p className="text-red-800">{Math.round(taxes / character.salary * 100)}%</p>
                         <p className="text-red-800">{formatter.format(taxes)}</p>
 
@@ -1248,6 +1259,47 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                             document.getElementById("goals-modal")!.style.display = "none";
                             setSelectedGoal("");
                         }}
+                        className="p-2 text-2xl w-80">Close
+                    </button>
+                </div>
+            </div>
+            <div id="tax-modal" className="flex hmodal justify-center"
+                 onClick={() => document.getElementById("tax-modal")!.style.display = "none"}>
+                <div
+                    className="flex flex-col gap-2 ml-auto mr-auto mt-[10%] w-180 bg-amber-100 rounded-xl items-center p-4"
+                    onClick={e => e.stopPropagation()}>
+                    <h2 className="text-gray-700!">Taxable Income <InfoButtonTooltip
+                        action={() => window.open("https://www.irs.gov/credits-and-deductions", "_blank")}
+                        text="Your taxable income is your salary minus any money put into a traditional retirement account, any credits and deductions"/></h2>
+                    <p className="text-gray-700">{formatter.format(taxableIncome)}</p>
+                    <h2 className="text-gray-700!">Tax Brackets <InfoButtonTooltip
+                        action={() => window.open("https://www.irs.gov/filing/federal-income-tax-rates-and-brackets", "_blank")}
+                    text="See actual tax brackets at the IRS webpage"/>
+                    </h2>
+                    <div className="grid grid-cols-4 w-full">
+                        <p className="text-gray-700">Percent</p>
+                        <p className="text-gray-700">From</p>
+                        <p className="text-gray-700">To</p>
+                        <p className="text-gray-700">Taxed</p>
+                        <hr/>
+                        <hr/>
+                        <hr/>
+                        <hr/>
+                        {taxBrackets.map((b, i) => [
+                                <p className="text-gray-700" key={i + "1"}>{b.percent}%</p>,
+                                <p className="text-gray-700"
+                                   key={i + "2"}>{formatter.format(i == 0 ? 0 : taxBrackets[i - 1].to * gameState.s.inflation + 1)}</p>,
+                                <p className="text-gray-700"
+                                   key={i + "3"}>{b.to > 700350 ? "" : formatter.format(b.to * gameState.s.inflation)}</p>,
+                                <p className="text-gray-700"
+                                   key={i + "4"}>{formatter.format(Math.max(0, (Math.min(taxableIncome, b.to * gameState.s.inflation) - (i == 0 ? 0 : taxBrackets[i - 1].to * gameState.s.inflation + 1)) * b.percent / 100))}</p>
+                            ]
+                        )}
+                    </div>
+                    <p className="text-gray-700">Total Taxes: {formatter.format(taxes)}</p>
+                    <p className="text-gray-700 italic">(number are adjusted to in-game inflation)</p>
+                    <button
+                        onClick={() => document.getElementById("tax-modal")!.style.display = "none"}
                         className="p-2 text-2xl w-80">Close
                     </button>
                 </div>
