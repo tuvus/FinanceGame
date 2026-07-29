@@ -36,8 +36,7 @@ export function BigTicketItemsPage({gameState}: GameStateProps) {
     const [transferFrom, setTransferFrom] = useState<TransferFundsSelectState>({selectedAccount: null});
     const [fundsToTransfer, setFundsToTransfer] = useState(0);
     const carSellValue = gameState.character.car.getSellValue(new Date(gameState.date.getFullYear() + duration, 0));
-
-    return (<div>
+    return (<div id="AddBigTicketItemButton">
             <button className="w-40 text-xl h-10 font-bold" onClick={() => setAddBigTicketItem(true)}>Add Item</button>
             {gameState.character.bigTicketItems.bigTicketItems.map((bt, i) =>
                 <div
@@ -69,7 +68,7 @@ export function BigTicketItemsPage({gameState}: GameStateProps) {
             {addBigTicketItem ?
                 <div className="flex modal justify-center" onClick={() => setAddBigTicketItem(false)}>
                     <div
-                        className="flex flex-col gap-2 ml-auto mr-auto mb-auto mt-[10%] bg-amber-100 rounded-xl items-center p-4"
+                        id="BigTicketItemModal" className="flex flex-col gap-2 ml-auto mr-auto mb-auto mt-[10%] bg-amber-100 rounded-xl items-center p-4"
                         onClick={e => e.stopPropagation()}>
                         <h3 className="text-gray-700">Big Ticket Item</h3>
 

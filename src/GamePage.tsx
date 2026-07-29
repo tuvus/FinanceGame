@@ -402,7 +402,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
         new TutorialChain("Year In Review Tutorial", () => gameState.s.GetCurrentPage().name == "Year in review", [
             new TutorialEvent("Year in review page", null, (<p className="text-gray-700">
                 On this page, you will be looking at your money's performance from last year and the years before
-                inorder to determine how to allocate this year's income. Each account that you own will show up on this
+                inorder to determine how to budget this year's income. Each account that you own will show up on this
                 page.
             </p>), null, null, "Next"),
             new TutorialEvent("Savings history", null,
@@ -414,9 +414,9 @@ function GamePage({fname, lname, tutorial}: GameProps) {
         ]),
         new TutorialChain("Budget Tutorial", () => gameState.s.GetCurrentPage().name == "Budget", [
             new TutorialEvent("Budget Page", null, (<p className="text-gray-700">
-                Congratulations on getting your first job! This page shows your paycheck fro the year,
+                Congratulations on getting your first job! This page shows your paycheck for the year,
                 and gives you the ability to <a
-                href="https://www.investopedia.com/terms/a/assetallocation.asp" target="_blank">allocate</a> the money.
+                href="https://www.investopedia.com/terms/b/budget.asp" target="_blank">budget</a> the money.
             </p>), null, null, "Next"),
             new TutorialEvent("Paycheck", null, (<p className="text-gray-700">
                 This your salary at your current job. This is your <a
@@ -442,9 +442,9 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                 payments are aggregated into yearly installments.
             </p>), "Loans", null, "Next"),
             new TutorialEvent("Discretionary Spending", null, (<p className="text-gray-700">
-                Discretionary spending is money that you have allocated towards your wants. This includes things like
+                Discretionary spending is money that you have budgeted towards your wants. This includes things like
                 shopping, subscriptions, etc. You can press the up and down arrows to change the percentage of your
-                paycheck that is allocated towards this category.
+                paycheck that is budgeted towards this category.
             </p>), "Discretionary", null, "Next"),
             new TutorialEvent("Vacation", null, (<p className="text-gray-700">
                 Vacations are a great way to see the world, money budgeted for vacations will be pooled together to go
@@ -523,6 +523,27 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                 your total liabilities.
             </p>), "summary", null, "Close"),
         ]),
+        new TutorialChain("Big-Ticket Items", () => gameState.s.GetCurrentPage().name == "Big-Ticket Items", [
+            new TutorialEvent("Big-Ticket Items", null, (<p className="text-gray-700">
+                Some purchases are very expensive but generally predictable. Because of this, you can save up for these
+                purchases ahead of time. These purchases are called big-ticket items.
+            </p>), null, null, "Next"),
+            new TutorialEvent("Creating a budget for a big-ticket item", null, (<p className="text-gray-700">
+                Click on add item to start creating budgeting for a big-ticket item.
+            </p>), "AddBigTicketItemButton", () => document.getElementById("BigTicketItemModal") != null, null),
+        ]),
+        new TutorialChain("Creating Big-Ticket Items",
+            () => gameState.s.GetCurrentPage().name == "Big-Ticket Items" && document.getElementById("BigTicketItemModal") != null, [
+            new TutorialEvent("Big-Ticket Items", null, (<p className="text-gray-700">
+                Use the drop-down menu to select what you want to save for.
+            </p>), null, null, "Next"),
+            new TutorialEvent("Creating a budget for a big-ticket item", null, (<p className="text-gray-700">
+                Here you set how long until you want to buy the big-ticket item, see how much it would cost to buy the
+                big-ticket item, what percentage you want to take out a loan for instead of paying cash, and see how
+                much you would pay in saved up money. You can click add to finish the creation of the big-ticket-item.
+                You can edit it later, if you change your mind.
+            </p>), null, null, "Next"),
+        ]),
         new TutorialChain("Investment Tutorial Year In Review", () => gameState.s.GetCurrentPage().name == "Year in review" && gameState.s.gameYear >= 3, [
             new TutorialEvent("Investment Accounts", null, (<p className="text-gray-700">
                 It is time to learn about investing.
@@ -534,7 +555,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
         ]),
         new TutorialChain("Investment Tutorial Budget", () => gameState.s.GetCurrentPage().name == "Budget" && gameState.s.gameYear >= 3, [
             new TutorialEvent("Budgeting for Investments", null, (<p className="text-gray-700">
-                The investment account now shows up in the budget page. You can change the amount to be allocated
+                The investment account now shows up in the budget page. You can change the amount to be budgeted
                 towards the investment account by using the arrows.
             </p>), null, null, "Next"),
             new TutorialEvent("Transferring Money", null, (<p className="text-gray-700">
@@ -550,7 +571,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                 history and a buy button.
             </p>), null, null, "Next"),
             new TutorialEvent("Investing", null, (<p className="text-gray-700">
-                This is the amount of money you have allocated towards investing, but have not yet invested. You will
+                This is the amount of money you have set aside for investing, but have not yet invested. You will
                 most likely want to invest all of it before ending the year, but you don't have to.
             </p>), "Uninvested", null, "Next"),
             new TutorialEvent("Index Fund", null, (<p className="text-gray-700">
@@ -569,9 +590,11 @@ function GamePage({fname, lname, tutorial}: GameProps) {
         ]),
         new TutorialChain("Retirement Tutorial Portfolio", () => gameState.s.GetCurrentPage().name == "Retirement" && gameState.s.gameYear >= 8, [
             new TutorialEvent("Saving for Retirement", null,
-                (<p className="text-gray-700">Now that you are getting to the middle of your life its time to start
-                    saving for retirement. You now have access to your retirement account. This account works similar to
-                    your investment account but for retirement.</p>),
+                (<p className="text-gray-700">Now that you have settled down, it is time for you to learn about
+                    retirement. Ideally you would have started saving for retirement as soon as you started making
+                    money, but for simplicity you are learning it now. You now have access to your retirement account
+                    and can budget for it. This account works similar to your investment account but for
+                    retirement.</p>),
                 null, null, "Continue")
         ]),
     ], render));
