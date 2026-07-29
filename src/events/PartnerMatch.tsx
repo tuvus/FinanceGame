@@ -40,6 +40,10 @@ export default function PartnerMatch({gameState}: GameStateProps) {
                     gameState.character.partnerFirstName = firstName;
                     gameState.character.partnerLastName = lastName;
                     gameState.character.satisfaction += 5;
+                    gameState.character.partnerSalary = 60000 * gameState.inflation;
+                    gameState.character.monthlyLivingExpenses = gameState.character.monthlyLivingExpenses.map(m => ({
+                        name: m.name, amount: m.amount * 2
+                    }));
                     gameState.lifeEventManager!.replaceEvent(new LifeEvent("Planning for a wedding", gameState.date,
                         <div className="flex flex-col w-full items-center">
                             <div className="flex flex-col justify-center gap-2 w-3/4">

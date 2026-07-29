@@ -25,7 +25,7 @@ import {BigTicketItemsPage} from "./components/BigTicketItems.tsx";
 import {Outline} from "./components/Outline.tsx";
 import {Car, Character, Goal} from "./Character.tsx";
 import {CarShop} from "./events/CarShop.tsx";
-import {taxBrackets} from "./Constants.tsx";
+import {marriedTaxBrackets, singleTaxBrackets} from "./Constants.tsx";
 import PartnerMatch from "./events/PartnerMatch.tsx";
 
 type GameProps = {
@@ -88,24 +88,25 @@ function GamePage({fname, lname, tutorial}: GameProps) {
         gameState.s.date.setMonth(11);
         gameState.s.date.setDate(31);
         gameState.s.date.setHours(18);
+        const combinedSalary = character.salary + character.partnerSalary;
         const livingExpenses = (character.monthlyLivingExpenses.map(e => e.amount).reduce((sum, curr) => sum + curr, 0)
             + character.getMonthlyCarCosts()) * gameState.s.inflation * 12;
-        const taxableIncome = Math.max(0, character.salary * (1 - character.pretirement / 100) - 15750);
+        const taxableIncome = Math.max(0, combinedSalary * (1 - character.pretirement / 100) - (character.isMarried() ? 29200 : 15750) * gameState.s.inflation);
         character.taxableIncome = taxableIncome;
-        const taxes = CalculateTaxes(taxableIncome);
-        const newSavings = character.salary * (100 - character.pinvestments - character.pretirement - character.pdiscretionary - character.ptrips) / 100 - taxes - livingExpenses;
+        const taxes = CalculateTaxes(taxableIncome, character.isMarried());
+        const newSavings = combinedSalary * (100 - character.pinvestments - character.pretirement - character.pdiscretionary - character.ptrips) / 100 - taxes - livingExpenses;
 
         // Pay for wants
-        const discretionarySpending = character.salary * character.pdiscretionary / 100 / gameState.s.inflation;
+        const discretionarySpending = combinedSalary * character.pdiscretionary / 100 / gameState.s.inflation;
         character.satisfaction += ((1.2 * discretionarySpending - 3500) / (Math.abs(discretionarySpending / 20) + 210)) * (character.loans.length > 0 ? .8 : 1);
 
         // Allocate money for trips
-        character.tripBalance += character.salary * character.ptrips / 100;
+        character.tripBalance += combinedSalary * character.ptrips / 100;
 
         // Income and interest
         character.addMoney(newSavings);
-        character.investmentAccount.balance += character.salary * character.pinvestments / 100;
-        character.retirementAccount.balance += character.salary * character.pretirement / 100;
+        character.investmentAccount.balance += combinedSalary * character.pinvestments / 100;
+        character.retirementAccount.balance += combinedSalary * character.pretirement / 100;
 
         // Big ticket items
         character.payMoney(character.bigTicketItems.getYearlyAllocation(gameState.s.date));
@@ -147,17 +148,18 @@ function GamePage({fname, lname, tutorial}: GameProps) {
         gameState.s.gameYear++;
     }
 
-    const taxableIncome = Math.max(0, character.salary * (1 - character.pretirement / 100) - 15750);
-    const taxes = CalculateTaxes(taxableIncome);
+    const combinedSalary = character.salary + character.partnerSalary;
+    const taxableIncome = Math.max(0, combinedSalary * (1 - character.pretirement / 100) - (character.isMarried() ? 29200 : 15750) * gameState.s.inflation);
+    const taxes = CalculateTaxes(taxableIncome, character.isMarried());
 
     const monthlyLivingExpenses = (character.monthlyLivingExpenses.map(e => e.amount)
         .reduce((sum, curr) => sum + curr, 0) + character.getMonthlyCarCosts()) * gameState.s.inflation;
     const livingExpenses = monthlyLivingExpenses * 12;
     const minLoanPayments = character.loans.reduce((sum, l) => sum + l.getPayment(), 0);
 
-    const newSavings = character.salary * (100 - character.pinvestments - character.pretirement - character.pdiscretionary - character.ptrips) / 100 - taxes - livingExpenses - minLoanPayments - character.bigTicketItems.getYearlyAllocation(gameState.s.date);
+    const newSavings = combinedSalary * (100 - character.pinvestments - character.pretirement - character.pdiscretionary - character.ptrips) / 100 - taxes - livingExpenses - minLoanPayments - character.bigTicketItems.getYearlyAllocation(gameState.s.date);
     character.previousYearlyBalance = newSavings;
-    const ploans = character.loans.reduce((sum, l) => sum + l.getPayment(), 0) / character.salary * 100;
+    const ploans = character.loans.reduce((sum, l) => sum + l.getPayment(), 0) / combinedSalary * 100;
 
 
     const [lifeEventManager] = useState(new LifeEventManager(gameState.s, nextYear, render, [
@@ -768,7 +770,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                     <div className="grid grid-cols-3 w-full">
                         <p className="text-green-700 font-bold" id="Paycheck">Paycheck</p>
                         <p></p>
-                        <p className="text-green-700 font-bold">{formatter.format(character.salary)}</p>
+                        <p className="text-green-700 font-bold">{formatter.format(combinedSalary)}</p>
                         <hr></hr>
                         <hr></hr>
                         <hr></hr>
@@ -778,7 +780,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                             <p className="text-gray-700" key={2}>
                                 <input name="character.pretirement" className="w-12 text-end"
                                        min="0"
-                                       max={Math.min(24500 * gameState.s.inflation / character.salary * 100, 100)}
+                                       max={Math.min(24500 * gameState.s.inflation / combinedSalary * 100, 100)}
                                        defaultValue={character.pretirement}
                                        onChange={e => {
                                            if (isNaN(e.target.valueAsNumber)) return;
@@ -788,46 +790,46 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                        type="number">
                                 </input>%</p>,
                             <p className="text-gray-700"
-                               key={3}>{formatter.format(character.salary * character.pretirement / 100)}</p>,
+                               key={3}>{formatter.format(combinedSalary * character.pretirement / 100)}</p>,
                         ] : []}
 
 
                         <p className="text-red-800" id="IncomeTaxes">Taxes <InfoButton
                             action={() => document.getElementById("tax-modal")!.style.display = "block"}/>
                         </p>
-                        <p className="text-red-800">{Math.round(taxes / character.salary * 100)}%</p>
+                        <p className="text-red-800">{Math.round(taxes / combinedSalary * 100)}%</p>
                         <p className="text-red-800">{formatter.format(taxes)}</p>
 
                         {character.monthlyLivingExpenses.map(({name, amount}, i) => {
                             return ([
                                 <p className="text-red-800" key={i + "1"} id="ItemizedLivingExpenses">{name}</p>,
                                 <p className="text-red-800" key={i + "2"}>
-                                    {Math.round(amount * 12 * gameState.s.inflation / character.salary * 100)}%</p>,
+                                    {Math.round(amount * 12 * gameState.s.inflation / combinedSalary * 100)}%</p>,
                                 <p className="text-red-800" key={i + "3"}>
                                     {formatter.format(amount * gameState.s.inflation * 12)}</p>
                             ]);
                         })}
 
                         <p className="text-red-800">Car maintenance cost</p>
-                        <p className="text-red-800">{Math.round(gameState.s.character.car.monthlyMaintenanceCost * 12 * gameState.s.inflation / character.salary * 100)}%</p>
+                        <p className="text-red-800">{Math.round(gameState.s.character.car.monthlyMaintenanceCost * 12 * gameState.s.inflation / combinedSalary * 100)}%</p>
                         <p className="text-red-800">{formatter.format(gameState.s.character.car.monthlyMaintenanceCost * 12 * gameState.s.inflation)}</p>
 
                         {(gameState.s.character.car.electric ?
                                 [<p className="text-red-800" key={1}>Car electricity cost</p>,
                                     <p className="text-red-800" key={2}>
-                                        {Math.round(gameState.s.character.milesDriven * 0.1833 * gameState.s.inflation * 12 / 3 / character.salary * 100)}%</p>,
+                                        {Math.round(gameState.s.character.milesDriven * 0.1833 * gameState.s.inflation * 12 / 3 / combinedSalary * 100)}%</p>,
                                     <p className="text-red-800" key={3}>
                                         {formatter.format(gameState.s.character.milesDriven * 0.1833 * gameState.s.inflation * 12 / 3 * gameState.s.inflation)}</p>
                                 ] : [
                                     <p className="text-red-800" key={1}>Car gas cost</p>,
                                     <p className="text-red-800" key={2}>
-                                        {Math.round(gameState.s.character.milesDriven * 3.2 * 12 * gameState.s.inflation / gameState.s.character.car.gpm / character.salary * 100)}%</p>,
+                                        {Math.round(gameState.s.character.milesDriven * 3.2 * 12 * gameState.s.inflation / gameState.s.character.car.gpm / combinedSalary * 100)}%</p>,
                                     <p className="text-red-800" key={3}>
                                         {formatter.format(gameState.s.character.milesDriven * 3.2 * 12 * gameState.s.inflation / gameState.s.character.car.gpm)}</p>]
                         )}
 
                         <p className="text-red-800">Car insurance cost</p>
-                        <p className="text-red-800">{Math.round(gameState.s.character.car.monthlyInsuranceCost * 12 * gameState.s.inflation / character.salary * 100)}%</p>
+                        <p className="text-red-800">{Math.round(gameState.s.character.car.monthlyInsuranceCost * 12 * gameState.s.inflation / combinedSalary * 100)}%</p>
                         <p className="text-red-800">{formatter.format(gameState.s.character.car.monthlyInsuranceCost * 12 * gameState.s.inflation)}</p>
 
                         {character.loans.length > 0 ? [
@@ -839,7 +841,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                         {gameState.s.bigTicketItemsUnlocked ? [
                             <p className="text-gray-700" key={1}>Big-Ticket Items</p>,
                             <p className="text-gray-700" key={2}>
-                                {Math.round(character.bigTicketItems.getYearlyAllocation(gameState.s.date) / character.salary * 100)}%</p>,
+                                {Math.round(character.bigTicketItems.getYearlyAllocation(gameState.s.date) / combinedSalary * 100)}%</p>,
                             <p className="text-gray-700" key={3}>
                                 {formatter.format(character.bigTicketItems.getYearlyAllocation(gameState.s.date))}</p>,
                         ] : []}
@@ -858,7 +860,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                        type="number">
                                 </input>%</p>,
                             <p className="text-gray-700"
-                               key={3}>{formatter.format(character.salary * character.pinvestments / 100)}</p>,
+                               key={3}>{formatter.format(combinedSalary * character.pinvestments / 100)}</p>,
                         ] : []}
 
                         <p className="text-gray-700" id="Discretionary">Discretionary</p>
@@ -873,7 +875,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                    }}
                                    type="number">
                             </input>%</p>
-                        <p className="text-gray-700">{formatter.format(character.salary * character.pdiscretionary / 100)}</p>
+                        <p className="text-gray-700">{formatter.format(combinedSalary * character.pdiscretionary / 100)}</p>
 
                         <p className="text-gray-700" id="Vacation">Vacation</p>
                         <p className="text-gray-700">
@@ -887,14 +889,14 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                    }}
                                    type="number">
                             </input>%</p>
-                        <p className="text-gray-700">{formatter.format(character.salary * character.ptrips / 100)}</p>
+                        <p className="text-gray-700">{formatter.format(combinedSalary * character.ptrips / 100)}</p>
 
                         <hr/>
                         <hr/>
                         <hr/>
 
                         <p className="text-yellow-600 font-bold" id="Savings">Savings</p>
-                        <p className="text-yellow-600 font-bold">{Math.round(newSavings / character.salary * 100)}%</p>
+                        <p className="text-yellow-600 font-bold">{Math.round(newSavings / combinedSalary * 100)}%</p>
                         <p className="text-yellow-600 font-bold">{formatter.format(newSavings)}</p>
                     </div>
 
@@ -985,7 +987,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                 <div className="flex flex-col gap-2 w-1/2 rounded-2xl bg-amber-100 items-center pt-2 pb-2" id="summary">
                     <div className="grid grid-cols-2 gap-2 w-full">
                         <p className="text-gray-700" id="takeHomeIncomeText">Take home income</p>
-                        <p className="text-gray-700">{formatter.format(character.salary - taxes)}</p>
+                        <p className="text-gray-700">{formatter.format(combinedSalary - taxes)}</p>
                         <p className="text-gray-800" id="expensesText">Expenses</p>
                         <p className="text-gray-800">{formatter.format(livingExpenses + minLoanPayments)}</p>
                         <p className="text-red-800">Loans</p>
@@ -1306,9 +1308,10 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                         text="Your taxable income is your salary minus any money put into a traditional retirement account, any credits and deductions"/>
                     </h2>
                     <p className="text-gray-700">{formatter.format(taxableIncome)}</p>
-                    <h2 className="text-gray-700!">Tax Brackets <InfoButtonTooltip
-                        action={() => window.open("https://www.irs.gov/filing/federal-income-tax-rates-and-brackets", "_blank")}
-                        text="See actual tax brackets at the IRS webpage"/>
+                    <h2 className="text-gray-700!">{(character.partnerFirstName ? "Married" : "Single")} Tax
+                        Brackets <InfoButtonTooltip
+                            action={() => window.open("https://www.irs.gov/filing/federal-income-tax-rates-and-brackets", "_blank")}
+                            text="See actual tax brackets at the IRS webpage"/>
                     </h2>
                     <div className="grid grid-cols-4 w-full">
                         <p className="text-gray-700">Percent</p>
@@ -1319,14 +1322,14 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                         <hr/>
                         <hr/>
                         <hr/>
-                        {taxBrackets.map((b, i) => [
+                        {(character.partnerFirstName ? marriedTaxBrackets : singleTaxBrackets).map((b, i) => [
                                 <p className="text-gray-700" key={i + "1"}>{b.percent}%</p>,
                                 <p className="text-gray-700"
-                                   key={i + "2"}>{formatter.format(i == 0 ? 0 : taxBrackets[i - 1].to * gameState.s.inflation + 1)}</p>,
+                                   key={i + "2"}>{formatter.format(i == 0 ? 0 : (character.partnerFirstName ? marriedTaxBrackets : singleTaxBrackets)[i - 1].to * gameState.s.inflation + 1)}</p>,
                                 <p className="text-gray-700"
                                    key={i + "3"}>{b.to > 700350 ? "" : formatter.format(b.to * gameState.s.inflation)}</p>,
                                 <p className="text-gray-700"
-                                   key={i + "4"}>{formatter.format(Math.max(0, (Math.min(taxableIncome, b.to * gameState.s.inflation) - (i == 0 ? 0 : taxBrackets[i - 1].to * gameState.s.inflation + 1)) * b.percent / 100))}</p>
+                                   key={i + "4"}>{formatter.format(Math.max(0, (Math.min(taxableIncome, b.to * gameState.s.inflation) - (i == 0 ? 0 : (character.partnerFirstName ? marriedTaxBrackets : singleTaxBrackets)[i - 1].to * gameState.s.inflation + 1)) * b.percent / 100))}</p>
                             ]
                         )}
                     </div>

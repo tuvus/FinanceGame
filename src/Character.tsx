@@ -30,6 +30,7 @@ export class Character {
     milesDriven: number;
     wealthHistory: { date: Date, dateString: string, NetWorth: number, Assets: number, Debt: number }[];
     partnerAspiration: string;
+    partnerSalary: number;
     partnerFirstName: string | null;
     partnerLastName: string | null;
 
@@ -62,6 +63,7 @@ export class Character {
         this.milesDriven = 300;
         this.wealthHistory = [];
         this.partnerAspiration = "";
+        this.partnerSalary = 0;
         this.partnerFirstName = null;
         this.partnerLastName = null;
     }
@@ -83,6 +85,7 @@ export class Character {
 
     endYear(gameState: GameState, inflation: number) {
         this.salary *= inflation;
+        this.partnerSalary *= inflation;
         this.loans.forEach(l => l.endLoanYear(gameState.date, inflation));
         this.accounts.forEach((account) => account.endYear(gameState.date));
         this.refreshLoans();
@@ -159,14 +162,14 @@ export class Character {
     scheduleTrips(gameState: GameState) {
         let expensiveTrips = 0;
         let cheapTrips = 0;
-        while (this.tripBalance >= 800 * gameState.inflation) {
-            if (this.tripBalance >= 2000 * gameState.inflation) {
+        while (this.tripBalance >= 800 * (this.partnerFirstName ? 2 : 1) * gameState.inflation) {
+            if (this.tripBalance >= 2000 * (this.partnerFirstName ? 2 : 1) * gameState.inflation) {
                 expensiveTrips++;
-                this.tripBalance -= 2000 * gameState.inflation;
+                this.tripBalance -= 2000 * (this.partnerFirstName ? 2 : 1) * gameState.inflation;
                 continue;
             }
             cheapTrips++;
-            this.tripBalance -= 800 * gameState.inflation;
+            this.tripBalance -= 800 * (this.partnerFirstName ? 2 : 1) * gameState.inflation;
         }
         let locations = ["Rome", "Tokyo", "Prague", "Swiss Alps", "Mauritius", "Machu Picchu", "Palawan", "Bora Bora", "Tanzania", "Sydney", "Paris", "Chiang Mai", "Maui", "Barcelona", "London", " England", "Great Barrier Reef", "Cappadocia", "Istanbul", "Glacier National Park", "Saint Lucia", "Yellowstone National Park", "South Island", " New Zealand", "Maldives", "Quebec City", "Banff", "Turks & Caicos"];
 
@@ -204,6 +207,10 @@ export class Character {
                 </div>, true))
             activities = activities.filter((_, i) => i != activity);
         }
+    }
+
+    isMarried() {
+        return this.partnerFirstName != null;
     }
 }
 

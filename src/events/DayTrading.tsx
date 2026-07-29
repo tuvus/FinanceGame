@@ -28,7 +28,7 @@ function DayTradingGame({gameState}: GameStateProps) {
     const [investmentAmount, setInvestmentAmount] = useState(Math.min(500, gameState.character.investmentAccount.balance));
     const [currentAmount, setCurrentAmount] = useState(Math.min(500, gameState.character.investmentAccount.balance));
     const [buyIndex, setBuyIndex] = useState<number | null>(null);
-    const taxes = currentAmount > investmentAmount ? CalculateTaxes(gameState.character.taxableIncome + currentAmount - investmentAmount) - CalculateTaxes(gameState.character.taxableIncome) : 0;
+    const taxes = currentAmount > investmentAmount ? CalculateTaxes(gameState.character.taxableIncome + currentAmount - investmentAmount, gameState.character.isMarried()) - CalculateTaxes(gameState.character.taxableIncome, gameState.character.isMarried()) : 0;
     const [companyName, setCompanyName] = useState("DefaultCompany")
     const [companies] = useState(() => {
         const companyNames = ["Environ", "Invtn Gmbh", "Standard Electric", "General Oil", "UnReal Estate", "Extra-Electronics Inc", "Insider Insurance", "Big Data Corp", "Hellman-Dough"]
@@ -41,7 +41,7 @@ function DayTradingGame({gameState}: GameStateProps) {
         return value;
     })
     const startEndValue = investmentAmount * history[history.length - 1].value / history[12].value;
-    const startEndTaxes = startEndValue > investmentAmount ? CalculateTaxes(gameState.character.taxableIncome + startEndValue - investmentAmount) - CalculateTaxes(gameState.character.taxableIncome) : 0;
+    const startEndTaxes = startEndValue > investmentAmount ? CalculateTaxes(gameState.character.taxableIncome + startEndValue - investmentAmount, gameState.character.isMarried()) - CalculateTaxes(gameState.character.taxableIncome, gameState.character.isMarried()) : 0;
     useEffect(() => {
         const interval = setInterval(() => {
             if (page == 3) {

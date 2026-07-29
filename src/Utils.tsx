@@ -1,12 +1,13 @@
 import {type GroupBase, type StylesConfig} from "react-select";
 import React, {useEffect, useState} from "react";
-import {taxBrackets} from "./Constants.tsx";
+import {marriedTaxBrackets, singleTaxBrackets} from "./Constants.tsx";
 
-export function CalculateTaxes(taxableAmount: number): number {
+export function CalculateTaxes(taxableAmount: number, married: boolean): number {
     let tax = 0;
-    for (let i = 0; i < taxBrackets.length; i++) {
-        tax += (Math.min(taxBrackets[i].to, taxableAmount) - (taxBrackets[i - 1]?.to ?? 0)) * taxBrackets[i].percent / 100;
-        if (taxBrackets[i].to > taxableAmount) break;
+    const taxBracket = married ? marriedTaxBrackets : singleTaxBrackets;
+    for (let i = 0; i < taxBracket.length; i++) {
+        tax += (Math.min(taxBracket[i].to, taxableAmount) - (taxBracket[i - 1]?.to ?? 0)) * taxBracket[i].percent / 100;
+        if (taxBracket[i].to > taxableAmount) break;
     }
     return tax;
 }
