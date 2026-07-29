@@ -538,20 +538,17 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                 purchases ahead of time. These purchases are called big-ticket items.
             </p>), null, null, "Next"),
             new TutorialEvent("Creating a budget for a big-ticket item", null, (<p className="text-gray-700">
-                Click on add item to start creating budgeting for a big-ticket item.
+                Click on add item to start budgeting for a big-ticket item.
             </p>), "AddBigTicketItemButton", () => document.getElementById("BigTicketItemModal") != null, null),
-        ]),
-        new TutorialChain("Creating Big-Ticket Items",
-            () => gameState.s.GetCurrentPage().name == "Big-Ticket Items" && document.getElementById("BigTicketItemModal") != null, [
             new TutorialEvent("Big-Ticket Items", null, (<p className="text-gray-700">
-                Use the drop-down menu to select what you want to save for.
-            </p>), null, null, "Next"),
+                Use the drop-down menu to select the car big ticket item.
+            </p>), "BigTicketItemModal", () => document.getElementById("modalCarSelected") != null, null),
             new TutorialEvent("Creating a budget for a big-ticket item", null, (<p className="text-gray-700">
                 Here you set how long until you want to buy the big-ticket item, see how much it would cost to buy the
                 big-ticket item, what percentage you want to take out a loan for instead of paying cash, and see how
                 much you would pay in saved up money. You can click add to finish the creation of the big-ticket-item.
                 You can edit it later, if you change your mind.
-            </p>), null, null, "Next"),
+            </p>), "BigTicketItemModal", null, "Close"),
         ]),
         new TutorialChain("Investment Tutorial Year In Review", () => gameState.s.GetCurrentPage().name == "Year in review" && gameState.s.gameYear >= 3, [
             new TutorialEvent("Investment Accounts", null, (<p className="text-gray-700">
@@ -1270,11 +1267,12 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                     onClick={e => e.stopPropagation()}>
                     <h2 className="text-gray-700!">Taxable Income <InfoButtonTooltip
                         action={() => window.open("https://www.irs.gov/credits-and-deductions", "_blank")}
-                        text="Your taxable income is your salary minus any money put into a traditional retirement account, any credits and deductions"/></h2>
+                        text="Your taxable income is your salary minus any money put into a traditional retirement account, any credits and deductions"/>
+                    </h2>
                     <p className="text-gray-700">{formatter.format(taxableIncome)}</p>
                     <h2 className="text-gray-700!">Tax Brackets <InfoButtonTooltip
                         action={() => window.open("https://www.irs.gov/filing/federal-income-tax-rates-and-brackets", "_blank")}
-                    text="See actual tax brackets at the IRS webpage"/>
+                        text="See actual tax brackets at the IRS webpage"/>
                     </h2>
                     <div className="grid grid-cols-4 w-full">
                         <p className="text-gray-700">Percent</p>

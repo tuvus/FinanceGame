@@ -37,7 +37,11 @@ export function BigTicketItemsPage({gameState}: GameStateProps) {
     const [fundsToTransfer, setFundsToTransfer] = useState(0);
     const carSellValue = gameState.character.car.getSellValue(new Date(gameState.date.getFullYear() + duration, 0));
     return (<div id="AddBigTicketItemButton">
-            <button className="w-40 text-xl h-10 font-bold" onClick={() => setAddBigTicketItem(true)}>Add Item</button>
+            <button className="w-40 text-xl h-10 font-bold" onClick={() => {
+                setAddBigTicketItem(true);
+                gameState.render();
+            }}>Add Item
+            </button>
             {gameState.character.bigTicketItems.bigTicketItems.map((bt, i) =>
                 <div
                     className="flex flex-col items-center w-124 bg-amber-100 rounded-xl p-4 m-4 gap-1 cursor-pointer"
@@ -66,9 +70,10 @@ export function BigTicketItemsPage({gameState}: GameStateProps) {
                 </div>
             )}
             {addBigTicketItem ?
-                <div className="flex modal justify-center" onClick={() => setAddBigTicketItem(false)}>
+                <div id="BigTicketItemModal" className="flex modal justify-center"
+                     onClick={() => setAddBigTicketItem(false)}>
                     <div
-                        id="BigTicketItemModal" className="flex flex-col gap-2 ml-auto mr-auto mb-auto mt-[10%] bg-amber-100 rounded-xl items-center p-4"
+                        className="flex flex-col gap-2 ml-auto mr-auto mb-auto mt-[10%] bg-amber-100 rounded-xl items-center p-4"
                         onClick={e => e.stopPropagation()}>
                         <h3 className="text-gray-700">Big Ticket Item</h3>
 
@@ -78,9 +83,12 @@ export function BigTicketItemsPage({gameState}: GameStateProps) {
                                 value={itemType.selectedType}
                                 isSearchable={false}
                                 styles={GetReactSelectStyle<ItemType>()}
-                                onChange={(t: ItemType | null) => setItemType({selectedType: t})}/>
+                                onChange={(t: ItemType | null) => {
+                                    setItemType({selectedType: t});
+                                    gameState.render();
+                                }}/>
                         {itemType.selectedType?.name == "Car" ?
-                            <div className="flex gap-4" key={0}>
+                            <div id="modalCarSelected" className="flex gap-4" key={0}>
                                 <div
                                     className={"eventButton w-60! panelButton duration-300! " + (itemSubType == "Buy used" ? "bg-gray-400!" : "bg-gray-200!")}
                                     onClick={() => {
