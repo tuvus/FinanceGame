@@ -57,9 +57,9 @@ export class LifeEventManager {
     }
 
     replaceEvent(lifeEvent: LifeEvent) {
+        if (lifeEvent.date.getFullYear() != this.gameState.date.getFullYear() || lifeEvent.date.getDay() != this.gameState.date.getDay())
+            console.error("Replacing the life event " + this.lifeEvents[0].name + " with " + lifeEvent.name + " which has a date other than the current date!");
         this.lifeEvents[0] = lifeEvent;
-        this.gameState.date.setMonth(this.lifeEvents[0].date.getMonth());
-        this.gameState.date.setDate(this.lifeEvents[0].date.getDate());
         this.render();
     }
 
@@ -69,7 +69,7 @@ export class LifeEventManager {
             && this.lifeEvents[0].date.getMonth() >= date.getMonth())
             return this.lifeEvents[0];
         if (this.lifeEvents.length > 0 && this.lifeEvents[0].date.getFullYear() < date.getFullYear()) {
-            console.error("Found a life event that should have occurred before now! Event date: " + this.lifeEvents[0].date.toString() + " Current Date: " + date.toString());
+            console.error("Found a life event that should have occurred before now! Name:" + this.lifeEvents[0].name + " Event date: " + this.lifeEvents[0].date.toString() + " Current Date: " + date.toString());
             this.printEvents();
         }
         return null;

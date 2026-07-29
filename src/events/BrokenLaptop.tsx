@@ -2,9 +2,23 @@
 import {LifeEvent} from "../EventManager.tsx";
 import random from "random";
 import type {GameStateProps} from "../Data.tsx";
+import {useEffect} from "react";
 
 function BrokenLaptopEvent({gameState}: GameStateProps) {
-
+    const keyPressed = ((e: KeyboardEvent) => {
+        if (e.key == "n") {
+            gameState.character.satisfaction -= 1;
+            gameState.character.payMoney(600 * gameState.inflation);
+            gameState.lifeEventManager!.nextEvent();
+            e.stopPropagation();
+        }
+    });
+    useEffect(() => {
+        document.addEventListener("keyup", keyPressed);
+        return () => {
+            document.removeEventListener("keyup", keyPressed);
+        };
+    }, []);
     return (
         <div className="flex flex-col w-full items-center mt-6 gap-4">
             <p className="w-3/4">Oops... You spilled coffee on your laptop and now it won't start. You need your
