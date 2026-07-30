@@ -40,7 +40,7 @@ export default function PartnerMatch({gameState}: GameStateProps) {
                     gameState.character.partnerFirstName = firstName;
                     gameState.character.partnerLastName = lastName;
                     gameState.character.satisfaction += 5;
-                    const partnerSalary = (gameState.character.education == "Bachelors" ? 7800 : (gameState.character.education == "Associates" ? 57000 : (gameState.character.education == "Trade School" ? 53000 : 48000))) * gameState.inflation * random.float(.9, 1.1);
+                    const partnerSalary = (gameState.character.education == "Bachelors" ? 78000 : (gameState.character.education == "Associates" ? 57000 : (gameState.character.education == "Trade School" ? 53000 : 48000))) * gameState.inflation * random.float(.9, 1.1);
                     const partnerLoans = (gameState.character.education == "Bachelors" ? 24000 : (gameState.character.education == "Associates" ? 8000 : (gameState.character.education == "Trade School" ? 9000 : 0))) * gameState.inflation * random.float(.9, 1.1);
                     const partnerSavings = 20000 * gameState.inflation;
                     gameState.lifeEventManager!.replaceEvent(new LifeEvent("Combining finances", gameState.date,
@@ -49,7 +49,7 @@ export default function PartnerMatch({gameState}: GameStateProps) {
                                 <p>You and your partner would like to combine finances, this not only makes it easier to
                                     live together, but also provides some tax benefits.</p>
                                 <p>{gameState.character.partnerPronoun2!.toUpperCase()[0] + gameState.character.partnerPronoun2!.substring(1)} current
-                                    salary is {gameState.formatter.format(gameState.character.partnerSalary)}, and they
+                                    salary is {gameState.formatter.format(partnerSalary)}, and they
                                     have {gameState.formatter.format(partnerSavings)} in savings.</p>
                                 {gameState.character.education == "Trade School" ? <p>They also went to trade school and
                                     have {gameState.formatter.format(partnerLoans)} of debt.</p> : <></>}
@@ -68,9 +68,12 @@ export default function PartnerMatch({gameState}: GameStateProps) {
                                     gameState.character.addLoan(new Loan("College Debt", partnerLoans, gameState.character.savingsAccount, 1.067, true));
                                 }
                                 gameState.character.addMoney(partnerSavings);
-                                gameState.character.monthlyLivingExpenses = gameState.character.monthlyLivingExpenses.map(m => ({
-                                    name: m.name, amount: m.amount * 2
-                                }));
+                                gameState.character.monthlyLivingExpenses.set("Rent", gameState.character.monthlyLivingExpenses.get("Rent")! *  1.5);
+                                gameState.character.monthlyLivingExpenses.set("Utilities", gameState.character.monthlyLivingExpenses.get("Utilities")! *  1.5);
+                                gameState.character.monthlyLivingExpenses.set("Groceries", gameState.character.monthlyLivingExpenses.get("Groceries")! *  1.7);
+                                gameState.character.monthlyLivingExpenses.set("Internet", gameState.character.monthlyLivingExpenses.get("Internet")! *  1.4);
+                                gameState.character.monthlyLivingExpenses.set("Phone Data", gameState.character.monthlyLivingExpenses.get("Phone Data")! *  2);
+                                gameState.character.monthlyLivingExpenses.set("Health Insurance", gameState.character.monthlyLivingExpenses.get("Health Insurance")! *  2);
                                 gameState.character.partnerSalary = partnerSalary;
                                 gameState.lifeEventManager!.replaceEvent(new LifeEvent("Planning for a wedding", gameState.date,
                                     <div className="flex flex-col w-full items-center">

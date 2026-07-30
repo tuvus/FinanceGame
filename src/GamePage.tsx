@@ -89,7 +89,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
         gameState.s.date.setDate(31);
         gameState.s.date.setHours(18);
         const combinedSalary = character.salary + character.partnerSalary;
-        const livingExpenses = (character.monthlyLivingExpenses.map(e => e.amount).reduce((sum, curr) => sum + curr, 0)
+        const livingExpenses = (Array.from(character.monthlyLivingExpenses.values()).reduce((sum, curr) => sum + curr, 0)
             + character.getMonthlyCarCosts()) * gameState.s.inflation * 12;
         const taxableIncome = Math.max(0, combinedSalary * (1 - character.pretirement / 100) - (character.isMarried() ? 29200 : 15750) * gameState.s.inflation);
         character.taxableIncome = taxableIncome;
@@ -97,7 +97,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
         const newSavings = combinedSalary * (100 - character.pinvestments - character.pretirement - character.pdiscretionary - character.ptrips) / 100 - taxes - livingExpenses;
 
         // Pay for wants
-        const discretionarySpending = combinedSalary * character.pdiscretionary / 100 / gameState.s.inflation;
+        const discretionarySpending = combinedSalary * character.pdiscretionary / 100 / gameState.s.inflation / (character.isMarried() ? 2 : 1);
         character.satisfaction += ((1.2 * discretionarySpending - 3500) / (Math.abs(discretionarySpending / 20) + 210)) * (character.loans.length > 0 ? .8 : 1);
 
         // Allocate money for trips
@@ -152,7 +152,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
     const taxableIncome = Math.max(0, combinedSalary * (1 - character.pretirement / 100) - (character.isMarried() ? 29200 : 15750) * gameState.s.inflation);
     const taxes = CalculateTaxes(taxableIncome, character.isMarried());
 
-    const monthlyLivingExpenses = (character.monthlyLivingExpenses.map(e => e.amount)
+    const monthlyLivingExpenses = (Array.from(character.monthlyLivingExpenses.values())
         .reduce((sum, curr) => sum + curr, 0) + character.getMonthlyCarCosts()) * gameState.s.inflation;
     const livingExpenses = monthlyLivingExpenses * 12;
     const minLoanPayments = character.loans.reduce((sum, l) => sum + l.getPayment(gameState.s.inflation), 0);
@@ -169,7 +169,6 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                 <div className="eventButton panelButton"
                      onClick={() => {
                          const previousExpenses = character.monthlyLivingExpenses;
-                         character.monthlyLivingExpenses = [];
                          character.savingsAccount.balance = 30000 * random.float(.9, 1.1);
                          endYear();
                          character.salary = 42000 * random.float(.95, 1.1);
@@ -191,15 +190,15 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                 <div className="eventButton panelButton"
                      onClick={() => {
                          const previousExpenses = character.monthlyLivingExpenses;
-                         character.monthlyLivingExpenses = [];
+                         character.monthlyLivingExpenses = new Map();
                          character.savingsAccount.balance = 30000 * random.float(.9, 1.1);
                          endYear();
-                         character.monthlyLivingExpenses = [
+                         [
                              {name: "Rent", amount: 500},
                              {name: "Utilities", amount: 50},
                              {name: "Groceries", amount: 150},
                              {name: "Health Insurance", amount: 200},
-                         ];
+                         ].forEach(m => character.monthlyLivingExpenses.set(m.name, m.amount))
 
                          character.addLoan(new Loan("Trade School Debt", 10000 * random.float(.9, 1.1), character.savingsAccount, 1.067, true));
                          character.savingsAccount.balance += 10000;
@@ -230,15 +229,15 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                  <div className="eventButton panelButton"
                                       onClick={() => {
                                           const previousExpenses = character.monthlyLivingExpenses;
-                                          character.monthlyLivingExpenses = [];
+                                          character.monthlyLivingExpenses = new Map();
                                           character.savingsAccount.balance = 30000 * random.float(.9, 1.1);
                                           endYear();
-                                          character.monthlyLivingExpenses = [
+                                          [
                                               {name: "Rent", amount: 500},
                                               {name: "Utilities", amount: 50},
                                               {name: "Groceries", amount: 150},
                                               {name: "Health Insurance", amount: 200},
-                                          ];
+                                          ].forEach(m => character.monthlyLivingExpenses.set(m.name, m.amount))
 
                                           character.addLoan(new Loan("College Debt", 4000 * random.float(.9, 1.1), character.savingsAccount, 1.067, true));
                                           character.savingsAccount.balance += 10000;
@@ -264,16 +263,16 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                  </div>
                                  <div className="eventButton panelButton"
                                       onClick={() => {
-                                          character.savingsAccount.balance = 30000 * random.float(.7, 1.3);
                                           const previousExpenses = character.monthlyLivingExpenses;
-                                          character.monthlyLivingExpenses = [];
+                                          character.monthlyLivingExpenses = new Map();
+                                          character.savingsAccount.balance = 30000 * random.float(.9, 1.1);
                                           endYear();
-                                          character.monthlyLivingExpenses = [
+                                          [
                                               {name: "Rent", amount: 500},
                                               {name: "Utilities", amount: 50},
                                               {name: "Groceries", amount: 150},
                                               {name: "Health Insurance", amount: 200},
-                                          ];
+                                          ].forEach(m => character.monthlyLivingExpenses.set(m.name, m.amount))
 
                                           character.addLoan(new Loan("College Debt", 20000 * random.float(.9, 1.1), character.savingsAccount, 1.067, true));
                                           character.savingsAccount.balance += 30000;
@@ -286,6 +285,8 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                           character.loans[0].balance += 25000;
                                           endYear();
                                           character.loans[0].balance += 20000 * random.float(.9, 1.1);
+                                          character.savingsAccount.balance += 20000;
+                                          character.loans[0].balance += 20000;
                                           endYear();
                                           character.monthlyLivingExpenses = previousExpenses;
                                           character.salary = 80000 * random.float(1, 1.3);
@@ -302,16 +303,16 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                  </div>
                                  <div className="eventButton panelButton"
                                       onClick={() => {
-                                          character.savingsAccount.balance = 30000 * random.float(.7, 1.3);
                                           const previousExpenses = character.monthlyLivingExpenses;
-                                          character.monthlyLivingExpenses = [];
+                                          character.monthlyLivingExpenses = new Map();
+                                          character.savingsAccount.balance = 30000 * random.float(.9, 1.1);
                                           endYear();
-                                          character.monthlyLivingExpenses = [
+                                          [
                                               {name: "Rent", amount: 500},
                                               {name: "Utilities", amount: 50},
                                               {name: "Groceries", amount: 150},
                                               {name: "Health Insurance", amount: 200},
-                                          ];
+                                          ].forEach(m => character.monthlyLivingExpenses.set(m.name, m.amount))
 
                                           character.addLoan(new Loan("College Debt", 50000 * random.float(.9, 1.1), character.savingsAccount, 1.067, true));
                                           character.savingsAccount.balance += 20000;
@@ -809,15 +810,16 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                         <p className="text-red-800">{Math.round(taxes / combinedSalary * 100)}%</p>
                         <p className="text-red-800">{formatter.format(taxes)}</p>
 
-                        {character.monthlyLivingExpenses.map(({name, amount}, i) => {
-                            return ([
-                                <p className="text-red-800" key={i + "1"} id="ItemizedLivingExpenses">{name}</p>,
-                                <p className="text-red-800" key={i + "2"}>
-                                    {Math.round(amount * 12 * gameState.s.inflation / combinedSalary * 100)}%</p>,
-                                <p className="text-red-800" key={i + "3"}>
-                                    {formatter.format(amount * gameState.s.inflation * 12)}</p>
-                            ]);
-                        })}
+                        {Array.from(character.monthlyLivingExpenses.entries())
+                            .map(([name, amount], i) => {
+                                return ([
+                                    <p className="text-red-800" key={i + "1"} id="ItemizedLivingExpenses">{name}</p>,
+                                    <p className="text-red-800" key={i + "2"}>
+                                        {Math.round(amount * 12 * gameState.s.inflation / combinedSalary * 100)}%</p>,
+                                    <p className="text-red-800" key={i + "3"}>
+                                        {formatter.format(amount * gameState.s.inflation * 12)}</p>
+                                ]);
+                            })}
 
                         <p className="text-red-800">Car maintenance cost</p>
                         <p className="text-red-800">{Math.round(gameState.s.character.car.monthlyMaintenanceCost * 12 * gameState.s.inflation / combinedSalary * 100)}%</p>

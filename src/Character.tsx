@@ -16,7 +16,7 @@ export class Character {
     loans: Loan[];
     totalLoans: Account;
     satisfaction: number;
-    monthlyLivingExpenses: { name: string, amount: number }[];
+    monthlyLivingExpenses: Map<string, number>;
     age: number;
     savingsAccount: Account;
     bigTicketItems: BigTicketItems;
@@ -51,7 +51,8 @@ export class Character {
         this.loans = [];
         this.totalLoans = new Account("Loans", 0, false);
         this.satisfaction = 0;
-        this.monthlyLivingExpenses = monthlyLivingExpenses;
+        this.monthlyLivingExpenses = new Map();
+        monthlyLivingExpenses.forEach(m => this.monthlyLivingExpenses.set(m.name, m.amount));
         this.age = age;
         this.savingsAccount = new Account("Savings Account", 0, true);
         this.accounts = [this.savingsAccount];
