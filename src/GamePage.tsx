@@ -155,7 +155,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
     const monthlyLivingExpenses = (character.monthlyLivingExpenses.map(e => e.amount)
         .reduce((sum, curr) => sum + curr, 0) + character.getMonthlyCarCosts()) * gameState.s.inflation;
     const livingExpenses = monthlyLivingExpenses * 12;
-    const minLoanPayments = character.loans.reduce((sum, l) => sum + l.getPayment(), 0);
+    const minLoanPayments = character.loans.reduce((sum, l) => sum + l.getPayment(gameState.s.inflation), 0);
 
     const newSavings = combinedSalary * (100 - character.pinvestments - character.pretirement - character.pdiscretionary - character.ptrips) / 100 - taxes - livingExpenses - minLoanPayments - character.bigTicketItems.getYearlyAllocation(gameState.s.date);
     character.previousYearlyBalance = newSavings;
