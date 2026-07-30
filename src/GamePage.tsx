@@ -159,7 +159,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
 
     const newSavings = combinedSalary * (100 - character.pinvestments - character.pretirement - character.pdiscretionary - character.ptrips) / 100 - taxes - livingExpenses - minLoanPayments - character.bigTicketItems.getYearlyAllocation(gameState.s.date);
     character.previousYearlyBalance = newSavings;
-    const ploans = character.loans.reduce((sum, l) => sum + l.getPayment(), 0) / combinedSalary * 100;
+    const ploans = minLoanPayments / combinedSalary * 100;
 
 
     const [lifeEventManager] = useState(new LifeEventManager(gameState.s, nextYear, render, [
@@ -322,12 +322,12 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                           character.loans[0].balance += 20000;
                                           endYear();
                                           character.loans[0].balance += 50000 * random.float(.9, 1.1);
-                                          character.savingsAccount.balance += 20000;
-                                          character.loans[0].balance += 20000;
+                                          character.savingsAccount.balance += 30000;
+                                          character.loans[0].balance += 30000;
                                           endYear();
                                           character.loans[0].balance += 50000 * random.float(.9, 1.1);
-                                          character.savingsAccount.balance += 20000;
-                                          character.loans[0].balance += 20000;
+                                          character.savingsAccount.balance += 30000;
+                                          character.loans[0].balance += 30000;
                                           endYear();
                                           character.monthlyLivingExpenses = previousExpenses;
                                           character.salary = 83000 * random.float(1, 1.3);
@@ -932,8 +932,8 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                     <div key={loan.name} id={"Loan" + loan.name}
                          className="flex flex-col items-center w-124 bg-amber-100 rounded-xl p-4 m-4 gap-1">
                         <h3 className="text-gray-700 font-bold">{loan.name}</h3>
-                        <p className="text-gray-700">Interest Rate: {Math.round(loan.interestRate * 100 - 100)}%
-                            ({formatter.format(loan.balance * (loan.interestRate - 1))})</p>
+                        <p className="text-gray-700">Interest Rate: {Math.round(loan.interestRate * 1000 - 1000) / 10}%
+                            ({formatter.format(loan.balance * (loan.interestRate - 1) * (loan.fixed ? 1 : gameState.s.inflation))})</p>
                         <LineChart className="h-60 w-120" data={loan.history}
                                    index="dateString"
                                    showLegend={false}
