@@ -33,6 +33,9 @@ export class Character {
     partnerSalary: number;
     partnerFirstName: string | null;
     partnerLastName: string | null;
+    partnerPronoun: string | null;
+    partnerPronoun2: string | null;
+    education: string;
 
     constructor(firstName: string, lastName: string, monthlyLivingExpenses: {
         name: string,
@@ -66,6 +69,9 @@ export class Character {
         this.partnerSalary = 0;
         this.partnerFirstName = null;
         this.partnerLastName = null;
+        this.partnerPronoun = null;
+        this.partnerPronoun2 = null;
+        this.education = "High School";
     }
 
     checkGoals(gameState: GameState) {

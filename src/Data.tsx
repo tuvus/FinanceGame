@@ -1,6 +1,8 @@
 import {type LifeEventManager, LifeEventScheduler} from "./EventManager.tsx";
 import type {JSX} from "react";
 import type {Character} from "./Character.tsx";
+import {CopyDate} from "./Utils.tsx";
+import random from "random";
 
 export type GameStateProps = {
     gameState: GameState;
@@ -146,7 +148,8 @@ export class GameState {
         displayCondition: () => boolean
     }[] = [];
     date: Date;
-    // The number of years the player has played, 0 is when choosing college, 1 is the first year they allocate for and so on
+    startingDate: Date;
+    // The number of years the player has played, -1 is when choosing college, 1 is the first year they allocate for and so on
     gameYear: number = 0;
     inflation: number = 1;
     character: Character;
@@ -161,6 +164,7 @@ export class GameState {
 
     constructor(date: Date, character: Character, formatter: Intl.NumberFormat, compactFormatter: Intl.NumberFormat, tutorial: boolean) {
         this.date = date;
+        this.startingDate = CopyDate(date);
         this.character = character;
         this.formatter = formatter;
         this.compactFormatter = compactFormatter;
@@ -169,7 +173,16 @@ export class GameState {
         this.lifeEventScheduler = null
     }
 
-    GetCurrentPage() {
+    getYearFromGameYear(gameYear: number) {
+        if (gameYear == -1) return this.startingDate.getFullYear();
+        return this.startingDate.getFullYear() + 5 + gameYear;
+    }
+
+    getRandomDateFromGameYear(gameYear: number) {
+        return new Date(this.getYearFromGameYear(gameYear), random.int(0,11), random.int(1, 28));
+    }
+
+    getCurrentPage() {
         return this.pages[Math.min(this.page, this.pages.length - 1)];
     }
 
