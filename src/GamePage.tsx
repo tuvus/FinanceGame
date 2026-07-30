@@ -653,7 +653,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
     ], render));
 
     useEffect(() => {
-        character.car = new Car(30000, new Date(gameState.s.date.getFullYear() - 3, random.int(0, 11), random.int(1, 28)), 20, 25, false, 180)
+        character.cars = [...character.cars, new Car(30000, new Date(gameState.s.date.getFullYear() - 3, random.int(0, 11), random.int(1, 28)), 20, 25, false, 180)];
         gameState.s.lifeEventScheduler = new LifeEventScheduler(lifeEventManager, gameState.s, [
             new LifeEventSchedule(new LifeEvent("Day Trading", new Date(),
                 <DayTrading gameState={gameState.s}/>, true), 99, 5, .1, () => gameState.s.investmentsUnlocked),
@@ -762,7 +762,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                     amount: character.totalLoans.getTotalValue()
                                 }, {
                                     name: "Assets",
-                                    amount: character.car.getBaseValue(gameState.s.date)
+                                    amount: character.cars.map(c => c.getBaseValue(gameState.s.date)).reduce((sum, curr) => sum + curr, 0)
                                 }
                             ]}
                             label={formatter.format(character.getNetWorth(gameState.s.date))}
@@ -822,26 +822,32 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                             })}
 
                         <p className="text-red-800">Car maintenance cost</p>
-                        <p className="text-red-800">{Math.round(gameState.s.character.car.monthlyMaintenanceCost * 12 * gameState.s.inflation / combinedSalary * 100)}%</p>
-                        <p className="text-red-800">{formatter.format(gameState.s.character.car.monthlyMaintenanceCost * 12 * gameState.s.inflation)}</p>
+                        <p className="text-red-800">{Math.round(gameState.s.character.cars.map(c => c.monthlyMaintenanceCost).reduce((sum, curr) => sum + curr, 0)
+                            * 12 * gameState.s.inflation / combinedSalary * 100)}%</p>
+                        <p className="text-red-800">{formatter.format(gameState.s.character.cars.map(c => c.monthlyMaintenanceCost).reduce((sum, curr) => sum + curr, 0)
+                            * 12 * gameState.s.inflation)}</p>
 
-                        {(gameState.s.character.car.electric ?
-                                [<p className="text-red-800" key={1}>Car electricity cost</p>,
-                                    <p className="text-red-800" key={2}>
-                                        {Math.round(gameState.s.character.milesDriven * 0.1833 * gameState.s.inflation * 12 / 3 / combinedSalary * 100)}%</p>,
-                                    <p className="text-red-800" key={3}>
-                                        {formatter.format(gameState.s.character.milesDriven * 0.1833 * gameState.s.inflation * 12 / 3 * gameState.s.inflation)}</p>
-                                ] : [
-                                    <p className="text-red-800" key={1}>Car gas cost</p>,
-                                    <p className="text-red-800" key={2}>
-                                        {Math.round(gameState.s.character.milesDriven * 3.2 * 12 * gameState.s.inflation / gameState.s.character.car.gpm / combinedSalary * 100)}%</p>,
-                                    <p className="text-red-800" key={3}>
-                                        {formatter.format(gameState.s.character.milesDriven * 3.2 * 12 * gameState.s.inflation / gameState.s.character.car.gpm)}</p>]
-                        )}
+                        {(gameState.s.character.cars.some(c => c.electric) ?
+                            [<p className="text-red-800" key={1}>Car electricity cost</p>,
+                                <p className="text-red-800" key={2}>
+                                    {Math.round(gameState.s.character.milesDriven * gameState.s.character.cars.filter(c => c.electric).length / gameState.s.character.cars.length * 0.1833 * gameState.s.inflation * 12 / 3 / combinedSalary * 100)}%</p>,
+                                <p className="text-red-800" key={3}>
+                                    {formatter.format(gameState.s.character.milesDriven * gameState.s.character.cars.filter(c => c.electric).length / gameState.s.character.cars.length * 0.1833 * gameState.s.inflation * 12 / 3 * gameState.s.inflation)}</p>
+                            ] : [])}
+                        {(gameState.s.character.cars.some(c => !c.electric) ?
+                            [
+                                <p className="text-red-800" key={1}>Car gas cost</p>,
+                                <p className="text-red-800" key={2}>
+                                    {Math.round(gameState.s.character.milesDriven * gameState.s.character.cars.filter(c => !c.electric).length / gameState.s.character.cars.length * 3.2 * 12 * gameState.s.inflation
+                                        / gameState.s.character.cars.filter(c => !c.electric).map(c => c.gpm).reduce((sum, curr) => sum + curr, 0) / gameState.s.character.cars.filter(c => !c.electric).length / combinedSalary * 100)}%</p>,
+                                <p className="text-red-800" key={3}>
+                                    {formatter.format(gameState.s.character.milesDriven * gameState.s.character.cars.filter(c => !c.electric).length / gameState.s.character.cars.length * 3.2 * 12 * gameState.s.inflation
+                                        / gameState.s.character.cars.filter(c => !c.electric).map(c => c.gpm).reduce((sum, curr) => sum + curr, 0) / gameState.s.character.cars.filter(c => !c.electric).length)}</p>]
+                            : [])}
 
                         <p className="text-red-800">Car insurance cost</p>
-                        <p className="text-red-800">{Math.round(gameState.s.character.car.monthlyInsuranceCost * 12 * gameState.s.inflation / combinedSalary * 100)}%</p>
-                        <p className="text-red-800">{formatter.format(gameState.s.character.car.monthlyInsuranceCost * 12 * gameState.s.inflation)}</p>
+                        <p className="text-red-800">{Math.round(gameState.s.character.cars.map(c => c.monthlyInsuranceCost).reduce((sum, curr) => sum + curr, 0) * 12 * gameState.s.inflation / combinedSalary * 100)}%</p>
+                        <p className="text-red-800">{formatter.format(gameState.s.character.cars.map(c => c.monthlyInsuranceCost).reduce((sum, curr) => sum + curr, 0) * 12 * gameState.s.inflation)}</p>
 
                         {character.loans.length > 0 ? [
                             <p className="text-red-800" key="111" id="Loans">Loans</p>,
@@ -1044,7 +1050,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                     amount: character.totalLoans.getTotalValue()
                                 }, {
                                     name: "Assets",
-                                    amount: character.car.getBaseValue(gameState.s.date)
+                                    amount: character.cars.map(c => c.getBaseValue(gameState.s.date)).reduce((sum, curr) => sum + curr, 0 )
                                 }
                             ]}
                             label={formatter.format(character.getNetWorth(gameState.s.date))}

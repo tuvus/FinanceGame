@@ -26,7 +26,7 @@ export class Character {
     tripBalance: number;
     taxableIncome: number;
     previousYearlyBalance: number;
-    car: Car;
+    cars: Car[];
     milesDriven: number;
     wealthHistory: { date: Date, dateString: string, NetWorth: number, Assets: number, Debt: number }[];
     partnerAspiration: string;
@@ -63,7 +63,7 @@ export class Character {
         this.tripBalance = 0;
         this.taxableIncome = 0;
         this.previousYearlyBalance = 0;
-        this.car = new Car(30000, new Date(1, 1), 1, 1, false, 1);
+        this.cars = [];
         this.milesDriven = 300;
         this.wealthHistory = [];
         this.partnerAspiration = "";
@@ -97,8 +97,10 @@ export class Character {
         this.accounts.forEach((account) => account.endYear(gameState.date));
         this.refreshLoans();
         this.totalLoans.endYear(gameState.date);
-        this.car.monthlyMaintenanceCost *= 1.1;
-        this.car.monthlyInsuranceCost *= 0.95;
+        this.cars.forEach(c => {
+            c.monthlyInsuranceCost *= 0.95;
+            c.monthlyMaintenanceCost *= 1.1;
+        })
         this.age++;
         this.wealthHistory = [...this.wealthHistory,
             {
@@ -149,17 +151,26 @@ export class Character {
         this.goals = [...this.goals, goal];
     }
 
+    getOldestCar() {
+        return this.cars.sort((a, b) => a.buyDate.getTime() - b.buyDate.getTime())[0];
+    }
+
     getMonthlyCarCosts() {
-        let fuelCost: number;
-        if (this.car.electric) fuelCost = this.milesDriven * 0.183 / 3;
-        else fuelCost = this.milesDriven * 3.2 / this.car.gpm;
-        return fuelCost + this.car.monthlyInsuranceCost + this.car.monthlyMaintenanceCost;
+        let totalCost = 0;
+        this.cars.forEach(c => {
+            let fuelCost: number;
+            if (c.electric) fuelCost = this.milesDriven * 0.183 / 3 / this.cars.length;
+            else fuelCost = this.milesDriven * 3.2 / c.gpm / this.cars.length;
+
+            totalCost += fuelCost + c.monthlyInsuranceCost + c.monthlyMaintenanceCost
+        });
+        return totalCost;
     }
 
     getAssetValue(date: Date) {
         return this.accounts.reduce((sum, curr) => sum + curr.getTotalValue(), 0)
             + this.bigTicketItems.bigTicketItems.reduce((sum, curr) => sum + curr.balance, 0)
-            + this.car.getBaseValue(date);
+            + this.cars.map(c => c.getBaseValue(date)).reduce((sum, curr) => sum + curr, 0);
     }
 
     getNetWorth(date: Date) {

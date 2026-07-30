@@ -12,12 +12,12 @@ export type CarShopProps = {
 
 export function CarShop({gameState, action, allocatedMoney}: CarShopProps) {
     const addCarGoal = (buyDate: Date) => {
-        const targetDate = new Date(gameState.character.car.getAvgExpirationDate().toString());
+        const targetDate = new Date(gameState.character.getOldestCar().getAvgExpirationDate().toString());
         gameState.character.checkGoalOfName(gameState, "Buy a new car");
         gameState.character.addGoal(new Goal("Buy a new car",
             "Your current car isn't going to last forever, you should plan to buy a new one within one year of " + targetDate.getFullYear(),
-            gameState.character.car.getAvgExpirationDate(),
-            (gameState) => gameState.character.car.buyDate.getFullYear() > buyDate.getFullYear(),
+            gameState.character.getOldestCar().getAvgExpirationDate(),
+            (gameState) => gameState.character.getOldestCar().buyDate.getFullYear() > buyDate.getFullYear(),
             (gameState) => {
                 gameState.character.satisfaction += 2;
                 action(gameState);
@@ -36,8 +36,9 @@ export function CarShop({gameState, action, allocatedMoney}: CarShopProps) {
                 new Loan("Car Loan", loan, gameState.character.savingsAccount, (used ? 1.1403 : 1.0967), true))
         if (cost - allocatedMoney - sellValue < 0.001)
             gameState.character.addMoney(allocatedMoney + sellValue - cost);
-        gameState.character.car = new Car(cost, new Date(gameState.date), used ? 33 : 50, gpm, ev, monthlyInsurance);
-        addCarGoal(gameState.character.car.buyDate);
+        gameState.character.cars = gameState.character.cars.filter(c => c != gameState.character.getOldestCar());
+        gameState.character.cars = [...gameState.character.cars, new Car(cost, new Date(gameState.date), used ? 33 : 50, gpm, ev, monthlyInsurance)];
+        addCarGoal(gameState.date);
         action(gameState);
     }
 
@@ -58,7 +59,7 @@ export function CarShop({gameState, action, allocatedMoney}: CarShopProps) {
         gpm *= 1.15;
         monthlyInsurance *= 1.8;
     }
-    const sellValue = gameState.character.car.getSellValue(gameState.date);
+    const sellValue = gameState.character.getOldestCar().getSellValue(gameState.date);
     const loan = cost - allocatedMoney - cash - sellValue;
     const keyPressed = ((e: KeyboardEvent) => {
         if (e.key == "n") {

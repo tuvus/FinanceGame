@@ -31,11 +31,11 @@ export function BigTicketItemsPage({gameState}: GameStateProps) {
     const [purchaseDesc, setPurchaseDesc] = useState("");
     const [bigTicketBaseValue, setBigTicketBaseValue] = useState(0);
     const [pLoans, setPLoans] = useState(0);
-    const [duration, setDuration] = useState<number>(gameState.character.car.getAvgExpirationDate().getFullYear() - gameState.date.getFullYear());
+    const [duration, setDuration] = useState<number>(gameState.character.getOldestCar().getAvgExpirationDate().getFullYear() - gameState.date.getFullYear());
     const [transferMoney, setTransferMoney] = useState(false);
     const [transferFrom, setTransferFrom] = useState<TransferFundsSelectState>({selectedAccount: null});
     const [fundsToTransfer, setFundsToTransfer] = useState(0);
-    const carSellValue = gameState.character.car.getSellValue(new Date(gameState.date.getFullYear() + duration, 0));
+    const carSellValue = gameState.character.getOldestCar().getSellValue(new Date(gameState.date.getFullYear() + duration, 0));
 
     return (<div>
             <button className="w-40 text-xl h-10 font-bold" onClick={() => setAddBigTicketItem(true)}>Add Item</button>

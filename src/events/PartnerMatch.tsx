@@ -5,6 +5,7 @@ import {femaleNames, lastNames, maleNames} from "../Constants.tsx";
 import random from "random";
 import {ButtonNext} from "../Utils.tsx";
 import {LifeEvent} from "../EventManager.tsx";
+import {Car} from "../Character.tsx";
 
 export default function PartnerMatch({gameState}: GameStateProps) {
     const getRandomFName = () => {
@@ -68,21 +69,20 @@ export default function PartnerMatch({gameState}: GameStateProps) {
                                     gameState.character.addLoan(new Loan("College Debt", partnerLoans, gameState.character.savingsAccount, 1.067, true));
                                 }
                                 gameState.character.addMoney(partnerSavings);
-                                gameState.character.monthlyLivingExpenses.set("Rent", gameState.character.monthlyLivingExpenses.get("Rent")! *  1.5);
-                                gameState.character.monthlyLivingExpenses.set("Utilities", gameState.character.monthlyLivingExpenses.get("Utilities")! *  1.5);
-                                gameState.character.monthlyLivingExpenses.set("Groceries", gameState.character.monthlyLivingExpenses.get("Groceries")! *  1.7);
-                                gameState.character.monthlyLivingExpenses.set("Internet", gameState.character.monthlyLivingExpenses.get("Internet")! *  1.4);
-                                gameState.character.monthlyLivingExpenses.set("Phone Data", gameState.character.monthlyLivingExpenses.get("Phone Data")! *  2);
-                                gameState.character.monthlyLivingExpenses.set("Health Insurance", gameState.character.monthlyLivingExpenses.get("Health Insurance")! *  2);
+                                gameState.character.monthlyLivingExpenses.set("Rent", gameState.character.monthlyLivingExpenses.get("Rent")! * 1.5);
+                                gameState.character.monthlyLivingExpenses.set("Utilities", gameState.character.monthlyLivingExpenses.get("Utilities")! * 1.5);
+                                gameState.character.monthlyLivingExpenses.set("Groceries", gameState.character.monthlyLivingExpenses.get("Groceries")! * 1.7);
+                                gameState.character.monthlyLivingExpenses.set("Internet", gameState.character.monthlyLivingExpenses.get("Internet")! * 1.4);
+                                gameState.character.monthlyLivingExpenses.set("Phone Data", gameState.character.monthlyLivingExpenses.get("Phone Data")! * 2);
+                                gameState.character.monthlyLivingExpenses.set("Health Insurance", gameState.character.monthlyLivingExpenses.get("Health Insurance")! * 2);
                                 gameState.character.partnerSalary = partnerSalary;
+                                gameState.character.cars = [...gameState.character.cars, new Car(32000, new Date(gameState.date.getFullYear(), random.int(0, 11), random.int(1, 28)), 20, 25, false, 180)]
                                 gameState.lifeEventManager!.replaceEvent(new LifeEvent("Planning for a wedding", gameState.date,
                                     <div className="flex flex-col w-full items-center">
                                         <div className="flex flex-col justify-center gap-2 w-3/4">
                                             <p>After settling down together you two would like to make your relationship
-                                                official.
-                                                Usually this involves a wedding ceremony, which can be very expensive.
-                                                How would you
-                                                like to host your wedding?</p>
+                                                official. Usually this involves a wedding ceremony, which can be very
+                                                expensive. How would you like to host your wedding?</p>
                                             <div className="flex justify-center gap-8 mt-6">
                                                 <div
                                                     className="eventButton panelButton"
@@ -97,15 +97,11 @@ export default function PartnerMatch({gameState}: GameStateProps) {
                                                                     </p>
                                                                     <p>
                                                                         The wedding was a blast! Your family, relatives
-                                                                        and close
-                                                                        friends traveled to congratulate you two on your
-                                                                        marriage.
-                                                                        The event was smaller than other weddings but
-                                                                        much more
-                                                                        personal. You felt like you could connect with
-                                                                        those who
-                                                                        came much better. Now you have some gifts to
-                                                                        open.
+                                                                        and close friends traveled to congratulate you
+                                                                        two on your marriage. The event was smaller than
+                                                                        other weddings but much more personal. You felt
+                                                                        like you could connect with those who came much
+                                                                        better. Now you have some gifts to open.
                                                                     </p>
                                                                     <ButtonNext
                                                                         style="w-50 text-xl h-10 p-1 font-bold mt-2"
@@ -135,12 +131,10 @@ export default function PartnerMatch({gameState}: GameStateProps) {
                                                                     </p>
                                                                     <p>
                                                                         The wedding was a blast! Your family, friends
-                                                                        and distant
-                                                                        relatives traveled to congratulate you two on
-                                                                        your marriage.
-                                                                        You met some friends that you hadn't seen since
-                                                                        high school!
-                                                                        Now you have some gifts to open.
+                                                                        and distant relatives traveled to congratulate
+                                                                        you two on your marriage. You met some friends
+                                                                        that you hadn't seen since high school! Now you
+                                                                        have some gifts to open.
                                                                     </p>
                                                                     <ButtonNext
                                                                         style="w-50 text-xl h-10 p-1 font-bold mt-2"
@@ -170,14 +164,11 @@ export default function PartnerMatch({gameState}: GameStateProps) {
                                                                     </p>
                                                                     <p>
                                                                         The wedding was a blast! Your family, friends,
-                                                                        distant
-                                                                        relatives, and some people who you don't quite
-                                                                        remember
-                                                                        traveled to congratulate you two on your
-                                                                        marriage. You met
-                                                                        some friends that you hadn't seen since high
-                                                                        school! Now you
-                                                                        have some gifts to open.
+                                                                        distant relatives, and some people who you don't
+                                                                        quite remember traveled to congratulate you two
+                                                                        on your marriage. You met some friends that you
+                                                                        hadn't seen since high school! Now you have some
+                                                                        gifts to open.
                                                                     </p>
                                                                     <ButtonNext
                                                                         style="w-50 text-xl h-10 p-1 font-bold mt-2"
