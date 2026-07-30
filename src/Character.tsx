@@ -113,8 +113,12 @@ export class Character {
     }
 
     addLoan(loan: Loan) {
-        this.loans = [...this.loans, loan];
         this.totalLoans.balance += loan.balance;
+        if (this.loans.some(l => l.name == loan.name)) {
+            this.loans.find(l => l.name == loan.name)!.balance += loan.balance;
+            return;
+        }
+        this.loans = [...this.loans, loan];
     }
 
     addCreditDebt(amount: number) {
