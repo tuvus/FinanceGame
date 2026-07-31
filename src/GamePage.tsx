@@ -512,6 +512,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                             className="eventButton panelButton"
                             onClick={() => {
                                 character.monthlyLivingExpenses.set("Rent", 1800 * gameState.s.inflation);
+                                character.housing = "Apartment";
                             }}>
                             <p className="text-gray-700">Move to a bigger apartment</p>
                         </div>
@@ -521,11 +522,11 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                             className="eventButton panelButton"
                             onClick={() => {
                                 gameState.s.lifeEventManager!.replaceEvent(new LifeEvent("Buying a mobile home", gameState.s.date,
-                                    <BuyHousing gameState={gameState.s} avgCost={50000 * gameState.s.inflation} type="Mobile Home"/>, true))
+                                    <BuyHousing gameState={gameState.s} avgCost={65000 * gameState.s.inflation} type="Mobile Home"/>, true))
                             }}>
                             <p className="text-gray-700">Buy a mobile home</p>
                             <p className="text-gray-700">Average
-                                cost: {formatter.format(50000 * gameState.s.inflation)}</p>
+                                cost: {formatter.format(65000 * gameState.s.inflation)}</p>
                         </div>
                     </div>
                     <div className="flex justify-center gap-8 mt-6">

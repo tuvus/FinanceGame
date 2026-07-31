@@ -36,6 +36,8 @@ export class Character {
     partnerPronoun: string | null;
     partnerPronoun2: string | null;
     education: string;
+    housing: string;
+    houseValue: number;
 
     constructor(firstName: string, lastName: string, monthlyLivingExpenses: {
         name: string,
@@ -73,6 +75,8 @@ export class Character {
         this.partnerPronoun = null;
         this.partnerPronoun2 = null;
         this.education = "High School";
+        this.housing = "Apartment";
+        this.houseValue = 0;
     }
 
     checkGoals(gameState: GameState) {
@@ -174,7 +178,8 @@ export class Character {
     getAssetValue(date: Date) {
         return this.accounts.reduce((sum, curr) => sum + curr.getTotalValue(), 0)
             + this.bigTicketItems.bigTicketItems.reduce((sum, curr) => sum + curr.balance, 0)
-            + this.cars.map(c => c.getBaseValue(date)).reduce((sum, curr) => sum + curr, 0);
+            + this.cars.map(c => c.getBaseValue(date)).reduce((sum, curr) => sum + curr, 0)
+            + this.houseValue;
     }
 
     getNetWorth(date: Date) {
