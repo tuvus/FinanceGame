@@ -68,7 +68,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
 
     const startYear = () => {
         setPage(pages.length - 1);
-        character.bigTicketItems.ScheduleBigTicketItems(gameState.s.lifeEventManager!, gameState.s, gameState.s.date);
+        character.bigTicketItems.scheduleBigTicketItems(gameState.s.lifeEventManager!, gameState.s, gameState.s.date);
         character.scheduleTrips(gameState.s);
         character.checkGoals(gameState.s);
         gameState.s.lifeEventScheduler!.generateEvents();
@@ -458,6 +458,26 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                     <PartnerMatch gameState={gameState.s}/>, true));
                             }}>
                             <p className="text-gray-700">Girlfriend</p>
+                        </div>
+                        <div
+                            className="eventButton panelButton"
+                            onClick={() => {
+                                gameState.s.character.partnerAspiration = "Diverse";
+                                gameState.s.character.satisfaction += 1;
+                                gameState.s.character.partnerPronoun = "they";
+                                gameState.s.character.partnerPronoun2 = "them";
+                                lifeEventManager.replaceEvent(new LifeEvent("Searching for a partner", gameState.s.date,
+                                    <div className="flex flex-col w-full items-center">
+                                        <div className="flex flex-col items-center gap-2 w-3/4">
+                                            <p>You double your efforts searching for the right match, partaking in more
+                                                social gatherings and go to local events. You might not have found them
+                                                yet, but at least you can enjoying your time searching.</p>
+                                        </div>
+                                    </div>, false))
+                                lifeEventManager.addEvent(new LifeEvent("Its a match!", gameState.s.getRandomDateFromGameYear(2),
+                                    <PartnerMatch gameState={gameState.s}/>, true));
+                            }}>
+                            <p className="text-gray-700">Diverse</p>
                         </div>
                         <div
                             className="eventButton panelButton"

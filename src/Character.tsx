@@ -293,7 +293,7 @@ export class BigTicketItems {
             bt.balance += (bt.targetBalance - bt.balance) / (bt.buyDate.getFullYear() - date.getFullYear()));
     }
 
-    ScheduleBigTicketItems(lifeEventManager: LifeEventManager, gameState: GameState, date: Date) {
+    scheduleBigTicketItems(lifeEventManager: LifeEventManager, gameState: GameState, date: Date) {
         this.bigTicketItems.forEach(bt => {
             if (bt.buyDate.getFullYear() <= date.getFullYear()) {
                 lifeEventManager.addEvent(new LifeEvent(bt.name, bt.buyDate,

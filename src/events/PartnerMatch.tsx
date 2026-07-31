@@ -9,9 +9,13 @@ import {Car} from "../Character.tsx";
 
 export default function PartnerMatch({gameState}: GameStateProps) {
     const getRandomFName = () => {
-        return gameState.character.partnerAspiration == "Girlfriend" ?
-            femaleNames.filter(n => n != gameState.character.firstName)[random.int(0, femaleNames.filter(n => n != gameState.character.firstName).length) - 1]
-            : maleNames.filter(n => n != gameState.character.firstName)[random.int(0, maleNames.filter(n => n != gameState.character.firstName).length) - 1];
+        let names: string[];
+        if (gameState.character.partnerAspiration == "Girlfriend")
+            names = femaleNames.filter(n => n != gameState.character.firstName);
+        else if (gameState.character.partnerAspiration == "Boyfriend")
+            names = maleNames.filter(n => n != gameState.character.firstName);
+        else names = [...femaleNames, ...maleNames].filter(n => n != gameState.character.firstName);
+        return names[random.int(0, names.length) - 1];
     }
     const getRandomLName = () => {
         return lastNames.filter(n => n != gameState.character.lastName)[random.int(0, lastNames.filter(n => n != gameState.character.lastName).length) - 1];
@@ -69,7 +73,7 @@ export default function PartnerMatch({gameState}: GameStateProps) {
                                     gameState.character.addLoan(new Loan("College Debt", partnerLoans, gameState.character.savingsAccount, 1.067, true));
                                 }
                                 gameState.character.addMoney(partnerSavings);
-                                gameState.character.monthlyLivingExpenses.set("Rent", gameState.character.monthlyLivingExpenses.get("Rent")! * 1.5);
+                                gameState.character.monthlyLivingExpenses.set("Rent", gameState.character.monthlyLivingExpenses.get("Rent")! * 1.7);
                                 gameState.character.monthlyLivingExpenses.set("Utilities", gameState.character.monthlyLivingExpenses.get("Utilities")! * 1.5);
                                 gameState.character.monthlyLivingExpenses.set("Groceries", gameState.character.monthlyLivingExpenses.get("Groceries")! * 1.7);
                                 gameState.character.monthlyLivingExpenses.set("Internet", gameState.character.monthlyLivingExpenses.get("Internet")! * 1.4);
