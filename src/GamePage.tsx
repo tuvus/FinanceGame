@@ -631,11 +631,9 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                 Use the drop-down menu to select the car big ticket item.
             </p>), "BigTicketItemModal", () => document.getElementById("modalCarSelected") != null, null),
             new TutorialEvent("Creating a budget for a big-ticket item", null, (<p className="text-gray-700">
-                Here you set how long until you want to buy the big-ticket item, see how much it would cost to buy the
-                big-ticket item, what percentage you want to take out a loan for instead of paying cash, and see how
-                much you would pay in saved up money. You can click add to finish the creation of the big-ticket-item.
-                You can edit it later, if you change your mind.
-            </p>), "BigTicketItemModal", null, "Close"),
+                Here you can change things like how long until you want to buy the car, and how much of it you want to pay with loans.
+                After finishing creating the big-ticket item, you will be able to edit or delete it afterwards. Click Add to finish creating the big-ticket item.
+            </p>), "BigTicketItemModal", () => document.getElementById("modalCarSelected") == null, null),
         ]),
         new TutorialChain("Investment Tutorial Year In Review", () => gameState.s.getCurrentPage().name == "Year in review" && gameState.s.gameYear >= 3, [
             new TutorialEvent("Investment Accounts", null, (<p className="text-gray-700">

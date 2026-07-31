@@ -73,17 +73,16 @@ export function BigTicketItemsPage({gameState}: GameStateProps) {
                         className="flex flex-col gap-2 ml-auto mr-auto mb-auto mt-[10%] bg-amber-100 rounded-xl items-center p-4"
                         onClick={e => e.stopPropagation()}>
                         <h3 className="text-gray-700">Big Ticket Item</h3>
-
-                        <Select className="w-60"
-                                options={itemTypeOptions}
-                                getOptionLabel={a => a.name}
-                                value={itemType.selectedType}
-                                isSearchable={false}
-                                styles={GetReactSelectStyle<ItemType>()}
-                                onChange={(t: ItemType | null) => {
-                                    setItemType({selectedType: t});
-                                    gameState.render();
-                                }}/>
+                            <Select className="w-60"
+                                    options={itemTypeOptions}
+                                    getOptionLabel={a => a.name}
+                                    value={itemType.selectedType}
+                                    isSearchable={false}
+                                    styles={GetReactSelectStyle<ItemType>()}
+                                    onChange={(t: ItemType | null) => {
+                                        setItemType({selectedType: t});
+                                        gameState.render();
+                                    }}/>
                         {itemType.selectedType?.name == "Car" ?
                             <div id="modalCarSelected" className="flex gap-4" key={0}>
                                 <div
@@ -150,8 +149,7 @@ export function BigTicketItemsPage({gameState}: GameStateProps) {
                                         }
                                     }}
                                     type="number">
-                                </input></p>
-                            </div>,
+                                </input></p></div>,
                             <p className="text-gray-700"
                                key={2}>Cost: {gameState.formatter.format(bigTicketBaseValue)}</p>,
                             <p className="text-gray-700"
