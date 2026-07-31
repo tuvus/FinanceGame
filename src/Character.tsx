@@ -16,7 +16,7 @@ export class Character {
     loans: Loan[];
     totalLoans: Account;
     satisfaction: number;
-    monthlyLivingExpenses: { name: string, amount: number }[];
+    monthlyLivingExpenses: Map<string, number>;
     age: number;
     savingsAccount: Account;
     bigTicketItems: BigTicketItems;
@@ -26,9 +26,16 @@ export class Character {
     tripBalance: number;
     taxableIncome: number;
     previousYearlyBalance: number;
-    car: Car;
+    cars: Car[];
     milesDriven: number;
     wealthHistory: { date: Date, dateString: string, NetWorth: number, Assets: number, Debt: number }[];
+    partnerAspiration: string;
+    partnerSalary: number;
+    partnerFirstName: string | null;
+    partnerLastName: string | null;
+    partnerPronoun: string | null;
+    partnerPronoun2: string | null;
+    education: string;
 
     constructor(firstName: string, lastName: string, monthlyLivingExpenses: {
         name: string,
@@ -44,7 +51,8 @@ export class Character {
         this.loans = [];
         this.totalLoans = new Account("Loans", 0, false);
         this.satisfaction = 0;
-        this.monthlyLivingExpenses = monthlyLivingExpenses;
+        this.monthlyLivingExpenses = new Map();
+        monthlyLivingExpenses.forEach(m => this.monthlyLivingExpenses.set(m.name, m.amount));
         this.age = age;
         this.savingsAccount = new Account("Savings Account", 0, true);
         this.accounts = [this.savingsAccount];
@@ -55,9 +63,16 @@ export class Character {
         this.tripBalance = 0;
         this.taxableIncome = 0;
         this.previousYearlyBalance = 0;
-        this.car = new Car(30000, new Date(1, 1), 1, 1, false, 1);
+        this.cars = [];
         this.milesDriven = 300;
         this.wealthHistory = [];
+        this.partnerAspiration = "";
+        this.partnerSalary = 0;
+        this.partnerFirstName = null;
+        this.partnerLastName = null;
+        this.partnerPronoun = null;
+        this.partnerPronoun2 = null;
+        this.education = "High School";
     }
 
     checkGoals(gameState: GameState) {
@@ -77,12 +92,15 @@ export class Character {
 
     endYear(gameState: GameState, inflation: number) {
         this.salary *= inflation;
+        this.partnerSalary *= inflation;
         this.loans.forEach(l => l.endLoanYear(gameState.date, inflation));
         this.accounts.forEach((account) => account.endYear(gameState.date));
         this.refreshLoans();
         this.totalLoans.endYear(gameState.date);
-        this.car.monthlyMaintenanceCost *= 1.1;
-        this.car.monthlyInsuranceCost *= 0.95;
+        this.cars.forEach(c => {
+            c.monthlyInsuranceCost *= 0.95;
+            c.monthlyMaintenanceCost *= 1.1;
+        })
         this.age++;
         this.wealthHistory = [...this.wealthHistory,
             {
@@ -95,8 +113,12 @@ export class Character {
     }
 
     addLoan(loan: Loan) {
-        this.loans = [...this.loans, loan];
         this.totalLoans.balance += loan.balance;
+        if (this.loans.some(l => l.name == loan.name)) {
+            this.loans.find(l => l.name == loan.name)!.balance += loan.balance;
+            return;
+        }
+        this.loans = [...this.loans, loan];
     }
 
     addCreditDebt(amount: number) {
@@ -133,17 +155,26 @@ export class Character {
         this.goals = [...this.goals, goal];
     }
 
+    getOldestCar() {
+        return this.cars.sort((a, b) => a.buyDate.getTime() - b.buyDate.getTime())[0];
+    }
+
     getMonthlyCarCosts() {
-        let fuelCost: number;
-        if (this.car.electric) fuelCost = this.milesDriven * 0.183 / 3;
-        else fuelCost = this.milesDriven * 3.2 / this.car.gpm;
-        return fuelCost + this.car.monthlyInsuranceCost + this.car.monthlyMaintenanceCost;
+        let totalCost = 0;
+        this.cars.forEach(c => {
+            let fuelCost: number;
+            if (c.electric) fuelCost = this.milesDriven * 0.183 / 3 / this.cars.length;
+            else fuelCost = this.milesDriven * 3.2 / c.gpm / this.cars.length;
+
+            totalCost += fuelCost + c.monthlyInsuranceCost + c.monthlyMaintenanceCost
+        });
+        return totalCost;
     }
 
     getAssetValue(date: Date) {
         return this.accounts.reduce((sum, curr) => sum + curr.getTotalValue(), 0)
             + this.bigTicketItems.bigTicketItems.reduce((sum, curr) => sum + curr.balance, 0)
-            + this.car.getBaseValue(date);
+            + this.cars.map(c => c.getBaseValue(date)).reduce((sum, curr) => sum + curr, 0);
     }
 
     getNetWorth(date: Date) {
@@ -153,20 +184,20 @@ export class Character {
     scheduleTrips(gameState: GameState) {
         let expensiveTrips = 0;
         let cheapTrips = 0;
-        while (this.tripBalance >= 800 * gameState.inflation) {
-            if (this.tripBalance >= 2000 * gameState.inflation) {
+        while (this.tripBalance >= 800 * (this.isMarried() ? 2 : 1) * gameState.inflation) {
+            if (this.tripBalance >= 2000 * (this.isMarried() ? 2 : 1) * gameState.inflation) {
                 expensiveTrips++;
-                this.tripBalance -= 2000 * gameState.inflation;
+                this.tripBalance -= 2000 * (this.isMarried() ? 2 : 1) * gameState.inflation;
                 continue;
             }
             cheapTrips++;
-            this.tripBalance -= 800 * gameState.inflation;
+            this.tripBalance -= 800 * (this.isMarried() ? 2 : 1) * gameState.inflation;
         }
         let locations = ["Rome", "Tokyo", "Prague", "Swiss Alps", "Mauritius", "Machu Picchu", "Palawan", "Bora Bora", "Tanzania", "Sydney", "Paris", "Chiang Mai", "Maui", "Barcelona", "London", " England", "Great Barrier Reef", "Cappadocia", "Istanbul", "Glacier National Park", "Saint Lucia", "Yellowstone National Park", "South Island", " New Zealand", "Maldives", "Quebec City", "Banff", "Turks & Caicos"];
 
         for (let i = 0; i < expensiveTrips; i++) {
             const location = random.int(0, locations.length - 1);
-            gameState.lifeEventManager!.AddEvent(new LifeEvent("Expensive Trip",
+            gameState.lifeEventManager!.addEvent(new LifeEvent("Expensive Trip",
                 new Date(gameState.date.getFullYear(), random.int(0, 11), random.int(1, 28), 12),
                 <div>
                     <h3>You flew to {locations[location]} for your vacation!</h3>
@@ -175,7 +206,7 @@ export class Character {
                         text="Relaxing!"
                         action={() => {
                             gameState.character.satisfaction += random.int(2, 4);
-                            gameState.lifeEventManager!.NextEvent();
+                            gameState.lifeEventManager!.nextEvent();
                         }}/>
                 </div>, true))
             locations = locations.filter((_, i) => i != location);
@@ -184,7 +215,7 @@ export class Character {
         let activities = ["camping", "kayaking", "canoeing", "sightseeing", "hiking", "biking"];
         for (let i = 0; i < cheapTrips; i++) {
             const activity = random.int(0, activities.length - 1);
-            gameState.lifeEventManager!.AddEvent(new LifeEvent("Road Trip",
+            gameState.lifeEventManager!.addEvent(new LifeEvent("Road Trip",
                 new Date(gameState.date.getFullYear(), random.int(0, 11), random.int(1, 28), 12),
                 <div>
                     <h3>You went {activities[activity]}!</h3>
@@ -193,11 +224,15 @@ export class Character {
                         text="That was fun!"
                         action={() => {
                             gameState.character.satisfaction += Math.round(Math.sqrt(random.float(.4, 3)));
-                            gameState.lifeEventManager!.NextEvent();
+                            gameState.lifeEventManager!.nextEvent();
                         }}/>
                 </div>, true))
             activities = activities.filter((_, i) => i != activity);
         }
+    }
+
+    isMarried() {
+        return this.partnerFirstName != null;
     }
 }
 
@@ -229,7 +264,7 @@ export class BigTicketItems {
         this.character = character;
     }
 
-    AddBigTicketItem(name: string, desc: string, buyDate: Date, fullCost: number, targetBalance: number, loanPercent: number) {
+    addBigTicketItem(name: string, desc: string, buyDate: Date, fullCost: number, targetBalance: number, loanPercent: number) {
         this.bigTicketItems = [...this.bigTicketItems, {
             name: name,
             desc: desc,
@@ -241,32 +276,32 @@ export class BigTicketItems {
         }];
     }
 
-    RemoveBigTicketItem(bigTicketItem: BigTicketItem) {
+    removeBigTicketItem(bigTicketItem: BigTicketItem) {
         this.character.addMoney(bigTicketItem.balance);
         this.bigTicketItems = this.bigTicketItems.filter(bt => bt != bigTicketItem);
     }
 
-    GetYearlyAllocation(date: Date) {
+    getYearlyAllocation(date: Date) {
         return this.bigTicketItems
             .filter(bt => bt.buyDate.getFullYear() > date.getFullYear())
             .reduce((sum, bt) =>
                 sum + (bt.targetBalance - bt.balance) / (bt.buyDate.getFullYear() - date.getFullYear()), 0);
     }
 
-    DoYearlyAllocations(date: Date) {
+    doYearlyAllocations(date: Date) {
         this.bigTicketItems.forEach(bt =>
             bt.balance += (bt.targetBalance - bt.balance) / (bt.buyDate.getFullYear() - date.getFullYear()));
     }
 
-    ScheduleBigTicketItems(lifeEventManager: LifeEventManager, gameState: GameState, date: Date) {
+    scheduleBigTicketItems(lifeEventManager: LifeEventManager, gameState: GameState, date: Date) {
         this.bigTicketItems.forEach(bt => {
             if (bt.buyDate.getFullYear() <= date.getFullYear()) {
-                lifeEventManager.AddEvent(new LifeEvent(bt.name, bt.buyDate,
+                lifeEventManager.addEvent(new LifeEvent(bt.name, bt.buyDate,
                     <div>
                         <p>{bt.desc}</p>
                         <div className="flex flex-col items-center w-full">
                             <CarShop gameState={gameState}
-                                     action={(gameState: GameState) => gameState.lifeEventManager!.NextEvent()}
+                                     action={(gameState: GameState) => gameState.lifeEventManager!.nextEvent()}
                                      allocatedMoney={bt.balance}
                             />
                         </div>

@@ -19,7 +19,7 @@ function PromotionEvent({gameState}: GameStateProps) {
             action={() => {
                 gameState.character.salary *= increase;
                 gameState.character.satisfaction += random.int(4, 7) * increase;
-                gameState.lifeEventManager!.NextEvent();
+                gameState.lifeEventManager!.nextEvent();
             }}/>
     </div>);
 }
