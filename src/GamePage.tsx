@@ -625,14 +625,17 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                 purchases ahead of time. These purchases are called big-ticket items.
             </p>), null, null, "Next"),
             new TutorialEvent("Creating a budget for a big-ticket item", null, (<p className="text-gray-700">
-                Click on add item to start budgeting for a big-ticket item.
+                Cars have a limited life span and need to be bought once in a while before they reach their lifetime
+                expectancy and break down. Click on add item to start budgeting for a big-ticket item.
             </p>), "AddBigTicketItemButton", () => document.getElementById("BigTicketItemModal") != null, null),
             new TutorialEvent("Big-Ticket Items", null, (<p className="text-gray-700">
                 Use the drop-down menu to select the car big ticket item.
             </p>), "BigTicketItemModal", () => document.getElementById("modalCarSelected") != null, null),
             new TutorialEvent("Creating a budget for a big-ticket item", null, (<p className="text-gray-700">
-                Here you can change things like how long until you want to buy the car, and how much of it you want to pay with loans.
-                After finishing creating the big-ticket item, you will be able to edit or delete it afterwards. Click Add to finish creating the big-ticket item.
+                Here you can change things like how long until you want to buy the car, and how much of it you want to
+                pay with loans.
+                After finishing creating the big-ticket item, you will be able to edit or delete it afterwards. Click
+                Add to finish creating the big-ticket item.
             </p>), "BigTicketItemModal", () => document.getElementById("modalCarSelected") == null, null),
         ]),
         new TutorialChain("Investment Tutorial Year In Review", () => gameState.s.getCurrentPage().name == "Year in review" && gameState.s.gameYear >= 3, [
@@ -843,7 +846,8 @@ function GamePage({fname, lname, tutorial}: GameProps) {
 
 
                         <p className="text-red-800" id="IncomeTaxes">Taxes <InfoButtonTooltip
-                            action={() => document.getElementById("tax-modal")!.style.display = "block"} text="See game tax brackets"/>
+                            action={() => document.getElementById("tax-modal")!.style.display = "block"}
+                            text="See game tax brackets"/>
                         </p>
                         <p className="text-red-800">{Math.round(taxes / combinedSalary * 100)}%</p>
                         <p className="text-red-800">{formatter.format(taxes)}</p>
@@ -1088,7 +1092,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                     amount: character.totalLoans.getTotalValue()
                                 }, {
                                     name: "Assets",
-                                    amount: character.cars.map(c => c.getBaseValue(gameState.s.date)).reduce((sum, curr) => sum + curr, 0 )
+                                    amount: character.cars.map(c => c.getBaseValue(gameState.s.date)).reduce((sum, curr) => sum + curr, 0)
                                 }
                             ]}
                             label={formatter.format(character.getNetWorth(gameState.s.date))}
@@ -1374,7 +1378,8 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                         <p className="text-gray-700">To</p>
                         <p className="text-gray-700">Taxed <InfoButtonTooltip
                             action={() => window.open("https://youtu.be/UE510ZiUcFg&t=27", "_blank")}
-                            text="Taxable income is split into brackets, money in a bracket is only taxed at that bracket's rate."/></p>
+                            text="Taxable income is split into brackets, money in a bracket is only taxed at that bracket's rate."/>
+                        </p>
                         <hr/>
                         <hr/>
                         <hr/>
