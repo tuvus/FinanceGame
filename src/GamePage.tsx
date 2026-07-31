@@ -842,8 +842,8 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                         ] : []}
 
 
-                        <p className="text-red-800" id="IncomeTaxes">Taxes <InfoButton
-                            action={() => document.getElementById("tax-modal")!.style.display = "block"}/>
+                        <p className="text-red-800" id="IncomeTaxes">Taxes <InfoButtonTooltip
+                            action={() => document.getElementById("tax-modal")!.style.display = "block"} text="See game tax brackets"/>
                         </p>
                         <p className="text-red-800">{Math.round(taxes / combinedSalary * 100)}%</p>
                         <p className="text-red-800">{formatter.format(taxes)}</p>
@@ -1372,7 +1372,9 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                         <p className="text-gray-700">Percent</p>
                         <p className="text-gray-700">From</p>
                         <p className="text-gray-700">To</p>
-                        <p className="text-gray-700">Taxed</p>
+                        <p className="text-gray-700">Taxed <InfoButtonTooltip
+                            action={() => window.open("https://youtu.be/UE510ZiUcFg&t=27", "_blank")}
+                            text="Taxable income is split into brackets, money in a bracket is only taxed at that bracket's rate."/></p>
                         <hr/>
                         <hr/>
                         <hr/>
@@ -1389,7 +1391,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                         )}
                     </div>
                     <p className="text-gray-700">Total Taxes: {formatter.format(taxes)}</p>
-                    <p className="text-gray-700 italic">(number are adjusted to in-game inflation)</p>
+                    <p className="text-gray-700 italic">(numbers are adjusted to in-game inflation)</p>
                     <button
                         onClick={() => document.getElementById("tax-modal")!.style.display = "none"}
                         className="p-2 text-2xl w-80">Close
