@@ -184,14 +184,14 @@ export class Character {
     scheduleTrips(gameState: GameState) {
         let expensiveTrips = 0;
         let cheapTrips = 0;
-        while (this.tripBalance >= 800 * (this.partnerFirstName ? 2 : 1) * gameState.inflation) {
-            if (this.tripBalance >= 2000 * (this.partnerFirstName ? 2 : 1) * gameState.inflation) {
+        while (this.tripBalance >= 800 * (this.isMarried() ? 2 : 1) * gameState.inflation) {
+            if (this.tripBalance >= 2000 * (this.isMarried() ? 2 : 1) * gameState.inflation) {
                 expensiveTrips++;
-                this.tripBalance -= 2000 * (this.partnerFirstName ? 2 : 1) * gameState.inflation;
+                this.tripBalance -= 2000 * (this.isMarried() ? 2 : 1) * gameState.inflation;
                 continue;
             }
             cheapTrips++;
-            this.tripBalance -= 800 * (this.partnerFirstName ? 2 : 1) * gameState.inflation;
+            this.tripBalance -= 800 * (this.isMarried() ? 2 : 1) * gameState.inflation;
         }
         let locations = ["Rome", "Tokyo", "Prague", "Swiss Alps", "Mauritius", "Machu Picchu", "Palawan", "Bora Bora", "Tanzania", "Sydney", "Paris", "Chiang Mai", "Maui", "Barcelona", "London", " England", "Great Barrier Reef", "Cappadocia", "Istanbul", "Glacier National Park", "Saint Lucia", "Yellowstone National Park", "South Island", " New Zealand", "Maldives", "Quebec City", "Banff", "Turks & Caicos"];
 
