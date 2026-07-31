@@ -8,7 +8,7 @@ type OutlineProps = {
 
 export function Outline({gameState, page, startYear}: OutlineProps) {
     if (page >= gameState.pages.length - 1) return <></>;
-    const currentPageName = gameState.GetCurrentPage().name;
+    const currentPageName = gameState.getCurrentPage().name;
     return (<div
         className="flex flex-col items-center w-50 absolute left-1 top-1/2 -translate-y-1/2 align-middle bg-amber-100 rounded-2xl p-0">
         <h2 className="text-gray-700! pt-2">Finances</h2>

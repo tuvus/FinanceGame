@@ -1,6 +1,8 @@
 import {type LifeEventManager, LifeEventScheduler} from "./EventManager.tsx";
 import type {JSX} from "react";
 import type {Character} from "./Character.tsx";
+import {CopyDate} from "./Utils.tsx";
+import random from "random";
 
 export type GameStateProps = {
     gameState: GameState;
@@ -107,8 +109,8 @@ export class StockAccount extends Account {
 
 export class Loan extends Account {
     linkedAccount: Account;
+    // Number > 1, eg 1.067
     interestRate: number;
-    minimumPayment: number;
     setPayment: number;
     fixed: boolean;
 
@@ -116,25 +118,32 @@ export class Loan extends Account {
         super(name, balance, false);
         this.linkedAccount = linkedAccount;
         this.interestRate = interestRate;
-        this.minimumPayment = balance * (interestRate * 1.1 - 1);
-        this.setPayment = this.minimumPayment;
+        this.setPayment = this.getMinimumPayment(1.04);
         this.fixed = fixed;
     }
 
     endLoanYear(date: Date, inflation: number): void {
-        this.balance *= inflation;
-        if (!this.fixed) this.balance *= this.interestRate;
-        const toTransfer = Math.min(this.getPayment(), this.linkedAccount.balance);
+        const toTransfer = Math.min(this.getPayment(inflation), this.linkedAccount.balance);
         this.linkedAccount.balance -= toTransfer;
         this.balance -= toTransfer;
+        this.balance *= this.interestRate;
+        if (!this.fixed) this.balance *= inflation;
+        this.setPayment *= inflation;
         super.endYear(date);
         if (this.balance < 0.00001) return;
         // Todo: find a better formula for not paying the minimum due
-        if (toTransfer < this.minimumPayment) this.balance += (this.minimumPayment - toTransfer) * 2;
+        if (toTransfer < this.getMinimumPayment(inflation)) {
+            this.balance += this.getMinimumPayment(inflation) * 2;
+            console.log(toTransfer + "  " + this.getMinimumPayment(inflation))
+        }
     }
 
-    getPayment(): number {
-        return Math.min(this.balance, this.setPayment);
+    getPayment(inflation: number): number {
+        return Math.min(this.balance, Math.max(this.setPayment, this.getMinimumPayment(inflation)));
+    }
+
+    getMinimumPayment(inflation: number): number {
+        return Math.min(this.balance, this.balance * (this.interestRate * 1.01 - 1) * (this.fixed ? 1 : inflation));
     }
 }
 
@@ -146,7 +155,8 @@ export class GameState {
         displayCondition: () => boolean
     }[] = [];
     date: Date;
-    // The number of years the player has played, 0 is when choosing college, 1 is the first year they allocate for and so on
+    startingDate: Date;
+    // The number of years the player has played, -1 is when choosing college, 1 is the first year they allocate for and so on
     gameYear: number = 0;
     inflation: number = 1;
     character: Character;
@@ -161,6 +171,7 @@ export class GameState {
 
     constructor(date: Date, character: Character, formatter: Intl.NumberFormat, compactFormatter: Intl.NumberFormat, tutorial: boolean) {
         this.date = date;
+        this.startingDate = CopyDate(date);
         this.character = character;
         this.formatter = formatter;
         this.compactFormatter = compactFormatter;
@@ -169,7 +180,16 @@ export class GameState {
         this.lifeEventScheduler = null
     }
 
-    GetCurrentPage() {
+    getYearFromGameYear(gameYear: number) {
+        if (gameYear == -1) return this.startingDate.getFullYear();
+        return this.startingDate.getFullYear() + 5 + gameYear;
+    }
+
+    getRandomDateFromGameYear(gameYear: number) {
+        return new Date(this.getYearFromGameYear(gameYear), random.int(0, 11), random.int(1, 28));
+    }
+
+    getCurrentPage() {
         return this.pages[Math.min(this.page, this.pages.length - 1)];
     }
 

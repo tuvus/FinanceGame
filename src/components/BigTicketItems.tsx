@@ -31,11 +31,11 @@ export function BigTicketItemsPage({gameState}: GameStateProps) {
     const [purchaseDesc, setPurchaseDesc] = useState("");
     const [bigTicketBaseValue, setBigTicketBaseValue] = useState(0);
     const [pLoans, setPLoans] = useState(0);
-    const [duration, setDuration] = useState<number>(gameState.character.car.getAvgExpirationDate().getFullYear() - gameState.date.getFullYear());
+    const [duration, setDuration] = useState<number>(gameState.character.getOldestCar().getAvgExpirationDate().getFullYear() - gameState.date.getFullYear());
     const [transferMoney, setTransferMoney] = useState(false);
     const [transferFrom, setTransferFrom] = useState<TransferFundsSelectState>({selectedAccount: null});
     const [fundsToTransfer, setFundsToTransfer] = useState(0);
-    const carSellValue = gameState.character.car.getSellValue(new Date(gameState.date.getFullYear() + duration, 0));
+    const carSellValue = gameState.character.getOldestCar().getSellValue(new Date(gameState.date.getFullYear() + duration, 0));
 
     return (<div>
             <button className="w-40 text-xl h-10 font-bold" onClick={() => setAddBigTicketItem(true)}>Add Item</button>
@@ -182,7 +182,7 @@ export function BigTicketItemsPage({gameState}: GameStateProps) {
                                         onClick={() => {
                                             setAddBigTicketItem(false);
                                             const targetBalance = duration > 0 ? (bigTicketBaseValue - carSellValue) * ((100 - pLoans) / 100) : 0;
-                                            gameState.character.bigTicketItems.AddBigTicketItem(
+                                            gameState.character.bigTicketItems.addBigTicketItem(
                                                 itemSubType + " " + itemType.selectedType!.name.toLowerCase(),
                                                 purchaseDesc,
                                                 new Date(gameState.date.getFullYear() + duration,
@@ -258,7 +258,7 @@ export function BigTicketItemsPage({gameState}: GameStateProps) {
                         <div className="flex gap-2 justify-center">
                             <button className="w-50 text-xl h-10 p-1 font-bold mt-2 bg-red-700!"
                                     onClick={() => {
-                                        gameState.character.bigTicketItems.RemoveBigTicketItem(selectedBigTicketItem);
+                                        gameState.character.bigTicketItems.removeBigTicketItem(selectedBigTicketItem);
                                         setSelectedBigTicketItem(null);
                                         gameState.render();
                                     }}>Remove

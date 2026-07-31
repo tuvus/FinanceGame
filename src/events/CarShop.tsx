@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/immutability */
 import {GameState, Loan} from "../Data.tsx";
 import {Car, Goal} from "../Character.tsx";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {NumberInputAutoSelect} from "../Utils.tsx";
 
 export type CarShopProps = {
@@ -12,12 +12,12 @@ export type CarShopProps = {
 
 export function CarShop({gameState, action, allocatedMoney}: CarShopProps) {
     const addCarGoal = (buyDate: Date) => {
-        const targetDate = new Date(gameState.character.car.getAvgExpirationDate().toString());
+        const targetDate = new Date(gameState.character.getOldestCar().getAvgExpirationDate().toString());
         gameState.character.checkGoalOfName(gameState, "Buy a new car");
         gameState.character.addGoal(new Goal("Buy a new car",
             "Your current car isn't going to last forever, you should plan to buy a new one within one year of " + targetDate.getFullYear(),
-            gameState.character.car.getAvgExpirationDate(),
-            (gameState) => gameState.character.car.buyDate.getFullYear() > buyDate.getFullYear(),
+            gameState.character.getOldestCar().getAvgExpirationDate(),
+            (gameState) => gameState.character.getOldestCar().buyDate.getFullYear() > buyDate.getFullYear(),
             (gameState) => {
                 gameState.character.satisfaction += 2;
                 action(gameState);
@@ -27,6 +27,20 @@ export function CarShop({gameState, action, allocatedMoney}: CarShopProps) {
     const [ev, setEv] = useState(false);
     const [extravagant, setExtravagant] = useState(false);
     const [cash, setCash] = useState(0);
+
+    const buyCar = () => {
+        gameState.character.satisfaction += (extravagant ? 3 : 1) * (used ? 1 : 2);
+        gameState.character.payMoney(Math.min(cash, cost - allocatedMoney - sellValue));
+        if (loan > 0.001)
+            gameState.character.addLoan(
+                new Loan("Car Loan", loan, gameState.character.savingsAccount, (used ? 1.1403 : 1.0967), true))
+        if (cost - allocatedMoney - sellValue < 0.001)
+            gameState.character.addMoney(allocatedMoney + sellValue - cost);
+        gameState.character.cars = gameState.character.cars.filter(c => c != gameState.character.getOldestCar());
+        gameState.character.cars = [...gameState.character.cars, new Car(cost, new Date(gameState.date), used ? 33 : 50, gpm, ev, monthlyInsurance)];
+        addCarGoal(gameState.date);
+        action(gameState);
+    }
 
     let cost = 50000 * gameState.inflation;
     let gpm = 30;
@@ -45,8 +59,20 @@ export function CarShop({gameState, action, allocatedMoney}: CarShopProps) {
         gpm *= 1.15;
         monthlyInsurance *= 1.8;
     }
-    const sellValue = gameState.character.car.getSellValue(gameState.date);
+    const sellValue = gameState.character.getOldestCar().getSellValue(gameState.date);
     const loan = cost - allocatedMoney - cash - sellValue;
+    const keyPressed = ((e: KeyboardEvent) => {
+        if (e.key == "n") {
+            buyCar();
+            e.stopPropagation();
+        }
+    });
+    useEffect(() => {
+        document.addEventListener("keyup", keyPressed);
+        return () => {
+            document.removeEventListener("keyup", keyPressed);
+        };
+    }, []);
 
     return (<div className="flex flex-col gap-4 items-center">
             <div className="flex gap-4">
@@ -105,18 +131,7 @@ export function CarShop({gameState, action, allocatedMoney}: CarShopProps) {
                 <h3>Loan: {gameState.formatter.format(loan)}</h3>
                 : <></>}
             <button className="w-50 text-xl h-10 p-1 font-bold mt-2"
-                    onClick={() => {
-                        gameState.character.satisfaction += (extravagant ? 3 : 1) * (used ? 1 : 2);
-                        gameState.character.payMoney(Math.min(cash, cost - allocatedMoney - sellValue));
-                        if (loan > 0.001)
-                            gameState.character.addLoan(
-                                new Loan("Car Loan", loan, gameState.character.savingsAccount, (used ? 1.1403 : 1.0967), true))
-                        if (cost - allocatedMoney - sellValue < 0.001)
-                            gameState.character.addMoney(allocatedMoney + sellValue - cost);
-                        gameState.character.car = new Car(cost, new Date(gameState.date), used ? 33 : 50, gpm, ev, monthlyInsurance);
-                        addCarGoal(gameState.character.car.buyDate);
-                        action(gameState);
-                    }}>Buy
+                    onClick={buyCar}>Buy
             </button>
         </div>
     );

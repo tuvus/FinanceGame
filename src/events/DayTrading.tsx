@@ -28,7 +28,7 @@ function DayTradingGame({gameState}: GameStateProps) {
     const [investmentAmount, setInvestmentAmount] = useState(Math.min(500, gameState.character.investmentAccount.balance));
     const [currentAmount, setCurrentAmount] = useState(Math.min(500, gameState.character.investmentAccount.balance));
     const [buyIndex, setBuyIndex] = useState<number | null>(null);
-    const taxes = currentAmount > investmentAmount ? CalculateTaxes(gameState.character.taxableIncome + currentAmount - investmentAmount) - CalculateTaxes(gameState.character.taxableIncome) : 0;
+    const taxes = currentAmount > investmentAmount ? CalculateTaxes(gameState.character.taxableIncome + currentAmount - investmentAmount, gameState.character.isMarried()) - CalculateTaxes(gameState.character.taxableIncome, gameState.character.isMarried()) : 0;
     const [companyName, setCompanyName] = useState("DefaultCompany")
     const [companies] = useState(() => {
         const companyNames = ["Environ", "Invtn Gmbh", "Standard Electric", "General Oil", "UnReal Estate", "Extra-Electronics Inc", "Insider Insurance", "Big Data Corp", "Hellman-Dough"]
@@ -41,7 +41,7 @@ function DayTradingGame({gameState}: GameStateProps) {
         return value;
     })
     const startEndValue = investmentAmount * history[history.length - 1].value / history[12].value;
-    const startEndTaxes = startEndValue > investmentAmount ? CalculateTaxes(gameState.character.taxableIncome + startEndValue - investmentAmount) - CalculateTaxes(gameState.character.taxableIncome) : 0;
+    const startEndTaxes = startEndValue > investmentAmount ? CalculateTaxes(gameState.character.taxableIncome + startEndValue - investmentAmount, gameState.character.isMarried()) - CalculateTaxes(gameState.character.taxableIncome, gameState.character.isMarried()) : 0;
     useEffect(() => {
         const interval = setInterval(() => {
             if (page == 3) {
@@ -70,7 +70,7 @@ function DayTradingGame({gameState}: GameStateProps) {
                     you want to give it a go and make some quick bucks?"</p>
                 <div className="flex gap-2 justify-center">
                     <button className="w-50 text-xl h-10 p-1 font-bold mt-2"
-                            onClick={() => gameState.lifeEventManager!.NextEvent()}>
+                            onClick={() => gameState.lifeEventManager!.nextEvent()}>
                         No thanks
                     </button>
                     <button className="w-50 text-xl h-10 p-1 font-bold mt-2" onClick={() => setPage(page + 1)}>Yeah!
@@ -108,7 +108,7 @@ function DayTradingGame({gameState}: GameStateProps) {
                     </div>
                     <div className="flex gap-2 justify-center">
                         <button className="w-50 text-xl h-10 p-1 font-bold mt-2"
-                                onClick={() => gameState.lifeEventManager!.NextEvent()}>Cancel
+                                onClick={() => gameState.lifeEventManager!.nextEvent()}>Cancel
                         </button>
                         <button className="w-50 text-xl h-10 p-1 font-bold mt-2" onClick={() => {
                             const fromInvestment = Math.min(gameState.character.investmentAccount.balance, investmentAmount);
@@ -215,7 +215,7 @@ function DayTradingGame({gameState}: GameStateProps) {
                     <button className="w-50 text-xl h-10 p-1 font-bold mt-2"
                             onClick={() => {
                                 gameState.character.investmentAccount.balance += currentAmount - taxes;
-                                gameState.lifeEventManager!.NextEvent();
+                                gameState.lifeEventManager!.nextEvent();
                             }}>
                         {currentAmount > investmentAmount ? "Nice!" : "Awww"}
                     </button>

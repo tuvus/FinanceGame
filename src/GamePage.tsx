@@ -25,7 +25,8 @@ import {BigTicketItemsPage} from "./components/BigTicketItems.tsx";
 import {Outline} from "./components/Outline.tsx";
 import {Car, Character, Goal} from "./Character.tsx";
 import {CarShop} from "./events/CarShop.tsx";
-import {taxBrackets} from "./Constants.tsx";
+import {marriedTaxBrackets, singleTaxBrackets} from "./Constants.tsx";
+import PartnerMatch from "./events/PartnerMatch.tsx";
 
 type GameProps = {
     fname: string; lname: string; tutorial: boolean;
@@ -67,17 +68,17 @@ function GamePage({fname, lname, tutorial}: GameProps) {
 
     const startYear = () => {
         setPage(pages.length - 1);
-        character.bigTicketItems.ScheduleBigTicketItems(gameState.s.lifeEventManager!, gameState.s, gameState.s.date);
+        character.bigTicketItems.scheduleBigTicketItems(gameState.s.lifeEventManager!, gameState.s, gameState.s.date);
         character.scheduleTrips(gameState.s);
         character.checkGoals(gameState.s);
-        gameState.s.lifeEventScheduler!.GenerateEvents();
-        if (!lifeEventManager.GetActiveEvent(gameState.s.date)) {
-            lifeEventManager.AddEvent(
+        gameState.s.lifeEventScheduler!.generateEvents();
+        if (!lifeEventManager.getActiveEvent(gameState.s.date)) {
+            lifeEventManager.addEvent(
                 new LifeEvent("Another year passes", gameState.s.date,
                     (<div><h3 className="m-4">There were no special events this year.</h3></div>))
             );
         } else {
-            lifeEventManager.AddEvent(new LifeEvent("New Year", new Date(gameState.s.date.getFullYear(), 11, 31),
+            lifeEventManager.addEvent(new LifeEvent("New Year", new Date(gameState.s.date.getFullYear(), 11, 31),
                 <h3>The year of {gameState.s.date.getFullYear()} flew by quickly, now its time to plan for the next
                     year.</h3>));
         }
@@ -87,28 +88,29 @@ function GamePage({fname, lname, tutorial}: GameProps) {
         gameState.s.date.setMonth(11);
         gameState.s.date.setDate(31);
         gameState.s.date.setHours(18);
-        const livingExpenses = (character.monthlyLivingExpenses.map(e => e.amount).reduce((sum, curr) => sum + curr, 0)
+        const combinedSalary = character.salary + character.partnerSalary;
+        const livingExpenses = (Array.from(character.monthlyLivingExpenses.values()).reduce((sum, curr) => sum + curr, 0)
             + character.getMonthlyCarCosts()) * gameState.s.inflation * 12;
-        const taxableIncome = Math.max(0, character.salary * (1 - character.pretirement / 100) - 15750);
+        const taxableIncome = Math.max(0, combinedSalary * (1 - character.pretirement / 100) - (character.isMarried() ? 29200 : 15750) * gameState.s.inflation);
         character.taxableIncome = taxableIncome;
-        const taxes = CalculateTaxes(taxableIncome);
-        const newSavings = character.salary * (100 - character.pinvestments - character.pretirement - character.pdiscretionary - character.ptrips) / 100 - taxes - livingExpenses;
+        const taxes = CalculateTaxes(taxableIncome, character.isMarried());
+        const newSavings = combinedSalary * (100 - character.pinvestments - character.pretirement - character.pdiscretionary - character.ptrips) / 100 - taxes - livingExpenses;
 
         // Pay for wants
-        const discretionarySpending = character.salary * character.pdiscretionary / 100 / gameState.s.inflation;
+        const discretionarySpending = combinedSalary * character.pdiscretionary / 100 / gameState.s.inflation / (character.isMarried() ? 2 : 1);
         character.satisfaction += ((1.2 * discretionarySpending - 3500) / (Math.abs(discretionarySpending / 20) + 210)) * (character.loans.length > 0 ? .8 : 1);
 
         // Allocate money for trips
-        character.tripBalance += character.salary * character.ptrips / 100;
+        character.tripBalance += combinedSalary * character.ptrips / 100;
 
         // Income and interest
         character.addMoney(newSavings);
-        character.investmentAccount.balance += character.salary * character.pinvestments / 100;
-        character.retirementAccount.balance += character.salary * character.pretirement / 100;
+        character.investmentAccount.balance += combinedSalary * character.pinvestments / 100;
+        character.retirementAccount.balance += combinedSalary * character.pretirement / 100;
 
         // Big ticket items
-        character.payMoney(character.bigTicketItems.GetYearlyAllocation(gameState.s.date));
-        character.bigTicketItems.DoYearlyAllocations(gameState.s.date);
+        character.payMoney(character.bigTicketItems.getYearlyAllocation(gameState.s.date));
+        character.bigTicketItems.doYearlyAllocations(gameState.s.date);
 
         //Stocks and bonds
         indexFund.a.balance *= random.float(.85, 1.2);
@@ -146,17 +148,18 @@ function GamePage({fname, lname, tutorial}: GameProps) {
         gameState.s.gameYear++;
     }
 
-    const taxableIncome = Math.max(0, character.salary * (1 - character.pretirement / 100) - 15750);
-    const taxes = CalculateTaxes(taxableIncome);
+    const combinedSalary = character.salary + character.partnerSalary;
+    const taxableIncome = Math.max(0, combinedSalary * (1 - character.pretirement / 100) - (character.isMarried() ? 29200 : 15750) * gameState.s.inflation);
+    const taxes = CalculateTaxes(taxableIncome, character.isMarried());
 
-    const monthlyLivingExpenses = (character.monthlyLivingExpenses.map(e => e.amount)
+    const monthlyLivingExpenses = (Array.from(character.monthlyLivingExpenses.values())
         .reduce((sum, curr) => sum + curr, 0) + character.getMonthlyCarCosts()) * gameState.s.inflation;
     const livingExpenses = monthlyLivingExpenses * 12;
-    const minLoanPayments = character.loans.reduce((sum, l) => sum + l.getPayment(), 0);
+    const minLoanPayments = character.loans.reduce((sum, l) => sum + l.getPayment(gameState.s.inflation), 0);
 
-    const newSavings = character.salary * (100 - character.pinvestments - character.pretirement - character.pdiscretionary - character.ptrips) / 100 - taxes - livingExpenses - minLoanPayments - character.bigTicketItems.GetYearlyAllocation(gameState.s.date);
+    const newSavings = combinedSalary * (100 - character.pinvestments - character.pretirement - character.pdiscretionary - character.ptrips) / 100 - taxes - livingExpenses - minLoanPayments - character.bigTicketItems.getYearlyAllocation(gameState.s.date);
     character.previousYearlyBalance = newSavings;
-    const ploans = character.loans.reduce((sum, l) => sum + l.getPayment(), 0) / character.salary * 100;
+    const ploans = minLoanPayments / combinedSalary * 100;
 
 
     const [lifeEventManager] = useState(new LifeEventManager(gameState.s, nextYear, render, [
@@ -166,7 +169,6 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                 <div className="eventButton panelButton"
                      onClick={() => {
                          const previousExpenses = character.monthlyLivingExpenses;
-                         character.monthlyLivingExpenses = [];
                          character.savingsAccount.balance = 30000 * random.float(.9, 1.1);
                          endYear();
                          character.salary = 42000 * random.float(.95, 1.1);
@@ -179,7 +181,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                          character.satisfaction = 35 * random.float(.9, 1.3);
                          character.pdiscretionary = 10;
                          character.ptrips = 2;
-                         lifeEventManager.NextEvent();
+                         lifeEventManager.nextEvent();
                      }}>
                     <h3 className="text-gray-700 font-bold">High School</h3>
                     <p className="text-gray-700">Graduates that go straight into the workforce start building their
@@ -188,15 +190,15 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                 <div className="eventButton panelButton"
                      onClick={() => {
                          const previousExpenses = character.monthlyLivingExpenses;
-                         character.monthlyLivingExpenses = [];
+                         character.monthlyLivingExpenses = new Map();
                          character.savingsAccount.balance = 30000 * random.float(.9, 1.1);
                          endYear();
-                         character.monthlyLivingExpenses = [
+                         [
                              {name: "Rent", amount: 500},
                              {name: "Utilities", amount: 50},
                              {name: "Groceries", amount: 150},
                              {name: "Health Insurance", amount: 200},
-                         ];
+                         ].forEach(m => character.monthlyLivingExpenses.set(m.name, m.amount))
 
                          character.addLoan(new Loan("Trade School Debt", 10000 * random.float(.9, 1.1), character.savingsAccount, 1.067, true));
                          character.savingsAccount.balance += 10000;
@@ -212,7 +214,8 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                          character.satisfaction = 37 * random.float(.9, 1.3);
                          character.pdiscretionary = 10;
                          character.ptrips = 2;
-                         lifeEventManager.NextEvent();
+                         character.education = "Trade School";
+                         lifeEventManager.nextEvent();
                      }}>
                     <h3 className="text-gray-700 font-bold">Trade School</h3>
                     <p className="text-gray-700">Trade school is around a one year program that emphasizes going into
@@ -221,20 +224,20 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                 </div>
                 <div className="eventButton panelButton"
                      onClick={() => {
-                         lifeEventManager.ReplaceEvent(new LifeEvent("Choosing a College", gameState.s.date, <>
+                         lifeEventManager.replaceEvent(new LifeEvent("Choosing a College", gameState.s.date, <>
                              <div className="flex justify-center gap-8">
                                  <div className="eventButton panelButton"
                                       onClick={() => {
                                           const previousExpenses = character.monthlyLivingExpenses;
-                                          character.monthlyLivingExpenses = [];
+                                          character.monthlyLivingExpenses = new Map();
                                           character.savingsAccount.balance = 30000 * random.float(.9, 1.1);
                                           endYear();
-                                          character.monthlyLivingExpenses = [
+                                          [
                                               {name: "Rent", amount: 500},
                                               {name: "Utilities", amount: 50},
                                               {name: "Groceries", amount: 150},
                                               {name: "Health Insurance", amount: 200},
-                                          ];
+                                          ].forEach(m => character.monthlyLivingExpenses.set(m.name, m.amount))
 
                                           character.addLoan(new Loan("College Debt", 4000 * random.float(.9, 1.1), character.savingsAccount, 1.067, true));
                                           character.savingsAccount.balance += 10000;
@@ -250,7 +253,8 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                           character.satisfaction = 38 * random.float(.9, 1.3);
                                           character.pdiscretionary = 10;
                                           character.ptrips = 2;
-                                          lifeEventManager.NextEvent();
+                                          character.education = "Associates";
+                                          lifeEventManager.nextEvent();
                                       }}>
                                      <h3 className="text-gray-700 font-bold">Community College</h3>
                                      <p className="text-gray-700">An associates degree is a two year program that
@@ -259,16 +263,16 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                  </div>
                                  <div className="eventButton panelButton"
                                       onClick={() => {
-                                          character.savingsAccount.balance = 30000 * random.float(.7, 1.3);
                                           const previousExpenses = character.monthlyLivingExpenses;
-                                          character.monthlyLivingExpenses = [];
+                                          character.monthlyLivingExpenses = new Map();
+                                          character.savingsAccount.balance = 30000 * random.float(.9, 1.1);
                                           endYear();
-                                          character.monthlyLivingExpenses = [
+                                          [
                                               {name: "Rent", amount: 500},
                                               {name: "Utilities", amount: 50},
                                               {name: "Groceries", amount: 150},
                                               {name: "Health Insurance", amount: 200},
-                                          ];
+                                          ].forEach(m => character.monthlyLivingExpenses.set(m.name, m.amount))
 
                                           character.addLoan(new Loan("College Debt", 20000 * random.float(.9, 1.1), character.savingsAccount, 1.067, true));
                                           character.savingsAccount.balance += 30000;
@@ -281,13 +285,16 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                           character.loans[0].balance += 25000;
                                           endYear();
                                           character.loans[0].balance += 20000 * random.float(.9, 1.1);
+                                          character.savingsAccount.balance += 20000;
+                                          character.loans[0].balance += 20000;
                                           endYear();
                                           character.monthlyLivingExpenses = previousExpenses;
                                           character.salary = 80000 * random.float(1, 1.3);
                                           character.satisfaction = 42 * random.float(.9, 1.3);
                                           character.pdiscretionary = 10;
                                           character.ptrips = 2;
-                                          lifeEventManager.NextEvent();
+                                          character.education = "Bachelors";
+                                          lifeEventManager.nextEvent();
                                       }}>
                                      <h3 className="text-gray-700 font-bold">Public University</h3>
                                      <p className="text-gray-700">A bachelors degree is a four year program that focuses
@@ -296,16 +303,16 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                  </div>
                                  <div className="eventButton panelButton"
                                       onClick={() => {
-                                          character.savingsAccount.balance = 30000 * random.float(.7, 1.3);
                                           const previousExpenses = character.monthlyLivingExpenses;
-                                          character.monthlyLivingExpenses = [];
+                                          character.monthlyLivingExpenses = new Map();
+                                          character.savingsAccount.balance = 30000 * random.float(.9, 1.1);
                                           endYear();
-                                          character.monthlyLivingExpenses = [
+                                          [
                                               {name: "Rent", amount: 500},
                                               {name: "Utilities", amount: 50},
                                               {name: "Groceries", amount: 150},
                                               {name: "Health Insurance", amount: 200},
-                                          ];
+                                          ].forEach(m => character.monthlyLivingExpenses.set(m.name, m.amount))
 
                                           character.addLoan(new Loan("College Debt", 50000 * random.float(.9, 1.1), character.savingsAccount, 1.067, true));
                                           character.savingsAccount.balance += 20000;
@@ -316,19 +323,20 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                           character.loans[0].balance += 20000;
                                           endYear();
                                           character.loans[0].balance += 50000 * random.float(.9, 1.1);
-                                          character.savingsAccount.balance += 20000;
-                                          character.loans[0].balance += 20000;
+                                          character.savingsAccount.balance += 30000;
+                                          character.loans[0].balance += 30000;
                                           endYear();
                                           character.loans[0].balance += 50000 * random.float(.9, 1.1);
-                                          character.savingsAccount.balance += 20000;
-                                          character.loans[0].balance += 20000;
+                                          character.savingsAccount.balance += 30000;
+                                          character.loans[0].balance += 30000;
                                           endYear();
                                           character.monthlyLivingExpenses = previousExpenses;
                                           character.salary = 83000 * random.float(1, 1.3);
                                           character.satisfaction = 44 * random.float(.9, 1.3);
                                           character.pdiscretionary = 10;
                                           character.ptrips = 2;
-                                          lifeEventManager.NextEvent();
+                                          character.education = "Bachelors";
+                                          lifeEventManager.nextEvent();
                                       }}>
                                      <h3 className="text-gray-700 font-bold">Private University</h3>
                                      <p className="text-gray-700">A bachelors degree is a four year program that focuses
@@ -366,7 +374,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                             (gameState) => {
                                 gameState.character.satisfaction += 1;
                                 gameState.character.milesDriven = 1000;
-                                gameState.lifeEventManager!.AddEvent(
+                                gameState.lifeEventManager!.addEvent(
                                     new LifeEvent("First plan!", new Date(gameState.date.getFullYear(), 0, 21),
                                         <div className="flex flex-col w-full items-center">
                                             <p className="w-3/4">Congratulations on finishing your first year plan, it
@@ -377,17 +385,17 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                         </div>
                                     ));
                             }));
-                        gameState.s.lifeEventManager!.NextEvent();
+                        gameState.s.lifeEventManager!.nextEvent();
                     }}/>
             </div>
         </div>, true),
-        new LifeEvent("Buying a Car", new Date(gameState.s.date.getFullYear() + 6, 1),
+        new LifeEvent("Buying a Car", gameState.s.getRandomDateFromGameYear(1),
             (<div className="flex flex-col items-center gap-4">
                 <p className="w-200">Your car is nearing the end of it's lifespan, and it is about time to buy a new
                     one. Luckily, your parents have offered to subsidise your purchase in celebration of your new job.
                     It is time to decide to get a new or used car, and how decked-out it is.</p>
                 <ButtonNext style="w-60 text-xl h-10 font-bold" text="Choose a car" action={() => {
-                    lifeEventManager.ReplaceEvent(new LifeEvent("Choosing a car", gameState.s.date,
+                    lifeEventManager.replaceEvent(new LifeEvent("Choosing a car", gameState.s.date,
                         <div className="flex flex-col items-center w-full">
                             <div className="flex flex-col items-center gap-4 w-3/4">
                                 <p>Your parents gave you {formatter.format(30000 * gameState.s.inflation)} to
@@ -396,7 +404,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                     money that you don't
                                     spend on the car.</p>
                                 <CarShop gameState={gameState.s}
-                                         action={(gameState: GameState) => gameState.lifeEventManager!.NextEvent()}
+                                         action={(gameState: GameState) => gameState.lifeEventManager!.nextEvent()}
                                          allocatedMoney={30000 * gameState.s.inflation}
                                 />
                             </div>
@@ -404,11 +412,90 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                     ));
                 }}/>
             </div>), true),
+        new LifeEvent("Finding a partner", gameState.s.getRandomDateFromGameYear(1),
+            <div className="flex flex-col w-full items-center">
+                <div className="flex flex-col justify-center gap-2 w-3/4">
+                    <p>Now that you have settled in its time to focus on your life goals: finding a partner. You've had
+                        some experience search in the past but now that you are settled, its time to get real. Who are
+                        you searching for?</p>
+                    <div className="flex justify-center gap-8 mt-6">
+                        <div
+                            className="eventButton panelButton"
+                            onClick={() => {
+                                gameState.s.character.partnerAspiration = "Boyfriend";
+                                gameState.s.character.satisfaction += 1;
+                                gameState.s.character.partnerPronoun = "he";
+                                gameState.s.character.partnerPronoun2 = "him";
+                                lifeEventManager.replaceEvent(new LifeEvent("Searching for a boyfriend", gameState.s.date,
+                                    <div className="flex flex-col w-full items-center">
+                                        <div className="flex flex-col items-center gap-2 w-3/4">
+                                            <p>You double your efforts searching for the right match, partaking in more
+                                                social gatherings and go to local events. You might not have found him
+                                                yet, but at least you can enjoying your time searching.</p>
+                                        </div>
+                                    </div>, false))
+                                lifeEventManager.addEvent(new LifeEvent("Its a match!", gameState.s.getRandomDateFromGameYear(2),
+                                    <PartnerMatch gameState={gameState.s}/>, true));
+                            }}>
+                            <p className="text-gray-700">Boyfriend</p>
+                        </div>
+                        <div
+                            className="eventButton panelButton"
+                            onClick={() => {
+                                gameState.s.character.partnerAspiration = "Girlfriend";
+                                gameState.s.character.satisfaction += 1;
+                                gameState.s.character.partnerPronoun = "she";
+                                gameState.s.character.partnerPronoun2 = "her";
+                                lifeEventManager.replaceEvent(new LifeEvent("Searching for a girlfriend", gameState.s.date,
+                                    <div className="flex flex-col w-full items-center">
+                                        <div className="flex flex-col items-center gap-2 w-3/4">
+                                            <p>You double your efforts searching for the right match, partaking in more
+                                                social gatherings and go to local events. You might not have found her
+                                                yet, but at least you can enjoying your time searching.</p>
+                                        </div>
+                                    </div>, false))
+                                lifeEventManager.addEvent(new LifeEvent("Its a match!", gameState.s.getRandomDateFromGameYear(2),
+                                    <PartnerMatch gameState={gameState.s}/>, true));
+                            }}>
+                            <p className="text-gray-700">Girlfriend</p>
+                        </div>
+                        <div
+                            className="eventButton panelButton"
+                            onClick={() => {
+                                gameState.s.character.partnerAspiration = "Diverse";
+                                gameState.s.character.satisfaction += 1;
+                                gameState.s.character.partnerPronoun = "they";
+                                gameState.s.character.partnerPronoun2 = "them";
+                                lifeEventManager.replaceEvent(new LifeEvent("Searching for a partner", gameState.s.date,
+                                    <div className="flex flex-col w-full items-center">
+                                        <div className="flex flex-col items-center gap-2 w-3/4">
+                                            <p>You double your efforts searching for the right match, partaking in more
+                                                social gatherings and go to local events. You might not have found them
+                                                yet, but at least you can enjoying your time searching.</p>
+                                        </div>
+                                    </div>, false))
+                                lifeEventManager.addEvent(new LifeEvent("Its a match!", gameState.s.getRandomDateFromGameYear(2),
+                                    <PartnerMatch gameState={gameState.s}/>, true));
+                            }}>
+                            <p className="text-gray-700">Diverse</p>
+                        </div>
+                        <div
+                            className="eventButton panelButton"
+                            onClick={() => {
+                                gameState.s.character.partnerAspiration = "Pet";
+                                gameState.s.character.satisfaction += 3;
+                            }}>
+                            <p className="text-gray-700">Pet</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>, true),
     ]));
-    const activeEvent = lifeEventManager.GetActiveEvent(gameState.s.date);
+    const activeEvent = lifeEventManager.getActiveEvent(gameState.s.date);
 
     const tutorialManager = useRef(new TutorialManager(gameState.s, [
-        new TutorialChain("Year In Review Tutorial", () => gameState.s.GetCurrentPage().name == "Year in review", [
+        new TutorialChain("Year In Review Tutorial", () => gameState.s.getCurrentPage().name == "Year in review", [
             new TutorialEvent("Year in review page", null, (<p className="text-gray-700">
                 On this page, you will be looking at your money's performance from last year and the years before
                 inorder to determine how to allocate this year's income. Each account that you own will show up on this
@@ -421,7 +508,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                                        target="_blank">portfolio</a>, or where your money is.
             </p>), "DonutChart", null, "Close"),
         ]),
-        new TutorialChain("Budget Tutorial", () => gameState.s.GetCurrentPage().name == "Budget", [
+        new TutorialChain("Budget Tutorial", () => gameState.s.getCurrentPage().name == "Budget", [
             new TutorialEvent("Budget Page", null, (<p className="text-gray-700">
                 Congratulations on getting your first job! This page shows your paycheck fro the year,
                 and gives you the ability to <a
@@ -470,7 +557,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                 current balance plus your savings from your paycheck.
             </p>), "PredictedBalance", null, "Close"),
         ]),
-        new TutorialChain("College Debt Tutorial", () => gameState.s.GetCurrentPage().name == "Loans" && character.loans.some(l => l.name == "College Debt"), [
+        new TutorialChain("College Debt Tutorial", () => gameState.s.getCurrentPage().name == "Loans" && character.loans.some(l => l.name == "College Debt"), [
             new TutorialEvent("College Debt", null, (<p className="text-gray-700">
                 You have <a href="https://www.investopedia.com/terms/d/debt.asp" target="_blank">debt</a> from going on
                 to college. This is the page where you will be able to manage it.
@@ -483,7 +570,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                 are more flexible than private loans, and tend to have lower interest rates.
             </p>), "LoanCollege Debt", null, "Next"),
         ]),
-        new TutorialChain("Trade School Debt Tutorial", () => gameState.s.GetCurrentPage().name == "Loans" && character.loans.some(l => l.name == "Trade School Debt"), [
+        new TutorialChain("Trade School Debt Tutorial", () => gameState.s.getCurrentPage().name == "Loans" && character.loans.some(l => l.name == "Trade School Debt"), [
             new TutorialEvent("Trade School Debt", null, (<p className="text-gray-700">
                 You have <a href="https://www.investopedia.com/terms/d/debt.asp" target="_blank">debt</a> from going to
                 trade school.
@@ -498,7 +585,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                 flexible than private loans, and tend to have lower interest rates.
             </p>), "LoanTrade School Debt", null, "Next"),
         ]),
-        new TutorialChain("Credit Card Debt Tutorial", () => gameState.s.GetCurrentPage().name == "Loans" && character.loans.some(l => l.name == "Credit Card Debt"), [
+        new TutorialChain("Credit Card Debt Tutorial", () => gameState.s.getCurrentPage().name == "Loans" && character.loans.some(l => l.name == "Credit Card Debt"), [
             new TutorialEvent("Credit Card Debt", null, (<p className="text-gray-700">
                 You have credit card <a href="https://www.investopedia.com/terms/d/debt.asp" target="_blank">debt</a>.
                 On this page you will be able to see and manage your debt.
@@ -516,7 +603,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                 which will show on the budget table.
             </p>), null, null, "close"),
         ]),
-        new TutorialChain("Summary Tutorial", () => gameState.s.GetCurrentPage().name == "Summary", [
+        new TutorialChain("Summary Tutorial", () => gameState.s.getCurrentPage().name == "Summary", [
             new TutorialEvent("Summary Page", null, (<p className="text-gray-700">
                 Here you can see your financial status at a glance. Take time to review and finalize your plans for the
                 year.
@@ -532,7 +619,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                 your total liabilities.
             </p>), "summary", null, "Close"),
         ]),
-        new TutorialChain("Investment Tutorial Year In Review", () => gameState.s.GetCurrentPage().name == "Year in review" && gameState.s.gameYear >= 3, [
+        new TutorialChain("Investment Tutorial Year In Review", () => gameState.s.getCurrentPage().name == "Year in review" && gameState.s.gameYear >= 3, [
             new TutorialEvent("Investment Accounts", null, (<p className="text-gray-700">
                 It is time to learn about investing.
             </p>), null, null, "Next"),
@@ -541,7 +628,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                 invest your money!
             </p>), "YIRAccountInvestment Account", null, "Close"),
         ]),
-        new TutorialChain("Investment Tutorial Budget", () => gameState.s.GetCurrentPage().name == "Budget" && gameState.s.gameYear >= 3, [
+        new TutorialChain("Investment Tutorial Budget", () => gameState.s.getCurrentPage().name == "Budget" && gameState.s.gameYear >= 3, [
             new TutorialEvent("Budgeting for Investments", null, (<p className="text-gray-700">
                 The investment account now shows up in the budget page. You can change the amount to be allocated
                 towards the investment account by using the arrows.
@@ -552,7 +639,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                 transfer money button to transfer money between different accounts at anytime in the year.
             </p>), "BottomBar", null, "Close"),
         ]),
-        new TutorialChain("Investment Tutorial Portfolio", () => gameState.s.GetCurrentPage().name == "Investments" && gameState.s.gameYear >= 3, [
+        new TutorialChain("Investment Tutorial Portfolio", () => gameState.s.getCurrentPage().name == "Investments" && gameState.s.gameYear >= 3, [
             new TutorialEvent("Investing", null, (<p className="text-gray-700">
                 Here is the page where you will be able to invest your money into stocks and bonds. You can click on the
                 different types of investments to expand them. This will display a graph of the investment's performance
@@ -576,7 +663,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                 the top.
             </p>), "Bond", null, "Close"),
         ]),
-        new TutorialChain("Retirement Tutorial Portfolio", () => gameState.s.GetCurrentPage().name == "Retirement" && gameState.s.gameYear >= 8, [
+        new TutorialChain("Retirement Tutorial Portfolio", () => gameState.s.getCurrentPage().name == "Retirement" && gameState.s.gameYear >= 8, [
             new TutorialEvent("Saving for Retirement", null,
                 (<p className="text-gray-700">Now that you are getting to the middle of your life its time to start
                     saving for retirement. You now have access to your retirement account. This account works similar to
@@ -586,7 +673,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
     ], render));
 
     useEffect(() => {
-        character.car = new Car(30000, new Date(gameState.s.date.getFullYear() - 3, random.int(0, 11), random.int(1, 28)), 20, 25, false, 180)
+        character.cars = [...character.cars, new Car(30000, new Date(gameState.s.date.getFullYear() - 3, random.int(0, 11), random.int(1, 28)), 20, 25, false, 180)];
         gameState.s.lifeEventScheduler = new LifeEventScheduler(lifeEventManager, gameState.s, [
             new LifeEventSchedule(new LifeEvent("Day Trading", new Date(),
                 <DayTrading gameState={gameState.s}/>, true), 99, 5, .1, () => gameState.s.investmentsUnlocked),
@@ -618,8 +705,8 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                 } else if (gameState.s.page < pages.length - 1) {
                     gameState.s.nextPage();
                     e.stopImmediatePropagation();
-                } else if (lifeEventManager.GetActiveEvent(gameState.s.date) != null && !lifeEventManager.GetActiveEvent(gameState.s.date)!.customContinue) {
-                    lifeEventManager.NextEvent();
+                } else if (lifeEventManager.getActiveEvent(gameState.s.date) != null && !lifeEventManager.getActiveEvent(gameState.s.date)!.customContinue) {
+                    lifeEventManager.nextEvent();
                     e.stopImmediatePropagation();
                 }
             } else if (e.key == "b") {
@@ -671,35 +758,36 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                     <div id="DonutChart"
                          className="flex flex-col items-center bg-amber-100 rounded-xl p-4 gap-1 w-130 h-70">
                         <h3 className="text-gray-700 font-bold">Total Assets</h3>
-                        <DonutChart className="h-full w-full m-auto"
-                                    data={[
-                                        {
-                                            name: "Cash",
-                                            amount: character.accounts.reduce((sum, curr) => sum + curr.balance, 0)
-                                        },
-                                        {
-                                            name: "Big-Ticket Item Allocations",
-                                            amount: character.bigTicketItems.bigTicketItems.reduce((sum, curr) => sum + curr.balance, 0)
-                                        },
-                                        {
-                                            name: "Stocks",
-                                            amount: character.accounts.filter(a => a instanceof StockAccount).map(a => a as StockAccount)
-                                                .reduce((sum, curr) => sum + curr.getStockValue(), 0)
-                                        }, {
-                                            name: "Bonds",
-                                            amount: character.accounts.filter(a => a instanceof StockAccount).map(a => a as StockAccount)
-                                                .reduce((sum, curr) => sum + curr.getBondValue(), 0)
-                                        }, {
-                                            name: "Loans",
-                                            amount: character.totalLoans.getTotalValue()
-                                        }, {
-                                            name: "Assets",
-                                            amount: character.car.getBaseValue(gameState.s.date)
-                                        }
-                                    ]}
-                                    label={formatter.format(character.getNetWorth(gameState.s.date))}
-                                    category="name" value="amount" showLabel={true}
-                                    valueFormatter={(number: number) => formatter.format(number)}/>
+                        <DonutChart
+                            className="h-full w-full m-auto"
+                            data={[
+                                {
+                                    name: "Cash",
+                                    amount: character.accounts.reduce((sum, curr) => sum + curr.balance, 0)
+                                },
+                                {
+                                    name: "Big-Ticket Item Allocations",
+                                    amount: character.bigTicketItems.bigTicketItems.reduce((sum, curr) => sum + curr.balance, 0)
+                                },
+                                {
+                                    name: "Stocks",
+                                    amount: character.accounts.filter(a => a instanceof StockAccount).map(a => a as StockAccount)
+                                        .reduce((sum, curr) => sum + curr.getStockValue(), 0)
+                                }, {
+                                    name: "Bonds",
+                                    amount: character.accounts.filter(a => a instanceof StockAccount).map(a => a as StockAccount)
+                                        .reduce((sum, curr) => sum + curr.getBondValue(), 0)
+                                }, {
+                                    name: "Loans",
+                                    amount: character.totalLoans.getTotalValue()
+                                }, {
+                                    name: "Assets",
+                                    amount: character.cars.map(c => c.getBaseValue(gameState.s.date)).reduce((sum, curr) => sum + curr, 0)
+                                }
+                            ]}
+                            label={formatter.format(character.getNetWorth(gameState.s.date))}
+                            category="name" value="amount" showLabel={true}
+                            valueFormatter={(number: number) => formatter.format(number)}/>
                     </div>
                 </div>
             </div>,
@@ -712,7 +800,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                     <div className="grid grid-cols-3 w-full">
                         <p className="text-green-700 font-bold" id="Paycheck">Paycheck</p>
                         <p></p>
-                        <p className="text-green-700 font-bold">{formatter.format(character.salary)}</p>
+                        <p className="text-green-700 font-bold">{formatter.format(combinedSalary)}</p>
                         <hr></hr>
                         <hr></hr>
                         <hr></hr>
@@ -722,7 +810,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                             <p className="text-gray-700" key={2}>
                                 <input name="character.pretirement" className="w-12 text-end"
                                        min="0"
-                                       max={Math.min(24500 * gameState.s.inflation / character.salary * 100, 100)}
+                                       max={Math.min(24500 * gameState.s.inflation / combinedSalary * 100, 100)}
                                        defaultValue={character.pretirement}
                                        onChange={e => {
                                            if (isNaN(e.target.valueAsNumber)) return;
@@ -732,47 +820,54 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                        type="number">
                                 </input>%</p>,
                             <p className="text-gray-700"
-                               key={3}>{formatter.format(character.salary * character.pretirement / 100)}</p>,
+                               key={3}>{formatter.format(combinedSalary * character.pretirement / 100)}</p>,
                         ] : []}
 
 
                         <p className="text-red-800" id="IncomeTaxes">Taxes <InfoButton
                             action={() => document.getElementById("tax-modal")!.style.display = "block"}/>
                         </p>
-                        <p className="text-red-800">{Math.round(taxes / character.salary * 100)}%</p>
+                        <p className="text-red-800">{Math.round(taxes / combinedSalary * 100)}%</p>
                         <p className="text-red-800">{formatter.format(taxes)}</p>
 
-                        {character.monthlyLivingExpenses.map(({name, amount}, i) => {
-                            return ([
-                                <p className="text-red-800" key={i + "1"} id="ItemizedLivingExpenses">{name}</p>,
-                                <p className="text-red-800" key={i + "2"}>
-                                    {Math.round(amount * 12 * gameState.s.inflation / character.salary * 100)}%</p>,
-                                <p className="text-red-800" key={i + "3"}>
-                                    {formatter.format(amount * gameState.s.inflation * 12)}</p>
-                            ]);
-                        })}
+                        {Array.from(character.monthlyLivingExpenses.entries())
+                            .map(([name, amount], i) => {
+                                return ([
+                                    <p className="text-red-800" key={i + "1"} id="ItemizedLivingExpenses">{name}</p>,
+                                    <p className="text-red-800" key={i + "2"}>
+                                        {Math.round(amount * 12 * gameState.s.inflation / combinedSalary * 100)}%</p>,
+                                    <p className="text-red-800" key={i + "3"}>
+                                        {formatter.format(amount * gameState.s.inflation * 12)}</p>
+                                ]);
+                            })}
 
                         <p className="text-red-800">Car maintenance cost</p>
-                        <p className="text-red-800">{Math.round(gameState.s.character.car.monthlyMaintenanceCost * 12 * gameState.s.inflation / character.salary * 100)}%</p>
-                        <p className="text-red-800">{formatter.format(gameState.s.character.car.monthlyMaintenanceCost * 12 * gameState.s.inflation)}</p>
+                        <p className="text-red-800">{Math.round(gameState.s.character.cars.map(c => c.monthlyMaintenanceCost).reduce((sum, curr) => sum + curr, 0)
+                            * 12 * gameState.s.inflation / combinedSalary * 100)}%</p>
+                        <p className="text-red-800">{formatter.format(gameState.s.character.cars.map(c => c.monthlyMaintenanceCost).reduce((sum, curr) => sum + curr, 0)
+                            * 12 * gameState.s.inflation)}</p>
 
-                        {(gameState.s.character.car.electric ?
-                                [<p className="text-red-800" key={1}>Car electricity cost</p>,
-                                    <p className="text-red-800" key={2}>
-                                        {Math.round(gameState.s.character.milesDriven * 0.1833 * gameState.s.inflation * 12 / 3 / character.salary * 100)}%</p>,
-                                    <p className="text-red-800" key={3}>
-                                        {formatter.format(gameState.s.character.milesDriven * 0.1833 * gameState.s.inflation * 12 / 3 * gameState.s.inflation)}</p>
-                                ] : [
-                                    <p className="text-red-800" key={1}>Car gas cost</p>,
-                                    <p className="text-red-800" key={2}>
-                                        {Math.round(gameState.s.character.milesDriven * 3.2 * 12 * gameState.s.inflation / gameState.s.character.car.gpm / character.salary * 100)}%</p>,
-                                    <p className="text-red-800" key={3}>
-                                        {formatter.format(gameState.s.character.milesDriven * 3.2 * 12 * gameState.s.inflation / gameState.s.character.car.gpm)}</p>]
-                        )}
+                        {(gameState.s.character.cars.some(c => c.electric) ?
+                            [<p className="text-red-800" key={1}>Car electricity cost</p>,
+                                <p className="text-red-800" key={2}>
+                                    {Math.round(gameState.s.character.milesDriven * gameState.s.character.cars.filter(c => c.electric).length / gameState.s.character.cars.length * 0.1833 * gameState.s.inflation * 12 / 3 / combinedSalary * 100)}%</p>,
+                                <p className="text-red-800" key={3}>
+                                    {formatter.format(gameState.s.character.milesDriven * gameState.s.character.cars.filter(c => c.electric).length / gameState.s.character.cars.length * 0.1833 * gameState.s.inflation * 12 / 3 * gameState.s.inflation)}</p>
+                            ] : [])}
+                        {(gameState.s.character.cars.some(c => !c.electric) ?
+                            [
+                                <p className="text-red-800" key={1}>Car gas cost</p>,
+                                <p className="text-red-800" key={2}>
+                                    {Math.round(gameState.s.character.milesDriven * gameState.s.character.cars.filter(c => !c.electric).length / gameState.s.character.cars.length * 3.2 * 12 * gameState.s.inflation
+                                        / gameState.s.character.cars.filter(c => !c.electric).map(c => c.gpm).reduce((sum, curr) => sum + curr, 0) / gameState.s.character.cars.filter(c => !c.electric).length / combinedSalary * 100)}%</p>,
+                                <p className="text-red-800" key={3}>
+                                    {formatter.format(gameState.s.character.milesDriven * gameState.s.character.cars.filter(c => !c.electric).length / gameState.s.character.cars.length * 3.2 * 12 * gameState.s.inflation
+                                        / gameState.s.character.cars.filter(c => !c.electric).map(c => c.gpm).reduce((sum, curr) => sum + curr, 0) / gameState.s.character.cars.filter(c => !c.electric).length)}</p>]
+                            : [])}
 
                         <p className="text-red-800">Car insurance cost</p>
-                        <p className="text-red-800">{Math.round(gameState.s.character.car.monthlyInsuranceCost * 12 * gameState.s.inflation / character.salary * 100)}%</p>
-                        <p className="text-red-800">{formatter.format(gameState.s.character.car.monthlyInsuranceCost * 12 * gameState.s.inflation)}</p>
+                        <p className="text-red-800">{Math.round(gameState.s.character.cars.map(c => c.monthlyInsuranceCost).reduce((sum, curr) => sum + curr, 0) * 12 * gameState.s.inflation / combinedSalary * 100)}%</p>
+                        <p className="text-red-800">{formatter.format(gameState.s.character.cars.map(c => c.monthlyInsuranceCost).reduce((sum, curr) => sum + curr, 0) * 12 * gameState.s.inflation)}</p>
 
                         {character.loans.length > 0 ? [
                             <p className="text-red-800" key="111" id="Loans">Loans</p>,
@@ -783,9 +878,9 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                         {gameState.s.bigTicketItemsUnlocked ? [
                             <p className="text-gray-700" key={1}>Big-Ticket Items</p>,
                             <p className="text-gray-700" key={2}>
-                                {Math.round(character.bigTicketItems.GetYearlyAllocation(gameState.s.date) / character.salary * 100)}%</p>,
+                                {Math.round(character.bigTicketItems.getYearlyAllocation(gameState.s.date) / combinedSalary * 100)}%</p>,
                             <p className="text-gray-700" key={3}>
-                                {formatter.format(character.bigTicketItems.GetYearlyAllocation(gameState.s.date))}</p>,
+                                {formatter.format(character.bigTicketItems.getYearlyAllocation(gameState.s.date))}</p>,
                         ] : []}
 
                         {gameState.s.investmentsUnlocked ? [
@@ -802,7 +897,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                        type="number">
                                 </input>%</p>,
                             <p className="text-gray-700"
-                               key={3}>{formatter.format(character.salary * character.pinvestments / 100)}</p>,
+                               key={3}>{formatter.format(combinedSalary * character.pinvestments / 100)}</p>,
                         ] : []}
 
                         <p className="text-gray-700" id="Discretionary">Discretionary</p>
@@ -817,7 +912,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                    }}
                                    type="number">
                             </input>%</p>
-                        <p className="text-gray-700">{formatter.format(character.salary * character.pdiscretionary / 100)}</p>
+                        <p className="text-gray-700">{formatter.format(combinedSalary * character.pdiscretionary / 100)}</p>
 
                         <p className="text-gray-700" id="Vacation">Vacation</p>
                         <p className="text-gray-700">
@@ -831,14 +926,14 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                    }}
                                    type="number">
                             </input>%</p>
-                        <p className="text-gray-700">{formatter.format(character.salary * character.ptrips / 100)}</p>
+                        <p className="text-gray-700">{formatter.format(combinedSalary * character.ptrips / 100)}</p>
 
                         <hr/>
                         <hr/>
                         <hr/>
 
                         <p className="text-yellow-600 font-bold" id="Savings">Savings</p>
-                        <p className="text-yellow-600 font-bold">{Math.round(newSavings / character.salary * 100)}%</p>
+                        <p className="text-yellow-600 font-bold">{Math.round(newSavings / combinedSalary * 100)}%</p>
                         <p className="text-yellow-600 font-bold">{formatter.format(newSavings)}</p>
                     </div>
 
@@ -865,8 +960,8 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                     <div key={loan.name} id={"Loan" + loan.name}
                          className="flex flex-col items-center w-124 bg-amber-100 rounded-xl p-4 m-4 gap-1">
                         <h3 className="text-gray-700 font-bold">{loan.name}</h3>
-                        <p className="text-gray-700">Interest Rate: {Math.round(loan.interestRate * 100 - 100)}%
-                            ({formatter.format(loan.balance * (loan.interestRate - 1))})</p>
+                        <p className="text-gray-700">Interest Rate: {Math.round(loan.interestRate * 1000 - 1000) / 10}%
+                            ({formatter.format(loan.balance * (loan.interestRate - 1) * (loan.fixed ? 1 : gameState.s.inflation))})</p>
                         <LineChart className="h-60 w-120" data={loan.history}
                                    index="dateString"
                                    showLegend={false}
@@ -929,7 +1024,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                 <div className="flex flex-col gap-2 w-1/2 rounded-2xl bg-amber-100 items-center pt-2 pb-2" id="summary">
                     <div className="grid grid-cols-2 gap-2 w-full">
                         <p className="text-gray-700" id="takeHomeIncomeText">Take home income</p>
-                        <p className="text-gray-700">{formatter.format(character.salary - taxes)}</p>
+                        <p className="text-gray-700">{formatter.format(combinedSalary - taxes)}</p>
                         <p className="text-gray-800" id="expensesText">Expenses</p>
                         <p className="text-gray-800">{formatter.format(livingExpenses + minLoanPayments)}</p>
                         <p className="text-red-800">Loans</p>
@@ -975,7 +1070,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                     amount: character.totalLoans.getTotalValue()
                                 }, {
                                     name: "Assets",
-                                    amount: character.car.getBaseValue(gameState.s.date)
+                                    amount: character.cars.map(c => c.getBaseValue(gameState.s.date)).reduce((sum, curr) => sum + curr, 0 )
                                 }
                             ]}
                             label={formatter.format(character.getNetWorth(gameState.s.date))}
@@ -1011,7 +1106,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                         {activeEvent.element}
                         {!activeEvent.customContinue ?
                             <button className="w-50 text-xl h-10 p-1 font-bold mt-2"
-                                    onClick={() => lifeEventManager.NextEvent()}>
+                                    onClick={() => lifeEventManager.nextEvent()}>
                                 <h3>Continue</h3>
                             </button> : <></>}
                     </>
@@ -1247,11 +1342,13 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                     onClick={e => e.stopPropagation()}>
                     <h2 className="text-gray-700!">Taxable Income <InfoButtonTooltip
                         action={() => window.open("https://www.irs.gov/credits-and-deductions", "_blank")}
-                        text="Your taxable income is your salary minus any money put into a traditional retirement account, any credits and deductions"/></h2>
+                        text="Your taxable income is your salary minus any money put into a traditional retirement account, any credits and deductions"/>
+                    </h2>
                     <p className="text-gray-700">{formatter.format(taxableIncome)}</p>
-                    <h2 className="text-gray-700!">Tax Brackets <InfoButtonTooltip
-                        action={() => window.open("https://www.irs.gov/filing/federal-income-tax-rates-and-brackets", "_blank")}
-                    text="See actual tax brackets at the IRS webpage"/>
+                    <h2 className="text-gray-700!">{(character.partnerFirstName ? "Married" : "Single")} Tax
+                        Brackets <InfoButtonTooltip
+                            action={() => window.open("https://www.irs.gov/filing/federal-income-tax-rates-and-brackets", "_blank")}
+                            text="See actual tax brackets at the IRS webpage"/>
                     </h2>
                     <div className="grid grid-cols-4 w-full">
                         <p className="text-gray-700">Percent</p>
@@ -1262,14 +1359,14 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                         <hr/>
                         <hr/>
                         <hr/>
-                        {taxBrackets.map((b, i) => [
+                        {(character.partnerFirstName ? marriedTaxBrackets : singleTaxBrackets).map((b, i) => [
                                 <p className="text-gray-700" key={i + "1"}>{b.percent}%</p>,
                                 <p className="text-gray-700"
-                                   key={i + "2"}>{formatter.format(i == 0 ? 0 : taxBrackets[i - 1].to * gameState.s.inflation + 1)}</p>,
+                                   key={i + "2"}>{formatter.format(i == 0 ? 0 : (character.partnerFirstName ? marriedTaxBrackets : singleTaxBrackets)[i - 1].to * gameState.s.inflation + 1)}</p>,
                                 <p className="text-gray-700"
                                    key={i + "3"}>{b.to > 700350 ? "" : formatter.format(b.to * gameState.s.inflation)}</p>,
                                 <p className="text-gray-700"
-                                   key={i + "4"}>{formatter.format(Math.max(0, (Math.min(taxableIncome, b.to * gameState.s.inflation) - (i == 0 ? 0 : taxBrackets[i - 1].to * gameState.s.inflation + 1)) * b.percent / 100))}</p>
+                                   key={i + "4"}>{formatter.format(Math.max(0, (Math.min(taxableIncome, b.to * gameState.s.inflation) - (i == 0 ? 0 : (character.partnerFirstName ? marriedTaxBrackets : singleTaxBrackets)[i - 1].to * gameState.s.inflation + 1)) * b.percent / 100))}</p>
                             ]
                         )}
                     </div>
