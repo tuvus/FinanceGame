@@ -170,7 +170,7 @@ export class Character {
             if (c.electric) fuelCost = this.milesDriven * 0.183 / 3 / this.cars.length;
             else fuelCost = this.milesDriven * 3.2 / c.gpm / this.cars.length;
 
-            totalCost += fuelCost + c.monthlyInsuranceCost + c.monthlyMaintenanceCost
+            totalCost += fuelCost + c.monthlyInsuranceCost + c.monthlyMaintenanceCost;
         });
         return totalCost;
     }

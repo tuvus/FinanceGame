@@ -65,11 +65,13 @@ export function BuyHousing({gameState, avgCost, type}: BuyHousingProps) {
                 gameState.character.housing = type;
                 gameState.character.houseValue = cost * (used ? 1 : .7);
                 gameState.character.monthlyLivingExpenses.delete("Rent");
-                gameState.character.monthlyLivingExpenses.set("House Maintenance", 50);
-                gameState.character.monthlyLivingExpenses.set("House Insurance", 180 *  avgCost / 350000 * gameState.inflation);
+                gameState.character.monthlyLivingExpenses.set("House Maintenance", cost * 0.02 / 12);
+                gameState.character.monthlyLivingExpenses.set("House Insurance", 180 *  cost / 350000);
+                gameState.character.monthlyLivingExpenses.set("House Tax", cost * 0.008 / 12);
                 if (loan > 0.001)
                     gameState.character.addLoan(
                         new Loan("House Mortgage", loan, gameState.character.savingsAccount, 1.065, true));
+                gameState.lifeEventManager!.nextEvent();
             }}/>
     </div>);
 }
