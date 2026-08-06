@@ -102,9 +102,11 @@ export class Character {
         this.refreshLoans();
         this.totalLoans.endYear(gameState.date);
         this.cars.forEach(c => {
-            c.monthlyInsuranceCost *= 0.95;
-            c.monthlyMaintenanceCost *= 1.1;
-        })
+            c.monthlyInsuranceCost *= 0.95 * inflation;
+            c.monthlyMaintenanceCost *= 1.1 * inflation;
+            c.cost *= inflation;
+        });
+        this.houseValue *= inflation;
         this.age++;
         this.wealthHistory = [...this.wealthHistory,
             {
