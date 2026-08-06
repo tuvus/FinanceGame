@@ -75,34 +75,45 @@ export function CarShop({gameState, action, allocatedMoney}: CarShopProps) {
     }, []);
 
     return (<div className="flex flex-col gap-4 items-center">
-            <div className="flex gap-4">
-                <div
-                    className={"eventButton w-60! panelButton duration-300! " + (used ? "bg-gray-400!" : "bg-gray-200!")}
-                    onClick={() => setUsed(true)}>
-                    <p className="text-gray-700">Used</p>
+            <div className="flex flex-row gap-4 items-center">
+                <div className="flex flex-col gap-4 items-center">
+                    <div className="flex gap-4">
+                        <div
+                            className={"eventButton w-60! panelButton duration-300! " + (used ? "bg-gray-400!" : "bg-gray-200!")}
+                            onClick={() => setUsed(true)}>
+                            <p className="text-gray-700">Used</p>
+                        </div>
+                        <div
+                            className={"eventButton w-60! panelButton duration-300! " + (!used ? "bg-gray-400!" : "bg-gray-200!")}
+                            onClick={() => setUsed(false)}>
+                            <p className="text-gray-700">New</p>
+                        </div>
+                    </div>
+                    <div className="flex gap-4">
+                        <div
+                            className={"eventButton w-60! panelButton duration-300! " + (!ev ? "bg-gray-400!" : "bg-gray-200!")}
+                            onClick={() => setEv(false)}>
+                            <p className="text-gray-700">Gas</p>
+                        </div>
+                        <div
+                            className={"eventButton w-60! panelButton duration-300! " + (ev ? "bg-gray-400!" : "bg-gray-200!")}
+                            onClick={() => setEv(true)}>
+                            <p className="text-gray-700">Electric</p>
+                        </div>
+                    </div>
+                    <div
+                        className={"eventButton w-60! panelButton duration-300! " + (extravagant ? "bg-gray-400!" : "bg-gray-200!")}
+                        onClick={() => setExtravagant(e => !e)}>
+                        <p className="text-gray-700">{extravagant ? "Extravagant" : "Normal"}</p>
+                    </div>
                 </div>
-                <div
-                    className={"eventButton w-60! panelButton duration-300! " + (!used ? "bg-gray-400!" : "bg-gray-200!")}
-                    onClick={() => setUsed(false)}>
-                    <p className="text-gray-700">New</p>
+                <div>
+                    {ev ? (extravagant ?
+                        <img src="src/resources/Lux car icon ev.svg" className="w-130"></img>
+                        : <img src="src/resources/Car icon ev.svg" className="w-130"></img>) : (extravagant ?
+                        <img src="src/resources/Lux car icon.svg" className="w-130"></img> :
+                        <img src="src/resources/Car icon.svg" className="w-130"></img>)}
                 </div>
-            </div>
-            <div className="flex gap-4">
-                <div
-                    className={"eventButton w-60! panelButton duration-300! " + (!ev ? "bg-gray-400!" : "bg-gray-200!")}
-                    onClick={() => setEv(false)}>
-                    <p className="text-gray-700">Gas</p>
-                </div>
-                <div
-                    className={"eventButton w-60! panelButton duration-300! " + (ev ? "bg-gray-400!" : "bg-gray-200!")}
-                    onClick={() => setEv(true)}>
-                    <p className="text-gray-700">Electric</p>
-                </div>
-            </div>
-            <div
-                className={"eventButton w-60! panelButton duration-300! " + (extravagant ? "bg-gray-400!" : "bg-gray-200!")}
-                onClick={() => setExtravagant(e => !e)}>
-                <p className="text-gray-700">{extravagant ? "Extravagant" : "Normal"}</p>
             </div>
             <h3>Cost: {gameState.formatter.format(cost)}</h3>
             <h3>Allocated money: {gameState.formatter.format(allocatedMoney)}</h3>
