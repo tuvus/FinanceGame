@@ -134,7 +134,6 @@ export class Loan extends Account {
         // Todo: find a better formula for not paying the minimum due
         if (toTransfer < this.getMinimumPayment(inflation)) {
             this.balance += this.getMinimumPayment(inflation) * 2;
-            console.log(toTransfer + "  " + this.getMinimumPayment(inflation))
         }
     }
 

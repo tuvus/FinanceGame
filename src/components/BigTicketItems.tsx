@@ -73,16 +73,16 @@ export function BigTicketItemsPage({gameState}: GameStateProps) {
                         className="flex flex-col gap-2 ml-auto mr-auto mb-auto mt-[10%] bg-amber-100 rounded-xl items-center p-4"
                         onClick={e => e.stopPropagation()}>
                         <h3 className="text-gray-700">Big Ticket Item</h3>
-                            <Select className="w-60"
-                                    options={itemTypeOptions}
-                                    getOptionLabel={a => a.name}
-                                    value={itemType.selectedType}
-                                    isSearchable={false}
-                                    styles={GetReactSelectStyle<ItemType>()}
-                                    onChange={(t: ItemType | null) => {
-                                        setItemType({selectedType: t});
-                                        gameState.render();
-                                    }}/>
+                        <Select className="w-60"
+                                options={itemTypeOptions}
+                                getOptionLabel={a => a.name}
+                                value={itemType.selectedType}
+                                isSearchable={false}
+                                styles={GetReactSelectStyle<ItemType>()}
+                                onChange={(t: ItemType | null) => {
+                                    setItemType({selectedType: t});
+                                    gameState.render();
+                                }}/>
                         {itemType.selectedType?.name == "Car" ?
                             <div id="modalCarSelected" className="flex gap-4" key={0}>
                                 <div
@@ -137,7 +137,7 @@ export function BigTicketItemsPage({gameState}: GameStateProps) {
                             : <></>}
                         {itemSubType != "" ? [
                             <div className="flex gap-2" key={1}>
-                                <p className="text-gray-700" key={3}>
+                                <p className="text-gray-700">
                                     Years until the item is bought <input
                                     className="w-16 bg-gray-200 rounded-lg p-1"
                                     min={0}
@@ -153,9 +153,9 @@ export function BigTicketItemsPage({gameState}: GameStateProps) {
                             <p className="text-gray-700"
                                key={2}>Cost: {gameState.formatter.format(bigTicketBaseValue)}</p>,
                             <p className="text-gray-700"
-                               key={4}>Current car predicted trade in
+                               key={3}>Current car predicted trade in
                                 value: {gameState.formatter.format(carSellValue)}</p>,
-                            <p className="text-gray-700" key={3}>Percent financed from loans at time of
+                            <p className="text-gray-700" key={4}>Percent financed from loans at time of
                                 purchase: <input
                                     className="w-16 bg-gray-200 rounded-lg p-1"
                                     min={0}
@@ -168,15 +168,15 @@ export function BigTicketItemsPage({gameState}: GameStateProps) {
                                 </input> %</p>,
 
                             (duration > 0 ? [
-                                    <p className="text-gray-700" key={4}>Yearly
+                                    <p className="text-gray-700" key={5}>Yearly
                                         payment: {gameState.formatter.format((bigTicketBaseValue - carSellValue) * ((100 - pLoans) / 100) / duration)}</p>,
-                                ] : <p className="text-gray-700" key={4}>
+                                ] : <p className="text-gray-700" key={5}>
                                     {gameState.formatter.format((bigTicketBaseValue - carSellValue) * ((100 - pLoans) / 100))} out
                                     of
                                     pocket payment
                                 </p>
                             ),
-                            <div className="flex gap-2 justify-center" key={5}>
+                            <div className="flex gap-2 justify-center" key={6}>
                                 <button className="w-50 text-xl h-10 p-1 font-bold mt-2"
                                         onClick={() => setAddBigTicketItem(false)}>Cancel
                                 </button>

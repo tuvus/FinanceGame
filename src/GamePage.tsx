@@ -673,7 +673,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
     ], render));
 
     useEffect(() => {
-        character.cars = [...character.cars, new Car(30000, new Date(gameState.s.date.getFullYear() - 3, random.int(0, 11), random.int(1, 28)), 20, 25, false, 180)];
+        character.cars = [...character.cars, new Car(30000, new Date(gameState.s.date.getFullYear() - 3, random.int(0, 11), random.int(1, 28)), 20, 25, false, 180, "src/resources/Car icon.svg")];
         gameState.s.lifeEventScheduler = new LifeEventScheduler(lifeEventManager, gameState.s, [
             new LifeEventSchedule(new LifeEvent("Day Trading", new Date(),
                 <DayTrading gameState={gameState.s}/>, true), 99, 5, .1, () => gameState.s.investmentsUnlocked),
@@ -1165,12 +1165,12 @@ function GamePage({fname, lname, tutorial}: GameProps) {
             {pages[Math.min(page, pages.length - 1)].page}
             <div className="flex gap-2 justify-center mt-4">
                 {pPage != null ?
-                    <button className="w-24 text-xl h-10 p-1 font-bold" onClick={() => previousPage()}><h3>Back</h3>
+                    <button className="w-24 h-10 p-1 font-bold" onClick={() => previousPage()}><p className="text-2xl">Back</p>
                     </button>
                     : <></>}
                 {nPage != null ?
-                    <button className="w-70 text-xl h-10 p-1 font-bold" onClick={() => nextPage()}>
-                        <h3>{nPage != pages.length - 1 ? "Next: " + pages[nPage].name : "Start the year"}</h3>
+                    <button className="w-70 h-10 p-1 font-bold" onClick={() => nextPage()}>
+                        <p className="text-2xl">{nPage != pages.length - 1 ? "Next: " + pages[nPage].name : "Start the year"}</p>
                     </button>
                     : <></>}
             </div>
@@ -1329,6 +1329,53 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                     <button
                         onClick={() => {
                             document.getElementById("goals-modal")!.style.display = "none";
+                            setSelectedGoal("");
+                        }}
+                        className="p-2 text-2xl w-80">Close
+                    </button>
+                </div>
+            </div>
+            <div id="family-modal" className="flex hmodal justify-center"
+                 onClick={() => {
+                     document.getElementById("family-modal")!.style.display = "none";
+                     setSelectedGoal("");
+                 }}>
+                <div
+                    className="flex flex-col gap-2 ml-auto mr-auto mt-[10%] w-120 bg-amber-100 rounded-xl items-center p-4"
+                    onClick={e => e.stopPropagation()}>
+                    <h2 className="text-gray-700!">Family</h2>
+                    <div className="flex w-full gap-2">
+                        <div className="flex flex-col w-full gap-2">
+                            <div
+                                className="bg-gray-200 text-gray-700 rounded-xl mb-1 p-1">
+                                <h3 className="text-gray-700">{character.firstName} {character.lastName}</h3>
+                                <p className="text-gray-700">Salary: {formatter.format(character.salary)}</p>
+                                <p className="text-gray-700">Age: {character.age}</p>
+                            </div>
+                            {character.isMarried() ?
+                                <div
+                                    className="bg-gray-200 text-gray-700 rounded-xl mb-1 p-1">
+                                    <h3 className="text-gray-700">{character.partnerFirstName} {character.partnerLastName}</h3>
+                                    <p className="text-gray-700">Salary: {formatter.format(character.partnerSalary)}</p>
+                                    <p className="text-gray-700">Age: {character.partnerAge}</p>
+                                </div>
+                                : <></>}
+                        </div>
+                        <div className="flex flex-col gap-2 w-full">
+                            {character.cars.map((c, i) =>
+                                <div className="bg-gray-200 justify-center rounded-xl p-1"
+                                     key={i}>
+                                    <h3 className="text-gray-700">{c.electric ? "Electric" : ""} Car</h3>
+                                    <img src={c.image} className="w-50 m-auto"></img>
+                                    <p className="text-gray-700">Value: {formatter.format(c.getBaseValue(gameState.s.date))}</p>
+                                    <p className="text-gray-700">Year: {c.buyDate.getFullYear()}</p>
+                                    <button className="p-1 w-30">Buy new Car</button>
+                                </div>)}
+                        </div>
+                    </div>
+                    <button
+                        onClick={() => {
+                            document.getElementById("family-modal")!.style.display = "none";
                             setSelectedGoal("");
                         }}
                         className="p-2 text-2xl w-80">Close

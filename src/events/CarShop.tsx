@@ -45,6 +45,11 @@ export function CarShop({gameState, action, allocatedMoney}: CarShopProps) {
         gpm *= 1.15;
         monthlyInsurance *= 1.8;
     }
+    const image = ev ? (extravagant ?
+        "src/resources/Lux car icon ev.svg"
+        : "src/resources/Car icon ev.svg") : (extravagant ?
+        "src/resources/Lux car icon.svg" :
+        "src/resources/Car icon.svg");
     const sellValue = gameState.character.getOldestCar().getSellValue(gameState.date);
     const loan = cost - allocatedMoney - cash - sellValue;
 
@@ -82,11 +87,7 @@ export function CarShop({gameState, action, allocatedMoney}: CarShopProps) {
                     </div>
                 </div>
                 <div>
-                    {ev ? (extravagant ?
-                        <img src="src/resources/Lux car icon ev.svg" className="w-130"></img>
-                        : <img src="src/resources/Car icon ev.svg" className="w-130"></img>) : (extravagant ?
-                        <img src="src/resources/Lux car icon.svg" className="w-130"></img> :
-                        <img src="src/resources/Car icon.svg" className="w-130"></img>)}
+                    <img src={image} className="w-130"></img>
                 </div>
             </div>
             <h3>Cost: {gameState.formatter.format(cost)}</h3>
@@ -115,20 +116,22 @@ export function CarShop({gameState, action, allocatedMoney}: CarShopProps) {
             {loan > 0.001 ?
                 <h3>Loan: {gameState.formatter.format(loan)}</h3>
                 : <></>}
-            <ButtonNext style="w-50 text-xl h-10 p-1 font-bold mt-2" text="Buy"
-                    action={() => {
-                        gameState.character.satisfaction += (extravagant ? 3 : 1) * (used ? 1 : 2);
-                        gameState.character.payMoney(Math.min(cash, cost - allocatedMoney - sellValue));
-                        if (loan > 0.001)
-                            gameState.character.addLoan(
-                                new Loan("Car Loan", loan, gameState.character.savingsAccount, (used ? 1.1403 : 1.0967), true))
-                        if (cost - allocatedMoney - sellValue < 0.001)
-                            gameState.character.addMoney(allocatedMoney + sellValue - cost);
-                        gameState.character.cars = gameState.character.cars.filter(c => c != gameState.character.getOldestCar());
-                        gameState.character.cars = [...gameState.character.cars, new Car(cost, new Date(gameState.date), used ? 33 : 50, gpm, ev, monthlyInsurance)];
-                        addCarGoal(gameState.date);
-                        action(gameState);
-                    }}/>
+            <ButtonNext
+                style="w-50 text-xl h-10 p-1 font-bold mt-2"
+                text="Buy"
+                action={() => {
+                    gameState.character.satisfaction += (extravagant ? 3 : 1) * (used ? 1 : 2);
+                    gameState.character.payMoney(Math.min(cash, cost - allocatedMoney - sellValue));
+                    if (loan > 0.001)
+                        gameState.character.addLoan(
+                            new Loan("Car Loan", loan, gameState.character.savingsAccount, (used ? 1.1403 : 1.0967), true))
+                    if (cost - allocatedMoney - sellValue < 0.001)
+                        gameState.character.addMoney(allocatedMoney + sellValue - cost);
+                    gameState.character.cars = gameState.character.cars.filter(c => c != gameState.character.getOldestCar());
+                    gameState.character.cars = [...gameState.character.cars, new Car(cost, new Date(gameState.date), used ? 33 : 50, gpm, ev, monthlyInsurance, image)];
+                    addCarGoal(gameState.date);
+                    action(gameState);
+                }}/>
         </div>
     );
 }

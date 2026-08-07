@@ -81,7 +81,7 @@ export default function PartnerMatch({gameState}: GameStateProps) {
                                 gameState.character.monthlyLivingExpenses.set("Phone Data", gameState.character.monthlyLivingExpenses.get("Phone Data")! * 2);
                                 gameState.character.monthlyLivingExpenses.set("Health Insurance", gameState.character.monthlyLivingExpenses.get("Health Insurance")! * 2);
                                 gameState.character.partnerSalary = partnerSalary;
-                                gameState.character.cars = [...gameState.character.cars, new Car(32000, new Date(gameState.date.getFullYear(), random.int(0, 11), random.int(1, 28)), 20, 25, false, 180)]
+                                gameState.character.cars = [...gameState.character.cars, new Car(32000, new Date(gameState.date.getFullYear(), random.int(0, 11), random.int(1, 28)), 20, 25, false, 180, "src/resources/Car icon.svg")]
                                 gameState.lifeEventManager!.replaceEvent(new LifeEvent("Planning for a wedding", gameState.date,
                                     <div className="flex flex-col w-full items-center">
                                         <div className="flex flex-col justify-center gap-2 w-3/4">
