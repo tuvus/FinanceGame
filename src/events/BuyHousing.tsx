@@ -68,6 +68,13 @@ export function BuyHousing({gameState, avgCost, type}: BuyHousingProps) {
                 gameState.character.monthlyLivingExpenses.set("House Maintenance", cost * 0.02 / 12);
                 gameState.character.monthlyLivingExpenses.set("House Insurance", 180 *  cost / 350000);
                 gameState.character.monthlyLivingExpenses.set("House Tax", cost * 0.008 / 12);
+                if (type == "Mobile Home") {
+                    gameState.character.housingDesc = "2 bed 1 bathroom"
+                } else if (type == "Condo") {
+                    gameState.character.housingDesc = "2 bed 1 bathroom"
+                } else {
+                    gameState.character.housingDesc = "4 bed 2 bathrooms"
+                }
                 if (loan > 0.001)
                     gameState.character.addLoan(
                         new Loan("House Mortgage", loan, gameState.character.savingsAccount, 1.065, true));

@@ -27,6 +27,7 @@ import {Car, Character, Goal} from "./Character.tsx";
 import {CarShop} from "./events/CarShop.tsx";
 import {marriedTaxBrackets, singleTaxBrackets} from "./Constants.tsx";
 import PartnerMatch from "./events/PartnerMatch.tsx";
+import {BuyHousing} from "./events/BuyHousing.tsx";
 
 type GameProps = {
     fname: string; lname: string; tutorial: boolean;
@@ -484,6 +485,8 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                             onClick={() => {
                                 gameState.s.character.partnerAspiration = "Pet";
                                 gameState.s.character.satisfaction += 3;
+                                gameState.s.character.payMoney(1000 * gameState.s.inflation);
+                                lifeEventManager.nextEvent();
                             }}>
                             <p className="text-gray-700">Pet</p>
                         </div>
@@ -491,6 +494,70 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                 </div>
 
             </div>, true),
+        new LifeEvent("Finding a place to live", gameState.s.getRandomDateFromGameYear(5),
+            <div className="flex flex-col w-full items-center">
+                <div className="flex flex-col justify-center gap-2 w-3/4">
+                    {character.isMarried() ?
+                        <p>Now that you are married you and {character.partnerFirstName} would like to find a more
+                            comfortable place to live. </p>
+                        :
+                        <p>Now that you have settled down you would like to find a more comfortable place to live.</p>}
+                    <p>Unfortunately houses are very expensive, most people take out a
+                        20-40 year loan so that they don't have to wait until they are older. It may be wise,
+                        however, to consider a cheaper, temporary option to save up some cash for the house. Note that
+                        when buying a mobile home or condo you own the property and can sell it to pay for a future
+                        property.</p>
+                    <div className="flex justify-center gap-8 mt-6">
+                        <div
+                            className="eventButton panelButton"
+                            onClick={() => {
+                                character.monthlyLivingExpenses.set("Rent", 1800 * gameState.s.inflation);
+                                character.housing = "Apartment";
+                            }}>
+                            <p className="text-gray-700">Move to a bigger apartment</p>
+                        </div>
+                    </div>
+                    <div className="flex justify-center gap-8 mt-6">
+                        <div
+                            className="eventButton panelButton"
+                            onClick={() => {
+                                gameState.s.lifeEventManager!.replaceEvent(new LifeEvent("Buying a mobile home", gameState.s.date,
+                                    <BuyHousing gameState={gameState.s} avgCost={65000 * gameState.s.inflation}
+                                                type="Mobile Home"/>, true))
+                            }}>
+                            <p className="text-gray-700">Buy a mobile home</p>
+                            <p className="text-gray-700">Average
+                                cost: {formatter.format(65000 * gameState.s.inflation)}</p>
+                        </div>
+                    </div>
+                    <div className="flex justify-center gap-8 mt-6">
+                        <div
+                            className="eventButton panelButton"
+                            onClick={() => {
+                                gameState.s.lifeEventManager!.replaceEvent(new LifeEvent("Buying a condo", gameState.s.date,
+                                    <BuyHousing gameState={gameState.s} avgCost={200000 * gameState.s.inflation}
+                                                type="Condo"/>, true))
+                            }}>
+                            <p className="text-gray-700">Buy a condo</p>
+                            <p className="text-gray-700">Average
+                                cost: {formatter.format(200000 * gameState.s.inflation)}</p>
+                        </div>
+                    </div>
+                    <div className="flex justify-center gap-8 mt-6">
+                        <div
+                            className="eventButton panelButton"
+                            onClick={() => {
+                                gameState.s.lifeEventManager!.replaceEvent(new LifeEvent("Buying a house", gameState.s.date,
+                                    <BuyHousing gameState={gameState.s} avgCost={390000 * gameState.s.inflation}
+                                                type="House"/>, true))
+                            }}>
+                            <p className="text-gray-700">Buy a house</p>
+                            <p className="text-gray-700">Average
+                                cost: {formatter.format(390000 * gameState.s.inflation)}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>, false),
     ]));
     const activeEvent = lifeEventManager.getActiveEvent(gameState.s.date);
 
@@ -782,7 +849,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                     amount: character.totalLoans.getTotalValue()
                                 }, {
                                     name: "Assets",
-                                    amount: character.cars.map(c => c.getBaseValue(gameState.s.date)).reduce((sum, curr) => sum + curr, 0)
+                                    amount: character.cars.map(c => c.getBaseValue(gameState.s.date)).reduce((sum, curr) => sum + curr, 0) + character.houseValue
                                 }
                             ]}
                             label={formatter.format(character.getNetWorth(gameState.s.date))}
@@ -1165,7 +1232,8 @@ function GamePage({fname, lname, tutorial}: GameProps) {
             {pages[Math.min(page, pages.length - 1)].page}
             <div className="flex gap-2 justify-center mt-4">
                 {pPage != null ?
-                    <button className="w-24 h-10 p-1 font-bold" onClick={() => previousPage()}><p className="text-2xl">Back</p>
+                    <button className="w-24 h-10 p-1 font-bold" onClick={() => previousPage()}><p
+                        className="text-2xl">Back</p>
                     </button>
                     : <></>}
                 {nPage != null ?
@@ -1343,7 +1411,13 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                 <div
                     className="flex flex-col gap-2 ml-auto mr-auto mt-[10%] w-120 bg-amber-100 rounded-xl items-center p-4"
                     onClick={e => e.stopPropagation()}>
-                    <h2 className="text-gray-700!">Family</h2>
+                    <div
+                        className="bg-gray-200 text-gray-700 rounded-xl mb-1 p-1 w-full">
+                        <h2 className="text-gray-700!">{character.housing}</h2>
+                        <p className="text-gray-700">{character.isRenting() ? "Rent: " + formatter.format(character.monthlyLivingExpenses.get("Rent")! * 12 * gameState.s.inflation)
+                            : "Value: " + formatter.format(character.houseValue)}</p>
+                        <p className="text-gray-700">{character.housingDesc}</p>
+                    </div>
                     <div className="flex w-full gap-2">
                         <div className="flex flex-col w-full gap-2">
                             <div
@@ -1362,9 +1436,9 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                 : <></>}
                         </div>
                         <div className="flex flex-col gap-2 w-full">
-                            {character.cars.map((c, i) =>
+                            {character.cars.map(c =>
                                 <div className="bg-gray-200 justify-center rounded-xl p-1"
-                                     key={i}>
+                                     key={c.buyDate.getFullYear().toString() + c.buyDate.getMonth().toString() + c.cost}>
                                     <h3 className="text-gray-700">{c.electric ? "Electric" : ""} Car</h3>
                                     <img src={c.image} className="w-50 m-auto"></img>
                                     <p className="text-gray-700">Value: {formatter.format(c.getBaseValue(gameState.s.date))}</p>

@@ -39,6 +39,7 @@ export class Character {
     education: string;
     housing: string;
     houseValue: number;
+    housingDesc: string;
 
     constructor(firstName: string, lastName: string, monthlyLivingExpenses: {
         name: string,
@@ -79,6 +80,7 @@ export class Character {
         this.education = "High School";
         this.housing = "Apartment";
         this.houseValue = 0;
+        this.housingDesc = "1 bedroom 1 bathroom";
     }
 
     checkGoals(gameState: GameState) {
@@ -242,6 +244,10 @@ export class Character {
 
     isMarried() {
         return this.partnerFirstName != null;
+    }
+
+    isRenting() {
+        return this.housing == "Apartment";
     }
 }
 
