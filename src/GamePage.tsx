@@ -27,7 +27,6 @@ import {Car, Character, Goal} from "./Character.tsx";
 import {CarShop} from "./events/CarShop.tsx";
 import {marriedTaxBrackets, singleTaxBrackets} from "./Constants.tsx";
 import PartnerMatch from "./events/PartnerMatch.tsx";
-import {BuyHousing} from "./events/BuyHousing.tsx";
 
 type GameProps = {
     fname: string; lname: string; tutorial: boolean;
@@ -485,8 +484,6 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                             onClick={() => {
                                 gameState.s.character.partnerAspiration = "Pet";
                                 gameState.s.character.satisfaction += 3;
-                                gameState.s.character.payMoney(1000 * gameState.s.inflation);
-                                lifeEventManager.nextEvent();
                             }}>
                             <p className="text-gray-700">Pet</p>
                         </div>
@@ -494,70 +491,6 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                 </div>
 
             </div>, true),
-        new LifeEvent("Finding a place to live", gameState.s.getRandomDateFromGameYear(5),
-            <div className="flex flex-col w-full items-center">
-                <div className="flex flex-col justify-center gap-2 w-3/4">
-                    {character.isMarried() ?
-                        <p>Now that you are married you and {character.partnerFirstName} would like to find a more
-                            comfortable place to live. </p>
-                        :
-                        <p>Now that you have settled down you would like to find a more comfortable place to live.</p>}
-                    <p>Unfortunately houses are very expensive, most people take out a
-                        20-40 year loan so that they don't have to wait until they are older. It may be wise,
-                        however, to consider a cheaper, temporary option to save up some cash for the house. Note that
-                        when buying a mobile home or condo you own the property and can sell it to pay for a future
-                        property.</p>
-                    <div className="flex justify-center gap-8 mt-6">
-                        <div
-                            className="eventButton panelButton"
-                            onClick={() => {
-                                character.monthlyLivingExpenses.set("Rent", 1800 * gameState.s.inflation);
-                                character.housing = "Apartment";
-                            }}>
-                            <p className="text-gray-700">Move to a bigger apartment</p>
-                        </div>
-                    </div>
-                    <div className="flex justify-center gap-8 mt-6">
-                        <div
-                            className="eventButton panelButton"
-                            onClick={() => {
-                                gameState.s.lifeEventManager!.replaceEvent(new LifeEvent("Buying a mobile home", gameState.s.date,
-                                    <BuyHousing gameState={gameState.s} avgCost={65000 * gameState.s.inflation}
-                                                type="Mobile Home"/>, true))
-                            }}>
-                            <p className="text-gray-700">Buy a mobile home</p>
-                            <p className="text-gray-700">Average
-                                cost: {formatter.format(65000 * gameState.s.inflation)}</p>
-                        </div>
-                    </div>
-                    <div className="flex justify-center gap-8 mt-6">
-                        <div
-                            className="eventButton panelButton"
-                            onClick={() => {
-                                gameState.s.lifeEventManager!.replaceEvent(new LifeEvent("Buying a condo", gameState.s.date,
-                                    <BuyHousing gameState={gameState.s} avgCost={200000 * gameState.s.inflation}
-                                                type="Condo"/>, true))
-                            }}>
-                            <p className="text-gray-700">Buy a condo</p>
-                            <p className="text-gray-700">Average
-                                cost: {formatter.format(200000 * gameState.s.inflation)}</p>
-                        </div>
-                    </div>
-                    <div className="flex justify-center gap-8 mt-6">
-                        <div
-                            className="eventButton panelButton"
-                            onClick={() => {
-                                gameState.s.lifeEventManager!.replaceEvent(new LifeEvent("Buying a house", gameState.s.date,
-                                    <BuyHousing gameState={gameState.s} avgCost={390000 * gameState.s.inflation}
-                                                type="House"/>, true))
-                            }}>
-                            <p className="text-gray-700">Buy a house</p>
-                            <p className="text-gray-700">Average
-                                cost: {formatter.format(390000 * gameState.s.inflation)}</p>
-                        </div>
-                    </div>
-                </div>
-            </div>, false),
     ]));
     const activeEvent = lifeEventManager.getActiveEvent(gameState.s.date);
 
@@ -849,7 +782,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                     amount: character.totalLoans.getTotalValue()
                                 }, {
                                     name: "Assets",
-                                    amount: character.cars.map(c => c.getBaseValue(gameState.s.date)).reduce((sum, curr) => sum + curr, 0) + character.houseValue
+                                    amount: character.cars.map(c => c.getBaseValue(gameState.s.date)).reduce((sum, curr) => sum + curr, 0)
                                 }
                             ]}
                             label={formatter.format(character.getNetWorth(gameState.s.date))}
@@ -1396,40 +1329,6 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                     <button
                         onClick={() => {
                             document.getElementById("goals-modal")!.style.display = "none";
-                            setSelectedGoal("");
-                        }}
-                        className="p-2 text-2xl w-80">Close
-                    </button>
-                </div>
-            </div>
-            <div id="family-modal" className="flex hmodal justify-center"
-                 onClick={() => {
-                     document.getElementById("family-modal")!.style.display = "none";
-                     setSelectedGoal("");
-                 }}>
-                <div
-                    className="flex flex-col gap-2 ml-auto mr-auto mt-[10%] w-120 bg-amber-100 rounded-xl items-center p-4"
-                    onClick={e => e.stopPropagation()}>
-                    <h2 className="text-gray-700!">Family</h2>
-                    <div className="w-full">
-                        <div className="flex flex-col">
-                            <div
-                                className="bg-gray-200 text-gray-700 rounded-xl">{character.firstName} {character.lastName} {character.age}</div>
-                            {character.isMarried() ? <div
-                                className="bg-gray-200 text-gray-700 rounded-xl">{character.firstName} {character.lastName} {character.partnerAge}</div> : <></>}
-                        </div>
-                        <div className="flex flex-col">
-                            {character.cars.map(c =>
-                                <div className="bg-gray-200">
-                                    <h3>Car</h3>
-                                    <p>Value: {formatter.format(c.getBaseValue(gameState.s.date))}</p>
-                                    <p>Year: {c.buyDate.getFullYear()}</p>
-                                </div>)}
-                        </div>
-                    </div>
-                    <button
-                        onClick={() => {
-                            document.getElementById("family-modal")!.style.display = "none";
                             setSelectedGoal("");
                         }}
                         className="p-2 text-2xl w-80">Close

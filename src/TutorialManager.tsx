@@ -73,6 +73,7 @@ export class TutorialManager {
     highlighter: ElementHighlighter;
     tutorialChains: TutorialChain[];
     activeTutorial: TutorialChain | null;
+    intervalId: number | null;
     render: () => void;
 
     constructor(gameState: GameState, tutorialChains: TutorialChain[], render: () => void) {
@@ -80,6 +81,7 @@ export class TutorialManager {
         this.highlighter = new ElementHighlighter();
         this.tutorialChains = tutorialChains;
         this.activeTutorial = null;
+        this.intervalId = null;
         this.render = render;
     }
 
@@ -92,7 +94,6 @@ export class TutorialManager {
                 if (!this.gameState.tutorial)
                     continue;
                 this.activeTutorial = tutorialChain;
-                break;
             }
         }
 
@@ -110,13 +111,33 @@ export class TutorialManager {
                 this.activeTutorial = null;
                 this.checkActiveTutorial();
                 return;
-            } else if (this.activeTutorial.getCurrentEvent().highlightElementId != null) {
-                this.highlighter.setTargetElement(document.getElementById(this.activeTutorial.getCurrentEvent().highlightElementId!));
             } else {
-                this.highlighter.setTargetElement(null);
+                if (this.activeTutorial.getCurrentEvent().highlightElementId != null) {
+                    this.highlighter.setTargetElement(document.getElementById(this.activeTutorial.getCurrentEvent().highlightElementId!));
+                } else {
+                    this.highlighter.setTargetElement(null);
+                }
+
+                if (!this.intervalId && this.activeTutorial.getCurrentEvent().satisfyCondition != null) {
+                    this.intervalId = setInterval(() => {
+                        const currentTutorial = this.activeTutorial;
+                        const currentEvent = this.activeTutorial?.getCurrentEvent();
+                        this.checkActiveTutorial();
+                        if (this.activeTutorial != currentTutorial || this.activeTutorial?.getCurrentEvent() != currentEvent) {
+                            this.gameState.render();
+                        }
+                    }, 200);
+                } else if (this.intervalId && this.activeTutorial.getCurrentEvent().satisfyCondition == null) {
+                    clearTimeout(this.intervalId);
+                    this.intervalId = null;
+                }
             }
         } else {
             this.highlighter.setTargetElement(null);
+
+            if (this.intervalId) {
+                clearTimeout(this.intervalId);
+            }
         }
     }
 
