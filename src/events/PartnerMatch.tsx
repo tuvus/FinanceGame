@@ -44,6 +44,7 @@ export default function PartnerMatch({gameState}: GameStateProps) {
                 <ButtonNext style="w-50 text-xl h-10 p-1 font-bold mt-2" text="Awsome!" action={() => {
                     gameState.character.partnerFirstName = firstName;
                     gameState.character.partnerLastName = lastName;
+                    gameState.character.partnerAge = gameState.character.age + random.int(-3,3);
                     gameState.character.satisfaction += 5;
                     const partnerSalary = (gameState.character.education == "Bachelors" ? 78000 : (gameState.character.education == "Associates" ? 57000 : (gameState.character.education == "Trade School" ? 53000 : 48000))) * gameState.inflation * random.float(.9, 1.1);
                     const partnerLoans = (gameState.character.education == "Bachelors" ? 24000 : (gameState.character.education == "Associates" ? 8000 : (gameState.character.education == "Trade School" ? 9000 : 0))) * gameState.inflation * random.float(.9, 1.1);

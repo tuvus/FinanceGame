@@ -33,6 +33,7 @@ export class Character {
     partnerSalary: number;
     partnerFirstName: string | null;
     partnerLastName: string | null;
+    partnerAge: number | null;
     partnerPronoun: string | null;
     partnerPronoun2: string | null;
     education: string;
@@ -72,6 +73,7 @@ export class Character {
         this.partnerSalary = 0;
         this.partnerFirstName = null;
         this.partnerLastName = null;
+        this.partnerAge = null;
         this.partnerPronoun = null;
         this.partnerPronoun2 = null;
         this.education = "High School";

@@ -25,9 +25,13 @@ export function Outline({gameState, page, startYear}: OutlineProps) {
                     <p className={"text-gray-700! " + (currentPageName == p.name ? "font-bold" : "")}>{p.name}</p>
                 </div>)}
         <hr className="bg-black border w-full mt-2"/>
-        <button className="m-2 w-full text-2xl font-bold" onClick={() =>
+        <button className="m-2 w-40 text-2xl font-bold" onClick={() =>
             document.getElementById("goals-modal")!.style.display = "block"
         }>Goals
+        </button>
+        <button className="m-2 w-40 text-2xl font-bold" onClick={() =>
+            document.getElementById("family-modal")!.style.display = "block"
+        }>Family
         </button>
     </div>);
 }
