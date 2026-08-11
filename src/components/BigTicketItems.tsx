@@ -237,6 +237,7 @@ export function BigTicketItemsPage({gameState}: GameStateProps) {
                                                 pLoans,
                                                 oldAsset);
                                             setItemType({selectedType: null});
+                                            gameState.render();
                                         }}>Add
                                 </button>
                             </div>

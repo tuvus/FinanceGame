@@ -1447,8 +1447,22 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                     <p className="text-gray-700">Value: {formatter.format(c.getBaseValue(gameState.s.date))}</p>
                                     <p className="text-gray-700">Year: {c.buyDate.getFullYear()}</p>
                                     {character.bigTicketItems.bigTicketItems.some(bt => bt.asset == c) ?
-                                        <button className="p-1 w-30">Replacing car</button> :
-                                        <button className="p-1 w-30">Buy new Car</button>}
+                                        <button className="p-1 w-30" onClick={() => {
+                                            character.bigTicketItems.removeBigTicketItem(
+                                                character.bigTicketItems.bigTicketItems.find(bt => bt.asset == c)!);
+                                            render();
+                                        }}>Replacing car</button> :
+                                        <button className="p-1 w-30" onClick={() => {
+                                            character.bigTicketItems.addBigTicketItem(
+                                                "Buy car",
+                                                "Buy a new car",
+                                                gameState.s.getRandomDateFromGameYear(gameState.s.date.getFullYear()),
+                                                c.cost * 2,
+                                                0,
+                                                0,
+                                                c);
+                                            render();
+                                        }}>Buy new Car</button>}
                                 </div>)}
                         </div>
                     </div>
