@@ -66,7 +66,7 @@ export function BigTicketItemsPage({gameState}: GameStateProps) {
                     setDuration(bt.buyDate.getFullYear() - gameState.date.getFullYear());
                 }}>
                     <h3 className="text-gray-700 font-bold">{bt.name}</h3>
-                    <p className="text-gray-700">Out of pocket cost: {gameState.formatter.format(bt.targetBalance)}</p>
+                    <p className="text-gray-700">Target Balance: {gameState.formatter.format(bt.targetBalance)}</p>
                     <p className="text-gray-700">Allocated: {gameState.formatter.format(bt.balance)}</p>
                     {bt.buyDate.getFullYear() > gameState.date.getFullYear() ? [
                         <p className="text-gray-700" key={1}>Years to

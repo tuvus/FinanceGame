@@ -1445,7 +1445,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                     <h3 className="text-gray-700">{c.model}</h3>
                                     <img src={c.image} className="w-50 m-auto"></img>
                                     <p className="text-gray-700">Value: {formatter.format(c.getBaseValue(gameState.s.date))}</p>
-                                    <p className="text-gray-700">Year: {c.buyDate.getFullYear()}</p>
+                                    <p className={gameState.s.date.getFullYear() -  c.buyDate.getFullYear() >= 9 ? "text-red-800" : "text-gray-700"}>Year: {c.buyDate.getFullYear()}</p>
                                     {character.bigTicketItems.bigTicketItems.some(bt => bt.asset == c) ?
                                         <button className="p-1 w-30" onClick={() => {
                                             character.bigTicketItems.removeBigTicketItem(
@@ -1454,11 +1454,11 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                         }}>Replacing car</button> :
                                         <button className="p-1 w-30" onClick={() => {
                                             character.bigTicketItems.addBigTicketItem(
-                                                "Buy car",
+                                                "Replace car",
                                                 "Buy a new car",
-                                                gameState.s.getRandomDateFromGameYear(gameState.s.date.getFullYear()),
-                                                c.cost * 2,
-                                                0,
+                                                gameState.s.getRandomDateFromYear(gameState.s.date.getFullYear()),
+                                                c.cost * 1.5,
+                                                c.cost * 1.5 - c.getSellValue(gameState.s.date),
                                                 0,
                                                 c);
                                             render();

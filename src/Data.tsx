@@ -188,6 +188,10 @@ export class GameState {
         return new Date(this.getYearFromGameYear(gameYear), random.int(0, 11), random.int(1, 28));
     }
 
+    getRandomDateFromYear(year: number) {
+        return new Date(year, random.int(0, 11), random.int(1, 28));
+    }
+
     getCurrentPage() {
         return this.pages[Math.min(this.page, this.pages.length - 1)];
     }
