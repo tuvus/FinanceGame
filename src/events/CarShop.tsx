@@ -3,6 +3,8 @@ import {GameState, Loan} from "../Data.tsx";
 import {Car, Goal} from "../Character.tsx";
 import {useState} from "react";
 import {ButtonNext, NumberInputAutoSelect} from "../Utils.tsx";
+import {electricCarModels, electricLuxuryCarModels, gasCarModels, gasLuxuryCarModels} from "../Constants.tsx";
+import random from "random";
 
 export type CarShopProps = {
     gameState: GameState;
@@ -27,6 +29,14 @@ export function CarShop({gameState, action, allocatedMoney}: CarShopProps) {
     const [ev, setEv] = useState(false);
     const [extravagant, setExtravagant] = useState(false);
     const [cash, setCash] = useState(0);
+    const [model, setModel] = useState(gasCarModels[random.int(0, gasCarModels.length - 1)]);
+    const refreshModel = () => {
+        setModel(ev ? (extravagant ?
+            electricLuxuryCarModels[random.int(0, electricLuxuryCarModels.length - 1)]
+            : electricCarModels[random.int(0, electricCarModels.length - 1)]) : (extravagant ?
+            gasLuxuryCarModels[random.int(0, gasLuxuryCarModels.length - 1)] :
+            gasCarModels[random.int(0, gasCarModels.length - 1)]));
+    };
 
     let cost = 50000 * gameState.inflation;
     let gpm = 30;
@@ -59,30 +69,45 @@ export function CarShop({gameState, action, allocatedMoney}: CarShopProps) {
                     <div className="flex gap-4">
                         <div
                             className={"eventButton w-60! panelButton duration-300! " + (used ? "bg-gray-400!" : "bg-gray-200!")}
-                            onClick={() => setUsed(true)}>
+                            onClick={() => {
+                                setUsed(true);
+                                refreshModel();
+                            }}>
                             <p className="text-gray-700">Used</p>
                         </div>
                         <div
                             className={"eventButton w-60! panelButton duration-300! " + (!used ? "bg-gray-400!" : "bg-gray-200!")}
-                            onClick={() => setUsed(false)}>
+                            onClick={() => {
+                                setUsed(false);
+                                refreshModel();
+                            }}>
                             <p className="text-gray-700">New</p>
                         </div>
                     </div>
                     <div className="flex gap-4">
                         <div
                             className={"eventButton w-60! panelButton duration-300! " + (!ev ? "bg-gray-400!" : "bg-gray-200!")}
-                            onClick={() => setEv(false)}>
+                            onClick={() => {
+                                setEv(false);
+                                refreshModel();
+                            }}>
                             <p className="text-gray-700">Gas</p>
                         </div>
                         <div
                             className={"eventButton w-60! panelButton duration-300! " + (ev ? "bg-gray-400!" : "bg-gray-200!")}
-                            onClick={() => setEv(true)}>
+                            onClick={() => {
+                                setEv(true);
+                                refreshModel();
+                            }}>
                             <p className="text-gray-700">Electric</p>
                         </div>
                     </div>
                     <div
                         className={"eventButton w-60! panelButton duration-300! " + (extravagant ? "bg-gray-400!" : "bg-gray-200!")}
-                        onClick={() => setExtravagant(e => !e)}>
+                        onClick={() => {
+                            setExtravagant(!extravagant);
+                            refreshModel();
+                        }}>
                         <p className="text-gray-700">{extravagant ? "Extravagant" : "Normal"}</p>
                     </div>
                 </div>
@@ -128,7 +153,7 @@ export function CarShop({gameState, action, allocatedMoney}: CarShopProps) {
                     if (cost - allocatedMoney - sellValue < 0.001)
                         gameState.character.addMoney(allocatedMoney + sellValue - cost);
                     gameState.character.cars = gameState.character.cars.filter(c => c != gameState.character.getOldestCar());
-                    gameState.character.cars = [...gameState.character.cars, new Car(cost, new Date(gameState.date), used ? 33 : 50, gpm, ev, monthlyInsurance, image)];
+                    gameState.character.cars = [...gameState.character.cars, new Car(cost, new Date(gameState.date), used ? 33 : 50, gpm, ev, monthlyInsurance, image, model)];
                     addCarGoal(gameState.date);
                     action(gameState);
                 }}/>

@@ -25,7 +25,7 @@ import {BigTicketItemsPage} from "./components/BigTicketItems.tsx";
 import {Outline} from "./components/Outline.tsx";
 import {Car, Character, Goal} from "./Character.tsx";
 import {CarShop} from "./events/CarShop.tsx";
-import {marriedTaxBrackets, singleTaxBrackets} from "./Constants.tsx";
+import {gasCarModels, marriedTaxBrackets, singleTaxBrackets} from "./Constants.tsx";
 import PartnerMatch from "./events/PartnerMatch.tsx";
 import {BuyHousing} from "./events/BuyHousing.tsx";
 
@@ -740,7 +740,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
     ], render));
 
     useEffect(() => {
-        character.cars = [...character.cars, new Car(30000, new Date(gameState.s.date.getFullYear() - 3, random.int(0, 11), random.int(1, 28)), 20, 25, false, 180, "src/resources/Car icon.svg")];
+        character.cars = [...character.cars, new Car(30000, new Date(gameState.s.date.getFullYear() - 3, random.int(0, 11), random.int(1, 28)), 20, 25, false, 180, "src/resources/Car icon.svg", gasCarModels[random.int(0, gasCarModels.length - 1)])];
         gameState.s.lifeEventScheduler = new LifeEventScheduler(lifeEventManager, gameState.s, [
             new LifeEventSchedule(new LifeEvent("Day Trading", new Date(),
                 <DayTrading gameState={gameState.s}/>, true), 99, 5, .1, () => gameState.s.investmentsUnlocked),
@@ -1441,6 +1441,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                      key={c.buyDate.getFullYear().toString() + c.buyDate.getMonth().toString() + c.cost}>
                                     <h3 className="text-gray-700">{c.electric ? "Electric" : ""} Car</h3>
                                     <img src={c.image} className="w-50 m-auto"></img>
+                                    <p className="text-gray-700">Model: {c.model}</p>
                                     <p className="text-gray-700">Value: {formatter.format(c.getBaseValue(gameState.s.date))}</p>
                                     <p className="text-gray-700">Year: {c.buyDate.getFullYear()}</p>
                                     <button className="p-1 w-30">Buy new Car</button>

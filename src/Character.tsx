@@ -351,8 +351,9 @@ export class Car {
     electric: boolean;
     monthlyInsuranceCost: number;
     image: string;
+    model: string;
 
-    constructor(cost: number, buyDate: Date, monthlyMaintenanceCost: number, gpm: number, electric: boolean, monthlyInsuranceCost: number, image: string) {
+    constructor(cost: number, buyDate: Date, monthlyMaintenanceCost: number, gpm: number, electric: boolean, monthlyInsuranceCost: number, image: string, model: string) {
         this.cost = cost;
         this.buyDate = buyDate;
         this.monthlyMaintenanceCost = monthlyMaintenanceCost;
@@ -360,6 +361,7 @@ export class Car {
         this.electric = electric;
         this.monthlyInsuranceCost = monthlyInsuranceCost;
         this.image = image;
+        this.model = model;
     }
 
     getAvgExpirationDate() {
