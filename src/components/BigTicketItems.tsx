@@ -49,10 +49,11 @@ export function BigTicketItemsPage({gameState}: GameStateProps) {
     const [fundsToTransfer, setFundsToTransfer] = useState(0);
     const [oldAsset, setOldAsset] = useState<Asset | null>(null);
     const carReplaceOptions: PreviousAsset[] = [...gameState.character.cars
-        .filter(c => !gameState.character.bigTicketItems.bigTicketItems.some(bt => bt.asset == c))
+        .filter(c => !gameState.character.bigTicketItems.bigTicketItems.some(bt => bt.asset === c))
         .map(c => new PreviousAsset(c)), new PreviousAsset(null)];
     const [carReplace, setCarReplace] = useState<PreviousAssetSelect>({selectedAsset: carReplaceOptions[0]});
     const sellValue = oldAsset?.getSellValue(new Date(gameState.date.getFullYear() + duration, 0)) ?? 0;
+
     return (<div id="AddBigTicketItemButton">
             <button className="w-40 text-xl h-10 font-bold" onClick={() => setAddBigTicketItem(true)}>Add Item
             </button>
@@ -85,7 +86,10 @@ export function BigTicketItemsPage({gameState}: GameStateProps) {
             )}
             {addBigTicketItem ?
                 <div id="BigTicketItemModal" className="flex modal justify-center"
-                     onClick={() => setAddBigTicketItem(false)}>
+                     onClick={() => {
+                         setAddBigTicketItem(false);
+                         setItemType({selectedType: null});
+                     }}>
                     <div
                         className="flex flex-col gap-2 ml-auto mr-auto mb-auto mt-[10%] bg-amber-100 rounded-xl items-center p-4"
                         onClick={e => e.stopPropagation()}>
@@ -98,6 +102,10 @@ export function BigTicketItemsPage({gameState}: GameStateProps) {
                                 styles={GetReactSelectStyle<ItemType>()}
                                 onChange={(t: ItemType | null) => {
                                     setItemType({selectedType: t});
+                                    if (t?.name === "Car") {
+                                        setCarReplace({selectedAsset: carReplaceOptions[0]});
+                                        setOldAsset(carReplaceOptions[0].asset);
+                                    }
                                     gameState.render();
                                 }}/>
                         {itemType.selectedType?.name == "Car" ?
@@ -155,7 +163,7 @@ export function BigTicketItemsPage({gameState}: GameStateProps) {
                         {itemType.selectedType?.name == "Car" ?
                             <Select className="w-100"
                                     options={carReplaceOptions}
-                                    getOptionLabel={cn => cn.asset ? "Replace " + cn.asset.buyDate.getFullYear() + " " + (cn.asset as Car).model : "Buy a new car"}
+                                    getOptionLabel={cn => cn.asset ? "Replace " + cn.asset.buyDate.getFullYear() + " " + (cn.asset as Car).model : "Don't replace car"}
                                     value={carReplace.selectedAsset}
                                     isSearchable={false}
                                     styles={GetReactSelectStyle<PreviousAsset>()}
@@ -165,7 +173,7 @@ export function BigTicketItemsPage({gameState}: GameStateProps) {
                                         gameState.render();
                                     }}/>
                             : <></>}
-                        {itemSubType != "" ? [
+                        {itemType.selectedType?.name == "Car" && itemSubType != "" ? [
                             <div className="flex gap-2" key={1}>
                                 <p className="text-gray-700">
                                     Years until the item is bought <input
@@ -182,9 +190,9 @@ export function BigTicketItemsPage({gameState}: GameStateProps) {
                                 </input></p></div>,
                             <p className="text-gray-700"
                                key={2}>Cost: {gameState.formatter.format(bigTicketBaseValue)}</p>,
-                            <p className="text-gray-700"
-                               key={3}>Current car predicted trade in
-                                value: {gameState.formatter.format(sellValue)}</p>,
+                            (oldAsset && carReplace.selectedAsset ?
+                                <p className="text-gray-700" key={3}>Current car predicted trade in value
+                                    : {gameState.formatter.format(sellValue)}</p> : <div key={3}></div>),
                             <p className="text-gray-700" key={4}>Percent financed from loans at time of
                                 purchase: <input
                                     className="w-16 bg-gray-200 rounded-lg p-1"
@@ -208,7 +216,10 @@ export function BigTicketItemsPage({gameState}: GameStateProps) {
                             ),
                             <div className="flex gap-2 justify-center" key={6}>
                                 <button className="w-50 text-xl h-10 p-1 font-bold mt-2"
-                                        onClick={() => setAddBigTicketItem(false)}>Cancel
+                                        onClick={() => {
+                                            setAddBigTicketItem(false);
+                                            setItemType({selectedType: null});
+                                        }}>Cancel
                                 </button>
                                 <button className="w-50 text-xl h-10 p-1 font-bold mt-2"
                                         onClick={() => {
@@ -225,6 +236,7 @@ export function BigTicketItemsPage({gameState}: GameStateProps) {
                                                 targetBalance,
                                                 pLoans,
                                                 oldAsset);
+                                            setItemType({selectedType: null});
                                         }}>Add
                                 </button>
                             </div>
