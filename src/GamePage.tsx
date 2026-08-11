@@ -741,7 +741,9 @@ function GamePage({fname, lname, tutorial}: GameProps) {
     ], render));
 
     useEffect(() => {
-        character.cars = [...character.cars, new Car(30000, new Date(gameState.s.date.getFullYear() - 3, random.int(0, 11), random.int(1, 28)), 20, 25, false, 180, "src/resources/Car icon.svg", gasCarModels[random.int(0, gasCarModels.length - 1)], 0)];
+        if (character.cars.length == 0) {
+            character.cars = [...character.cars, new Car(30000, new Date(gameState.s.date.getFullYear() - 3, random.int(0, 11), random.int(1, 28)), 20, 25, false, 180, "src/resources/Car icon.svg", gasCarModels[random.int(0, gasCarModels.length - 1)], 0)];
+        }
         gameState.s.lifeEventScheduler = new LifeEventScheduler(lifeEventManager, gameState.s, [
             new LifeEventSchedule(new LifeEvent("Day Trading", new Date(),
                 <DayTrading gameState={gameState.s}/>, true), 99, 5, .1, () => gameState.s.investmentsUnlocked),
@@ -1444,7 +1446,9 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                     <img src={c.image} className="w-50 m-auto"></img>
                                     <p className="text-gray-700">Value: {formatter.format(c.getBaseValue(gameState.s.date))}</p>
                                     <p className="text-gray-700">Year: {c.buyDate.getFullYear()}</p>
-                                    <button className="p-1 w-30">Buy new Car</button>
+                                    {character.bigTicketItems.bigTicketItems.some(bt => bt.asset == c) ?
+                                        <button className="p-1 w-30">Replacing car</button> :
+                                        <button className="p-1 w-30">Buy new Car</button>}
                                 </div>)}
                         </div>
                     </div>
