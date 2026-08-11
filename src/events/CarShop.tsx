@@ -10,16 +10,17 @@ export type CarShopProps = {
     gameState: GameState;
     action: (gameState: GameState) => void;
     allocatedMoney: number;
+    garage: number;
 }
 
-export function CarShop({gameState, action, allocatedMoney}: CarShopProps) {
+export function CarShop({gameState, action, allocatedMoney, garage}: CarShopProps) {
     const addCarGoal = (buyDate: Date) => {
-        const targetDate = new Date(gameState.character.getOldestCar().getAvgExpirationDate().toString());
+        const targetDate = new Date(gameState.character.cars[garage].getAvgExpirationDate().toString());
         gameState.character.checkGoalOfName(gameState, "Buy a new car");
         gameState.character.addGoal(new Goal("Buy a new car",
             "Your current car isn't going to last forever, you should plan to buy a new one within one year of " + targetDate.getFullYear(),
-            gameState.character.getOldestCar().getAvgExpirationDate(),
-            (gameState) => gameState.character.getOldestCar().buyDate.getFullYear() > buyDate.getFullYear(),
+            gameState.character.cars[garage].getAvgExpirationDate(),
+            (gameState) => gameState.character.cars[garage].buyDate.getFullYear() > buyDate.getFullYear(),
             (gameState) => {
                 gameState.character.satisfaction += 2;
                 action(gameState);
@@ -60,7 +61,7 @@ export function CarShop({gameState, action, allocatedMoney}: CarShopProps) {
         : "src/resources/Car icon ev.svg") : (extravagant ?
         "src/resources/Lux car icon.svg" :
         "src/resources/Car icon.svg");
-    const sellValue = gameState.character.getOldestCar().getSellValue(gameState.date);
+    const sellValue = gameState.character.cars[garage].getSellValue(gameState.date);
     const loan = cost - allocatedMoney - cash - sellValue;
 
     return (<div className="flex flex-col gap-4 items-center">
@@ -152,8 +153,7 @@ export function CarShop({gameState, action, allocatedMoney}: CarShopProps) {
                             new Loan("Car Loan", loan, gameState.character.savingsAccount, (used ? 1.1403 : 1.0967), true))
                     if (cost - allocatedMoney - sellValue < 0.001)
                         gameState.character.addMoney(allocatedMoney + sellValue - cost);
-                    gameState.character.cars = gameState.character.cars.filter(c => c != gameState.character.getOldestCar());
-                    gameState.character.cars = [...gameState.character.cars, new Car(cost, new Date(gameState.date), used ? 33 : 50, gpm, ev, monthlyInsurance, image, model)];
+                    gameState.character.cars[garage] = new Car(cost, new Date(gameState.date), used ? 33 : 50, gpm, ev, monthlyInsurance, image, model, garage);
                     addCarGoal(gameState.date);
                     action(gameState);
                 }}/>

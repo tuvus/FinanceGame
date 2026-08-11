@@ -259,8 +259,9 @@ export class BigTicketItem {
     targetBalance: number;
     loanPercent: number
     balance: number;
+    asset: Asset | null;
 
-    constructor(name: string, desc: string, buyDate: Date, fullCost: number, targetBalance: number, loanPercent: number, balance: number) {
+    constructor(name: string, desc: string, buyDate: Date, fullCost: number, targetBalance: number, loanPercent: number, balance: number, asset: Asset | null) {
         this.name = name;
         this.desc = desc;
         this.buyDate = buyDate;
@@ -268,6 +269,7 @@ export class BigTicketItem {
         this.targetBalance = targetBalance;
         this.loanPercent = loanPercent;
         this.balance = balance;
+        this.asset = asset;
     }
 }
 
@@ -279,16 +281,8 @@ export class BigTicketItems {
         this.character = character;
     }
 
-    addBigTicketItem(name: string, desc: string, buyDate: Date, fullCost: number, targetBalance: number, loanPercent: number) {
-        this.bigTicketItems = [...this.bigTicketItems, {
-            name: name,
-            desc: desc,
-            buyDate: buyDate,
-            fullCost: fullCost,
-            targetBalance: targetBalance,
-            loanPercent: loanPercent,
-            balance: 0
-        }];
+    addBigTicketItem(name: string, desc: string, buyDate: Date, fullCost: number, targetBalance: number, loanPercent: number, asset: Asset | null) {
+        this.bigTicketItems = [...this.bigTicketItems, new BigTicketItem(name, desc, buyDate, fullCost, targetBalance, loanPercent, 0, asset)];
     }
 
     removeBigTicketItem(bigTicketItem: BigTicketItem) {
@@ -318,6 +312,7 @@ export class BigTicketItems {
                             <CarShop gameState={gameState}
                                      action={(gameState: GameState) => gameState.lifeEventManager!.nextEvent()}
                                      allocatedMoney={bt.balance}
+                                     garage={(bt?.asset as Car).garage ?? gameState.character.cars.length}
                             />
                         </div>
                     </div>, true));
@@ -343,25 +338,46 @@ export class Goal {
     }
 }
 
-export class Car {
+export class Asset {
     cost: number;
     buyDate: Date;
     monthlyMaintenanceCost: number;
-    gpm: number;
-    electric: boolean;
     monthlyInsuranceCost: number;
     image: string;
-    model: string;
 
-    constructor(cost: number, buyDate: Date, monthlyMaintenanceCost: number, gpm: number, electric: boolean, monthlyInsuranceCost: number, image: string, model: string) {
+    constructor(cost: number, buyDate: Date, monthlyMaintenanceCost: number, monthlyInsuranceCost: number, image: string) {
         this.cost = cost;
         this.buyDate = buyDate;
         this.monthlyMaintenanceCost = monthlyMaintenanceCost;
-        this.gpm = gpm;
-        this.electric = electric;
         this.monthlyInsuranceCost = monthlyInsuranceCost;
         this.image = image;
+    }
+
+    getAvgExpirationDate() {
+        return new Date(this.buyDate.getFullYear() + 10, this.buyDate.getMonth(), this.buyDate.getDate());
+    }
+
+    getBaseValue(date: Date) {
+        return this.cost / ((date.getFullYear() - this.buyDate.getFullYear()) / 5 + 1)
+    }
+
+    getSellValue(date: Date) {
+        return this.getBaseValue(date) / 2;
+    }
+}
+
+export class Car extends Asset {
+    model: string;
+    gpm: number;
+    electric: boolean;
+    garage: number;
+
+    constructor(cost: number, buyDate: Date, monthlyMaintenanceCost: number, gpm: number, electric: boolean, monthlyInsuranceCost: number, image: string, model: string, garage: number) {
+        super(cost, buyDate, monthlyMaintenanceCost, monthlyInsuranceCost, image);
+        this.gpm = gpm;
+        this.electric = electric;
         this.model = model;
+        this.garage = garage;
     }
 
     getAvgExpirationDate() {

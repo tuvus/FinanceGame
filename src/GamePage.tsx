@@ -407,6 +407,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                 <CarShop gameState={gameState.s}
                                          action={(gameState: GameState) => gameState.lifeEventManager!.nextEvent()}
                                          allocatedMoney={30000 * gameState.s.inflation}
+                                         garage={0}
                                 />
                             </div>
                         </div>, true
@@ -740,7 +741,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
     ], render));
 
     useEffect(() => {
-        character.cars = [...character.cars, new Car(30000, new Date(gameState.s.date.getFullYear() - 3, random.int(0, 11), random.int(1, 28)), 20, 25, false, 180, "src/resources/Car icon.svg", gasCarModels[random.int(0, gasCarModels.length - 1)])];
+        character.cars = [...character.cars, new Car(30000, new Date(gameState.s.date.getFullYear() - 3, random.int(0, 11), random.int(1, 28)), 20, 25, false, 180, "src/resources/Car icon.svg", gasCarModels[random.int(0, gasCarModels.length - 1)], 0)];
         gameState.s.lifeEventScheduler = new LifeEventScheduler(lifeEventManager, gameState.s, [
             new LifeEventSchedule(new LifeEvent("Day Trading", new Date(),
                 <DayTrading gameState={gameState.s}/>, true), 99, 5, .1, () => gameState.s.investmentsUnlocked),
@@ -1409,7 +1410,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                      setSelectedGoal("");
                  }}>
                 <div
-                    className="flex flex-col gap-2 ml-auto mr-auto mt-[10%] w-120 bg-amber-100 rounded-xl items-center p-4"
+                    className="flex flex-col gap-2 ml-auto mr-auto mt-[10%] w-180 bg-amber-100 rounded-xl items-center p-4"
                     onClick={e => e.stopPropagation()}>
                     <div
                         className="bg-gray-200 text-gray-700 rounded-xl mb-1 p-1 w-full">
@@ -1438,10 +1439,9 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                         <div className="flex flex-col gap-2 w-full">
                             {character.cars.map(c =>
                                 <div className="bg-gray-200 justify-center rounded-xl p-1"
-                                     key={c.buyDate.getFullYear().toString() + c.buyDate.getMonth().toString() + c.cost}>
-                                    <h3 className="text-gray-700">{c.electric ? "Electric" : ""} Car</h3>
+                                     key={c.garage}>
+                                    <h3 className="text-gray-700">{c.model}</h3>
                                     <img src={c.image} className="w-50 m-auto"></img>
-                                    <p className="text-gray-700">Model: {c.model}</p>
                                     <p className="text-gray-700">Value: {formatter.format(c.getBaseValue(gameState.s.date))}</p>
                                     <p className="text-gray-700">Year: {c.buyDate.getFullYear()}</p>
                                     <button className="p-1 w-30">Buy new Car</button>
