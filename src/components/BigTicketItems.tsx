@@ -67,291 +67,290 @@ export function BigTicketItemsPage({gameState}: GameStateProps) {
     const bigTicketBaseValue = lowerPriceRange + (upperPriceRange - lowerPriceRange) * bigTicketCostValue / 10;
 
     return (<div id="AddBigTicketItemButton">
-            <button className="w-40 text-xl h-10 font-bold" onClick={() => setAddBigTicketItem(true)}>Add Item
-            </button>
-            {gameState.character.bigTicketItems.bigTicketItems.map((bt, i) =>
+        <button className="w-40 text-xl h-10 font-bold" onClick={() => setAddBigTicketItem(true)}>Add Item
+        </button>
+        {gameState.character.bigTicketItems.bigTicketItems.map((bt, i) =>
+            <div
+                className="flex flex-col items-center w-124 bg-amber-100 rounded-xl p-4 m-4 gap-1 cursor-pointer"
+                key={i} onClick={() => {
+                setSelectedBigTicketItem(bt);
+                setTransferMoney(false);
+                setDuration(bt.buyDate.getFullYear() - gameState.date.getFullYear());
+            }}>
+                <h3 className="text-gray-700 font-bold">{bt.name}</h3>
+                <p className="text-gray-700">Target Balance: {gameState.formatter.format(bt.targetBalance)}</p>
+                <p className="text-gray-700">Allocated: {gameState.formatter.format(bt.balance)}</p>
+                {bt.buyDate.getFullYear() > gameState.date.getFullYear() ? [
+                    <p className="text-gray-700" key={1}>Years to
+                        purchase: {bt.buyDate.getFullYear() - gameState.date.getFullYear()}</p>,
+                    <p className="text-gray-700" key={2}>Yearly
+                        allocation: {gameState.formatter.format((bt.targetBalance - bt.balance) / (bt.buyDate.getFullYear() - gameState.date.getFullYear()))}</p>,
+                ] : [
+                    <p className="text-gray-700" key={1}>
+                        Buying this year
+                    </p>,
+                    <p className="text-gray-700" key={2}>
+                        Out of pocket payment: {gameState.formatter.format(bt.targetBalance - bt.balance)}
+                    </p>
+                ]}
+            </div>
+        )}
+        {addBigTicketItem ?
+            <div id="BigTicketItemModal" className="flex modal justify-center"
+                 onClick={() => {
+                     setAddBigTicketItem(false);
+                     setItemType({selectedType: null});
+                 }}>
                 <div
-                    className="flex flex-col items-center w-124 bg-amber-100 rounded-xl p-4 m-4 gap-1 cursor-pointer"
-                    key={i} onClick={() => {
-                    setSelectedBigTicketItem(bt);
-                    setTransferMoney(false);
-                    setDuration(bt.buyDate.getFullYear() - gameState.date.getFullYear());
-                }}>
-                    <h3 className="text-gray-700 font-bold">{bt.name}</h3>
-                    <p className="text-gray-700">Target Balance: {gameState.formatter.format(bt.targetBalance)}</p>
-                    <p className="text-gray-700">Allocated: {gameState.formatter.format(bt.balance)}</p>
-                    {bt.buyDate.getFullYear() > gameState.date.getFullYear() ? [
-                        <p className="text-gray-700" key={1}>Years to
-                            purchase: {bt.buyDate.getFullYear() - gameState.date.getFullYear()}</p>,
-                        <p className="text-gray-700" key={2}>Yearly
-                            allocation: {gameState.formatter.format((bt.targetBalance - bt.balance) / (bt.buyDate.getFullYear() - gameState.date.getFullYear()))}</p>,
-                    ] : [
-                        <p className="text-gray-700" key={1}>
-                            Buying this year
-                        </p>,
-                        <p className="text-gray-700" key={2}>
-                            Out of pocket payment: {gameState.formatter.format(bt.targetBalance - bt.balance)}
-                        </p>
-                    ]}
-                </div>
-            )}
-            {addBigTicketItem ?
-                <div id="BigTicketItemModal" className="flex modal justify-center"
-                     onClick={() => {
-                         setAddBigTicketItem(false);
-                         setItemType({selectedType: null});
-                     }}>
-                    <div
-                        className="flex flex-col gap-2 ml-auto mr-auto mb-auto mt-[10%] bg-amber-100 rounded-xl items-center p-4"
-                        onClick={e => e.stopPropagation()}>
-                        <h3 className="text-gray-700">Big Ticket Item</h3>
-                        <Select className="w-60"
-                                options={itemTypeOptions}
-                                getOptionLabel={a => a.name}
-                                value={itemType.selectedType}
-                                isSearchable={false}
-                                styles={GetReactSelectStyle<ItemType>()}
-                                onChange={(t: ItemType | null) => {
-                                    setItemType({selectedType: t});
-                                    calculatePriceRanges(t?.name ?? "");
-                                    setBigTicketCostValue(5);
-                                    gameState.render();
-                                }}/>
-                        {itemType.selectedType?.name.length ?? 0 > 0 ? [
-                            <h3 className="text-gray-700 mt-2"
-                                key={-2}>Cost: {gameState.formatter.format(bigTicketBaseValue)}</h3>,
-                            <SingleRangeSlider
-                                key={-1}
-                                min={0}
-                                max={5}
-                                defaultValue={2}
-                                width={80}
-                                onChange={value => {
-                                    setBigTicketCostValue(value);
-                                }}/>,
+                    className="flex flex-col gap-2 ml-auto mr-auto mb-auto mt-[10%] bg-amber-100 rounded-xl items-center p-4"
+                    onClick={e => e.stopPropagation()}>
+                    <h3 className="text-gray-700">Big Ticket Item</h3>
+                    <Select className="w-60"
+                            options={itemTypeOptions}
+                            getOptionLabel={a => a.name}
+                            value={itemType.selectedType}
+                            isSearchable={false}
+                            styles={GetReactSelectStyle<ItemType>()}
+                            onChange={(t: ItemType | null) => {
+                                setItemType({selectedType: t});
+                                calculatePriceRanges(t?.name ?? "");
+                                setBigTicketCostValue(5);
+                                gameState.render();
+                            }}/>
+                    {itemType.selectedType?.name.length ?? 0 > 0 ? [
+                        <h3 className="text-gray-700 mt-2"
+                            key={-2}>Cost: {gameState.formatter.format(bigTicketBaseValue)}</h3>,
+                        <SingleRangeSlider
+                            key={-1}
+                            min={0}
+                            max={5}
+                            defaultValue={2}
+                            width={80}
+                            onChange={value => {
+                                setBigTicketCostValue(value);
+                            }}/>,
 
-                            (itemType.selectedType?.name == "Car" ?
-                                <Select className="w-100"
-                                        key={0}
-                                        options={carReplaceOptions}
-                                        getOptionLabel={cn => cn.asset ? "Replace " + cn.asset.buyDate.getFullYear() + " " + (cn.asset as Car).model : "Don't replace car"}
-                                        value={carReplace.selectedAsset}
-                                        isSearchable={false}
-                                        styles={GetReactSelectStyle<PreviousAsset>()}
-                                        onChange={(a: PreviousAsset | null) => {
-                                            setCarReplace({selectedAsset: a});
-                                            setOldAsset(a?.asset ?? null);
-                                            gameState.render();
-                                        }}/>
-                                : <div key={0}></div>),
-                            <div className="flex gap-2" key={1}>
-                                <p className="text-gray-700">
-                                    Years until the item is bought <input
-                                    className="w-16 bg-gray-200 rounded-lg p-1"
-                                    min={0}
-                                    max={80}
-                                    value={duration}
-                                    onChange={e => {
-                                        if (!isNaN(e.target.valueAsNumber) && e.target.valueAsNumber >= 0) {
-                                            setDuration(Math.min(80, e.target.valueAsNumber));
-                                        } else if (isNaN(e.target.valueAsNumber)) {
-                                            setDuration(0);
-                                        }
-                                    }}
-                                    type="number">
-                                </input></p></div>,
-                            (oldAsset && carReplace.selectedAsset ?
-                                <p className="text-gray-700" key={3}>Current car predicted trade in value
-                                    : {gameState.formatter.format(sellValue)}</p> : <div key={3}></div>),
-                            <p className="text-gray-700" key={4}>Percent financed from loans at time of
-                                purchase: <input
-                                    className="w-16 bg-gray-200 rounded-lg p-1"
-                                    min={0}
-                                    max={80}
-                                    value={pLoans}
-                                    onChange={e => {
-                                        setPLoans(e.target.valueAsNumber);
-                                    }}
-                                    type="number">
-                                </input> %</p>,
-
-                            (duration > 0 ? [
-                                    <p className="text-gray-700" key={5}>Yearly
-                                        payment: {gameState.formatter.format((bigTicketBaseValue - sellValue) * ((100 - pLoans) / 100) / duration)}</p>,
-                                ] : <p className="text-gray-700" key={5}>
-                                    {gameState.formatter.format((bigTicketBaseValue - sellValue) * ((100 - pLoans) / 100))} out
-                                    of
-                                    pocket payment
-                                </p>
-                            ),
-                            <div className="flex gap-2 justify-center" key={6}>
-                                <button className="w-50 text-xl h-10 p-1 font-bold mt-2"
-                                        onClick={() => {
-                                            setAddBigTicketItem(false);
-                                            setItemType({selectedType: null});
-                                        }}>Cancel
-                                </button>
-                                <button className="w-50 text-xl h-10 p-1 font-bold mt-2"
-                                        onClick={() => {
-                                            setAddBigTicketItem(false);
-                                            const targetBalance = duration > 0 ? (bigTicketBaseValue - sellValue) * ((100 - pLoans) / 100) : 0;
-                                            gameState.character.bigTicketItems.addBigTicketItem(
-                                                itemType.selectedType!.name.toLowerCase(),
-                                                purchaseDesc,
-                                                new Date(gameState.date.getFullYear() + duration,
-                                                    random.int(0, 11),
-                                                    random.int(0, 28),
-                                                    random.int(9, 18)),
-                                                bigTicketBaseValue,
-                                                targetBalance,
-                                                pLoans,
-                                                oldAsset);
-                                            setItemType({selectedType: null});
-                                            gameState.render();
-                                        }}>Add
-                                </button>
-                            </div>
-                        ] : <div key={-1}></div>}
-                    </div>
-                </div>
-                : <></>}
-
-            {selectedBigTicketItem ?
-                <div className="flex modal justify-center" onClick={() => setSelectedBigTicketItem(null)}>
-                    <div
-                        className="flex flex-col gap-2 ml-auto mr-auto mb-auto mt-[15%] bg-amber-100 rounded-xl items-center p-4"
-                        onClick={e => e.stopPropagation()}>
-                        <h3 className="text-gray-700">Big Ticket Item</h3>
-                        <p className="text-gray-700">Cost: {gameState.formatter.format(selectedBigTicketItem.fullCost)}</p>
-                        <p className="text-gray-700">
-                            Current car predicted trade in value: {gameState.formatter.format(sellValue)}
-                        </p>
-                        <p className="text-gray-700">Allocated: {gameState.formatter.format(selectedBigTicketItem.balance)}</p>
-                        <div className="flex gap-2">
-                            <p className="text-gray-700 content-center">
+                        (itemType.selectedType?.name == "Car" ?
+                            <Select className="w-100"
+                                    key={0}
+                                    options={carReplaceOptions}
+                                    getOptionLabel={cn => cn.asset ? "Replace " + cn.asset.buyDate.getFullYear() + " " + (cn.asset as Car).model : "Don't replace car"}
+                                    value={carReplace.selectedAsset}
+                                    isSearchable={false}
+                                    styles={GetReactSelectStyle<PreviousAsset>()}
+                                    onChange={(a: PreviousAsset | null) => {
+                                        setCarReplace({selectedAsset: a});
+                                        setOldAsset(a?.asset ?? null);
+                                        gameState.render();
+                                    }}/>
+                            : <div key={0}></div>),
+                        <div className="flex gap-2" key={1}>
+                            <p className="text-gray-700">
                                 Years until the item is bought <input
-                                className="w-14 bg-gray-200 rounded-lg p-1"
+                                className="w-16 bg-gray-200 rounded-lg p-1"
                                 min={0}
                                 max={80}
                                 value={duration}
                                 onChange={e => {
                                     if (!isNaN(e.target.valueAsNumber) && e.target.valueAsNumber >= 0) {
-                                        setDuration(e.target.valueAsNumber);
-                                        selectedBigTicketItem.buyDate = ReplaceYear(selectedBigTicketItem.buyDate, gameState.date.getFullYear() + e.target.valueAsNumber);
+                                        setDuration(Math.min(80, e.target.valueAsNumber));
+                                    } else if (isNaN(e.target.valueAsNumber)) {
+                                        setDuration(0);
                                     }
                                 }}
                                 type="number">
-                            </input>
-                            </p>
-                        </div>
-                        <p className="text-gray-700">
-                            Percent financed from loans at time of purchase: <input
-                            className="w-16 bg-gray-200 rounded-lg p-1"
-                            min={0}
-                            max={80}
-                            value={pLoans}
-                            onChange={e => {
-                                if (isNaN(e.target.valueAsNumber) && e.target.valueAsNumber < 0 && e.target.valueAsNumber > 80) return;
-                                setPLoans(e.target.valueAsNumber);
-                                selectedBigTicketItem.loanPercent = e.target.valueAsNumber;
-                                selectedBigTicketItem.targetBalance = (selectedBigTicketItem.fullCost - sellValue) * (100 - pLoans) / 100;
-                            }}
-                            type="number">
-                        </input> %</p>
+                            </input></p></div>,
+                        (oldAsset && carReplace.selectedAsset ?
+                            <p className="text-gray-700" key={3}>Current car predicted trade in value
+                                : {gameState.formatter.format(sellValue)}</p> : <div key={3}></div>),
+                        <p className="text-gray-700" key={4}>Percent financed from loans at time of
+                            purchase: <input
+                                className="w-16 bg-gray-200 rounded-lg p-1"
+                                min={0}
+                                max={80}
+                                value={pLoans}
+                                onChange={e => {
+                                    setPLoans(e.target.valueAsNumber);
+                                }}
+                                type="number">
+                            </input> %</p>,
 
-                        {(duration > 0 ? [
-                                <p className="text-gray-700" key={4}>Yearly
-                                    payment: {gameState.formatter.format((selectedBigTicketItem.targetBalance - selectedBigTicketItem.balance) / duration)}</p>,
-                            ] : <p className="text-gray-700"
-                                   key={4}>
-                                {gameState.formatter.format(selectedBigTicketItem.targetBalance - selectedBigTicketItem.balance)} out
-                                of pocket payment
+                        (duration > 0 ? [
+                                <p className="text-gray-700" key={5}>Yearly
+                                    payment: {gameState.formatter.format((bigTicketBaseValue - sellValue) * ((100 - pLoans) / 100) / duration)}</p>,
+                            ] : <p className="text-gray-700" key={5}>
+                                {gameState.formatter.format((bigTicketBaseValue - sellValue) * ((100 - pLoans) / 100))} out
+                                of
+                                pocket payment
                             </p>
-                        )}
-                        <button className="w-50 text-xl h-10 p-1 font-bold mt-2"
-                                onClick={() => setTransferMoney(true)}>Allocate Money
-                        </button>
-                        <div className="flex gap-2 justify-center">
-                            <button className="w-50 text-xl h-10 p-1 font-bold mt-2 bg-red-700!"
+                        ),
+                        <div className="flex gap-2 justify-center" key={6}>
+                            <button className="w-50 text-xl h-10 p-1 font-bold mt-2"
                                     onClick={() => {
-                                        gameState.character.bigTicketItems.removeBigTicketItem(selectedBigTicketItem);
-                                        setSelectedBigTicketItem(null);
-                                        gameState.render();
-                                    }}>Remove
+                                        setAddBigTicketItem(false);
+                                        setItemType({selectedType: null});
+                                    }}>Cancel
                             </button>
                             <button className="w-50 text-xl h-10 p-1 font-bold mt-2"
-                                    onClick={() => setSelectedBigTicketItem(null)}>Close
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                : <></>}
-            {selectedBigTicketItem && transferMoney ?
-                <div className="modal justify-center"
-                     onClick={() => setTransferMoney(false)}>
-                    <div
-                        className="flex flex-col gap-2 ml-auto mr-auto mt-[20%] w-100 bg-amber-100 rounded-xl justify-center p-4"
-                        onClick={e => e.stopPropagation()}>
-                        <h3 className="text-gray-700">Transfer Funds</h3>
-                        <p className="text-gray-700 text-lg!">Allocated: {gameState.formatter.format(selectedBigTicketItem.balance)}
-                        </p>
-                        <p className="text-gray-700 text-lg!">To
-                            Allocate: {gameState.formatter.format(selectedBigTicketItem.targetBalance - selectedBigTicketItem.balance)}
-                        </p>
-                        <Select
-                            options={gameState.character.accounts.filter(a => a.isOwnedAccount)}
-                            getOptionLabel={a => a.name}
-                            value={transferFrom.selectedAccount}
-                            isSearchable={false}
-                            styles={GetReactSelectStyle<Account>()}
-                            onChange={(a: Account | null) => {
-                                setTransferFrom({selectedAccount: a});
-                            }}></Select>
-                        {transferFrom.selectedAccount ?
-                            <p className="text-gray-700 text-lg!">Balance: {gameState.formatter.format(transferFrom.selectedAccount!.balance)}
-                            </p> : <></>
-                        }
-                        <div className="flex flex-col items-center">
-                            <div className="w-fit bg-gray-200 rounded-xl p-1 ">
-                                <p className="text-xl text-gray-700! pl-1">$
-                                    <NumberInputAutoSelect
-                                        className="w-40 text-gray-700"
-                                        min={-selectedBigTicketItem.balance}
-                                        max={Math.min(transferFrom.selectedAccount?.balance ?? 0, selectedBigTicketItem.targetBalance - selectedBigTicketItem.balance)}
-                                        disabled={transferFrom.selectedAccount == null}
-                                        value={fundsToTransfer}
-                                        onChange={e =>
-                                            setFundsToTransfer(Math.min(Math.ceil(100 * Math.min(transferFrom.selectedAccount?.balance ?? 0, selectedBigTicketItem.targetBalance - selectedBigTicketItem.balance)) / 100, e.target.valueAsNumber))}>
-                                    </NumberInputAutoSelect>
-                                </p>
-                            </div>
-                        </div>
-
-                        <div className="flex gap-2 justify-center">
-                            <button
-                                id="transfer-cancel"
-                                onClick={() => setTransferMoney(false)}
-                                className="p-2 w-25">Cancel
-                            </button>
-                            <button
-                                id="transfer-confirm"
-                                disabled={transferFrom.selectedAccount == null || isNaN(fundsToTransfer)}
-                                onClick={() => {
-                                    if (transferFrom.selectedAccount != null) {
-                                        const toTransfer = Math.max(Math.min(Math.min(fundsToTransfer, transferFrom.selectedAccount.balance), selectedBigTicketItem.targetBalance - selectedBigTicketItem.balance), -selectedBigTicketItem.balance);
-                                        transferFrom.selectedAccount.balance -= toTransfer;
-                                        selectedBigTicketItem!.balance += toTransfer;
+                                    onClick={() => {
+                                        setAddBigTicketItem(false);
+                                        const targetBalance = duration > 0 ? (bigTicketBaseValue - sellValue) * ((100 - pLoans) / 100) : 0;
+                                        gameState.character.bigTicketItems.addBigTicketItem(
+                                            itemType.selectedType!.name.toLowerCase(),
+                                            purchaseDesc,
+                                            new Date(gameState.date.getFullYear() + duration,
+                                                random.int(0, 11),
+                                                random.int(0, 28),
+                                                random.int(9, 18)),
+                                            bigTicketBaseValue,
+                                            targetBalance,
+                                            pLoans,
+                                            oldAsset);
+                                        setItemType({selectedType: null});
                                         gameState.render();
-                                    }
-                                    setTransferMoney(false);
-                                }}
-                                className="p-2 w-25 enabled:bg-green-700! disabled:bg-gray-400!">Transfer
+                                    }}>Add
                             </button>
                         </div>
+                    ] : <div key={-1}></div>}
+                </div>
+            </div>
+            : <></>}
+
+        {selectedBigTicketItem ?
+            <div className="flex modal justify-center" onClick={() => setSelectedBigTicketItem(null)}>
+                <div
+                    className="flex flex-col gap-2 ml-auto mr-auto mb-auto mt-[15%] bg-amber-100 rounded-xl items-center p-4"
+                    onClick={e => e.stopPropagation()}>
+                    <h3 className="text-gray-700">Big Ticket Item</h3>
+                    <p className="text-gray-700">Cost: {gameState.formatter.format(selectedBigTicketItem.fullCost)}</p>
+                    <p className="text-gray-700">
+                        Current car predicted trade in value: {gameState.formatter.format(sellValue)}
+                    </p>
+                    <p className="text-gray-700">Allocated: {gameState.formatter.format(selectedBigTicketItem.balance)}</p>
+                    <div className="flex gap-2">
+                        <p className="text-gray-700 content-center">
+                            Years until the item is bought <input
+                            className="w-14 bg-gray-200 rounded-lg p-1"
+                            min={0}
+                            max={80}
+                            value={duration}
+                            onChange={e => {
+                                if (!isNaN(e.target.valueAsNumber) && e.target.valueAsNumber >= 0) {
+                                    setDuration(e.target.valueAsNumber);
+                                    selectedBigTicketItem.buyDate = ReplaceYear(selectedBigTicketItem.buyDate, gameState.date.getFullYear() + e.target.valueAsNumber);
+                                }
+                            }}
+                            type="number">
+                        </input>
+                        </p>
+                    </div>
+                    <p className="text-gray-700">
+                        Percent financed from loans at time of purchase: <input
+                        className="w-16 bg-gray-200 rounded-lg p-1"
+                        min={0}
+                        max={80}
+                        value={pLoans}
+                        onChange={e => {
+                            if (isNaN(e.target.valueAsNumber) && e.target.valueAsNumber < 0 && e.target.valueAsNumber > 80) return;
+                            setPLoans(e.target.valueAsNumber);
+                            selectedBigTicketItem.loanPercent = e.target.valueAsNumber;
+                            selectedBigTicketItem.targetBalance = (selectedBigTicketItem.fullCost - sellValue) * (100 - pLoans) / 100;
+                        }}
+                        type="number">
+                    </input> %</p>
+
+                    {(duration > 0 ? [
+                            <p className="text-gray-700" key={4}>Yearly
+                                payment: {gameState.formatter.format((selectedBigTicketItem.targetBalance - selectedBigTicketItem.balance) / duration)}</p>,
+                        ] : <p className="text-gray-700"
+                               key={4}>
+                            {gameState.formatter.format(selectedBigTicketItem.targetBalance - selectedBigTicketItem.balance)} out
+                            of pocket payment
+                        </p>
+                    )}
+                    <button className="w-50 text-xl h-10 p-1 font-bold mt-2"
+                            onClick={() => setTransferMoney(true)}>Allocate Money
+                    </button>
+                    <div className="flex gap-2 justify-center">
+                        <button className="w-50 text-xl h-10 p-1 font-bold mt-2 bg-red-700!"
+                                onClick={() => {
+                                    gameState.character.bigTicketItems.removeBigTicketItem(selectedBigTicketItem);
+                                    setSelectedBigTicketItem(null);
+                                    gameState.render();
+                                }}>Remove
+                        </button>
+                        <button className="w-50 text-xl h-10 p-1 font-bold mt-2"
+                                onClick={() => setSelectedBigTicketItem(null)}>Close
+                        </button>
                     </div>
                 </div>
-                : <></>
-            }
-        </div>
-    );
+            </div>
+            : <></>}
+        {selectedBigTicketItem && transferMoney ?
+            <div className="modal justify-center"
+                 onClick={() => setTransferMoney(false)}>
+                <div
+                    className="flex flex-col gap-2 ml-auto mr-auto mt-[20%] w-100 bg-amber-100 rounded-xl justify-center p-4"
+                    onClick={e => e.stopPropagation()}>
+                    <h3 className="text-gray-700">Transfer Funds</h3>
+                    <p className="text-gray-700 text-lg!">Allocated: {gameState.formatter.format(selectedBigTicketItem.balance)}
+                    </p>
+                    <p className="text-gray-700 text-lg!">To
+                        Allocate: {gameState.formatter.format(selectedBigTicketItem.targetBalance - selectedBigTicketItem.balance)}
+                    </p>
+                    <Select
+                        options={gameState.character.accounts.filter(a => a.isOwnedAccount)}
+                        getOptionLabel={a => a.name}
+                        value={transferFrom.selectedAccount}
+                        isSearchable={false}
+                        styles={GetReactSelectStyle<Account>()}
+                        onChange={(a: Account | null) => {
+                            setTransferFrom({selectedAccount: a});
+                        }}></Select>
+                    {transferFrom.selectedAccount ?
+                        <p className="text-gray-700 text-lg!">Balance: {gameState.formatter.format(transferFrom.selectedAccount!.balance)}
+                        </p> : <></>
+                    }
+                    <div className="flex flex-col items-center">
+                        <div className="w-fit bg-gray-200 rounded-xl p-1 ">
+                            <p className="text-xl text-gray-700! pl-1">$
+                                <NumberInputAutoSelect
+                                    className="w-40 text-gray-700"
+                                    min={-selectedBigTicketItem.balance}
+                                    max={Math.min(transferFrom.selectedAccount?.balance ?? 0, selectedBigTicketItem.targetBalance - selectedBigTicketItem.balance)}
+                                    disabled={transferFrom.selectedAccount == null}
+                                    value={fundsToTransfer}
+                                    onChange={e =>
+                                        setFundsToTransfer(Math.min(Math.ceil(100 * Math.min(transferFrom.selectedAccount?.balance ?? 0, selectedBigTicketItem.targetBalance - selectedBigTicketItem.balance)) / 100, e.target.valueAsNumber))}>
+                                </NumberInputAutoSelect>
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="flex gap-2 justify-center">
+                        <button
+                            id="transfer-cancel"
+                            onClick={() => setTransferMoney(false)}
+                            className="p-2 w-25">Cancel
+                        </button>
+                        <button
+                            id="transfer-confirm"
+                            disabled={transferFrom.selectedAccount == null || isNaN(fundsToTransfer)}
+                            onClick={() => {
+                                if (transferFrom.selectedAccount != null) {
+                                    const toTransfer = Math.max(Math.min(Math.min(fundsToTransfer, transferFrom.selectedAccount.balance), selectedBigTicketItem.targetBalance - selectedBigTicketItem.balance), -selectedBigTicketItem.balance);
+                                    transferFrom.selectedAccount.balance -= toTransfer;
+                                    selectedBigTicketItem!.balance += toTransfer;
+                                    gameState.render();
+                                }
+                                setTransferMoney(false);
+                            }}
+                            className="p-2 w-25 enabled:bg-green-700! disabled:bg-gray-400!">Transfer
+                        </button>
+                    </div>
+                </div>
+            </div>
+            : <></>
+        }
+    </div>);
 }
