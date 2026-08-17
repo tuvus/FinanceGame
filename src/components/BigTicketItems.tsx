@@ -117,29 +117,33 @@ export function BigTicketItemsPage({gameState}: GameStateProps) {
                                     setBigTicketCostValue(5);
                                     gameState.render();
                                 }}/>
-                        <h3 className="text-gray-700 mt-2">Cost: {gameState.formatter.format(bigTicketBaseValue)}</h3>
-                        <SingleRangeSlider
-                            min={0}
-                            max={5}
-                            defaultValue={2}
-                            width={80}
-                            onChange={value => {
-                                setBigTicketCostValue(value);
-                            }}/>
-                        {itemType.selectedType?.name == "Car" ?
-                            <Select className="w-100"
-                                    options={carReplaceOptions}
-                                    getOptionLabel={cn => cn.asset ? "Replace " + cn.asset.buyDate.getFullYear() + " " + (cn.asset as Car).model : "Don't replace car"}
-                                    value={carReplace.selectedAsset}
-                                    isSearchable={false}
-                                    styles={GetReactSelectStyle<PreviousAsset>()}
-                                    onChange={(a: PreviousAsset | null) => {
-                                        setCarReplace({selectedAsset: a});
-                                        setOldAsset(a?.asset ?? null);
-                                        gameState.render();
-                                    }}/>
-                            : <></>}
                         {itemType.selectedType?.name.length ?? 0 > 0 ? [
+                            <h3 className="text-gray-700 mt-2"
+                                key={-2}>Cost: {gameState.formatter.format(bigTicketBaseValue)}</h3>,
+                            <SingleRangeSlider
+                                key={-1}
+                                min={0}
+                                max={5}
+                                defaultValue={2}
+                                width={80}
+                                onChange={value => {
+                                    setBigTicketCostValue(value);
+                                }}/>,
+
+                            (itemType.selectedType?.name == "Car" ?
+                                <Select className="w-100"
+                                        key={0}
+                                        options={carReplaceOptions}
+                                        getOptionLabel={cn => cn.asset ? "Replace " + cn.asset.buyDate.getFullYear() + " " + (cn.asset as Car).model : "Don't replace car"}
+                                        value={carReplace.selectedAsset}
+                                        isSearchable={false}
+                                        styles={GetReactSelectStyle<PreviousAsset>()}
+                                        onChange={(a: PreviousAsset | null) => {
+                                            setCarReplace({selectedAsset: a});
+                                            setOldAsset(a?.asset ?? null);
+                                            gameState.render();
+                                        }}/>
+                                : <div key={0}></div>),
                             <div className="flex gap-2" key={1}>
                                 <p className="text-gray-700">
                                     Years until the item is bought <input
