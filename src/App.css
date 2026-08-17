@@ -60,6 +60,20 @@ label {
     @apply rounded-xl p-2 w-100
 }
 
+.slider {
+    -webkit-appearance: none;
+    @apply block h-4 bg-white border border-b-gray-400 rounded-md focus:border-blue-500 focus:outline-none focus:ring appearance-none bg-transparent
+}
+
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    @apply h-4 bg-gray-500
+}
+
+.slider::-moz-range-thumb {
+    @apply h-5 w-8 rounded-4xl bg-gray-300
+}
+
 a {
     @apply text-blue-500
 }

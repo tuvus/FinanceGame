@@ -1,6 +1,7 @@
 import {type GroupBase, type StylesConfig} from "react-select";
 import React, {useEffect, useState} from "react";
 import {marriedTaxBrackets, singleTaxBrackets} from "./Constants.tsx";
+import {getTrackBackground, Range} from "react-range";
 
 export function CalculateTaxes(taxableAmount: number, married: boolean): number {
     let tax = 0;
@@ -125,4 +126,77 @@ export function InfoButtonTooltip({action, text}: InfoButtonTooltip) {
         <div
             className={"fixed -translate-x-1/2 translate-y-2 text-white bg-gray-500 p-2 rounded-xl transition-opacity pointer-events-none " + (mouseEnter ? "opacity-100" : "opacity-0")}>{text}</div>
     </button>);
+}
+
+type SingleRangeSliderProps = {
+    defaultValue: number;
+    min: number;
+    max: number;
+    width: number;
+    onChange: (value: number) => void;
+}
+
+export function SingleRangeSlider({defaultValue, min, max, width, onChange}: SingleRangeSliderProps) {
+    const [value, setValue] = useState<number[]>([defaultValue])
+
+    return (<div className={"w-" + width}><Range
+        min={min}
+        max={max}
+        step={1}
+        values={value}
+        onChange={(values) => {
+            if (values[0] != value[0]) {
+                onChange(values[0]);
+            }
+            setValue(values);
+        }}
+        renderTrack={({props, children}) => (
+            <div
+                onMouseDown={props.onMouseDown}
+                onTouchStart={props.onTouchStart}
+                style={{
+                    ...props.style,
+                    height: "36px",
+                    display: "flex",
+                    width: "100%",
+                }}
+            >
+                <div
+                    ref={props.ref}
+                    style={{
+                        height: "14px",
+                        width: "100%",
+                        borderRadius: "8px",
+                        background: getTrackBackground({
+                            values: value,
+                            colors: ["#234692", "#ccc"],
+                            min: min,
+                            max: max,
+                            rtl: false,
+                        }),
+                        alignSelf: "center",
+                    }}
+                >
+                    {children}
+                </div>
+            </div>
+        )}
+        renderThumb={({props}) => (
+            <div
+                {...props}
+                key={props.key}
+                style={{
+                    ...props.style,
+                    height: "24px",
+                    width: "24px",
+                    borderRadius: "20px",
+                    backgroundColor: "#FFF",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    boxShadow: "0px 0px 8px #AAA",
+                }}
+            />
+        )}
+    /></div>);
 }

@@ -2,7 +2,7 @@
 import {Account, type GameStateProps} from "../Data.tsx";
 import {useState} from "react";
 import Select from "react-select";
-import {GetReactSelectStyle, NumberInputAutoSelect, ReplaceYear} from "../Utils.tsx";
+import {GetReactSelectStyle, NumberInputAutoSelect, ReplaceYear, SingleRangeSlider} from "../Utils.tsx";
 import random from "random";
 import {Asset, type BigTicketItem, Car} from "../Character.tsx";
 
@@ -39,9 +39,8 @@ export function BigTicketItemsPage({gameState}: GameStateProps) {
     const [addBigTicketItem, setAddBigTicketItem] = useState(false);
     const [itemType, setItemType] = useState<ItemTypeSelectState>({selectedType: null});
     const [itemTypeOptions] = useState([new ItemType("Car"), new ItemType("House")]);
-    const [itemSubType, setItemSubType] = useState("");
     const [purchaseDesc, setPurchaseDesc] = useState("");
-    const [bigTicketBaseValue, setBigTicketBaseValue] = useState(0);
+    const [bigTicketCostValue, setBigTicketCostValue] = useState(5);
     const [pLoans, setPLoans] = useState(0);
     const [duration, setDuration] = useState<number>(gameState.character.getOldestCar().getAvgExpirationDate().getFullYear() - gameState.date.getFullYear());
     const [transferMoney, setTransferMoney] = useState(false);
@@ -53,6 +52,19 @@ export function BigTicketItemsPage({gameState}: GameStateProps) {
         .map(c => new PreviousAsset(c)), new PreviousAsset(null)];
     const [carReplace, setCarReplace] = useState<PreviousAssetSelect>({selectedAsset: carReplaceOptions[0]});
     const sellValue = oldAsset?.getSellValue(new Date(gameState.date.getFullYear() + duration, 0)) ?? 0;
+    let lowerPriceRange = 0;
+    let upperPriceRange = 0;
+    const calculatePriceRanges = (type: string) => {
+        if (type == "Car") {
+            lowerPriceRange = 30000 * gameState.inflation * gameState.getFutureInflation(duration);
+            upperPriceRange = 65000 * gameState.inflation * gameState.getFutureInflation(duration);
+        } else if (type == "House") {
+            lowerPriceRange = 300000 * gameState.inflation * gameState.getFutureInflation(duration);
+            upperPriceRange = 600000 * gameState.inflation * gameState.getFutureInflation(duration);
+        }
+    }
+    calculatePriceRanges(itemType.selectedType?.name ?? "");
+    const bigTicketBaseValue = lowerPriceRange + (upperPriceRange - lowerPriceRange) * bigTicketCostValue / 10;
 
     return (<div id="AddBigTicketItemButton">
             <button className="w-40 text-xl h-10 font-bold" onClick={() => setAddBigTicketItem(true)}>Add Item
@@ -81,7 +93,6 @@ export function BigTicketItemsPage({gameState}: GameStateProps) {
                             Out of pocket payment: {gameState.formatter.format(bt.targetBalance - bt.balance)}
                         </p>
                     ]}
-
                 </div>
             )}
             {addBigTicketItem ?
@@ -102,64 +113,19 @@ export function BigTicketItemsPage({gameState}: GameStateProps) {
                                 styles={GetReactSelectStyle<ItemType>()}
                                 onChange={(t: ItemType | null) => {
                                     setItemType({selectedType: t});
-                                    if (t?.name === "Car") {
-                                        setCarReplace({selectedAsset: carReplaceOptions[0]});
-                                        setOldAsset(carReplaceOptions[0].asset);
-                                    }
+                                    calculatePriceRanges(t?.name ?? "");
+                                    setBigTicketCostValue(5);
                                     gameState.render();
                                 }}/>
-                        {itemType.selectedType?.name == "Car" ?
-                            <div id="modalCarSelected" className="flex gap-4" key={0}>
-                                <div
-                                    className={"eventButton w-60! panelButton duration-300! " + (itemSubType == "Buy used" ? "bg-gray-400!" : "bg-gray-200!")}
-                                    onClick={() => {
-                                        setItemSubType("Buy used");
-                                        setBigTicketBaseValue(25945 * gameState.inflation);
-                                        setPurchaseDesc("Time to buy a car!");
-                                    }}>
-                                    <p className="text-gray-700">
-                                        Buy a used car
-                                    </p>
-                                </div>
-                                <div
-                                    className={"eventButton w-60! panelButton duration-300! " + (itemSubType == "Buy new" ? "bg-gray-400!" : "bg-gray-200!")}
-                                    onClick={() => {
-                                        setItemSubType("Buy new");
-                                        setBigTicketBaseValue(49814 * gameState.inflation);
-                                        setPurchaseDesc("Time to buy a car!");
-                                    }}>
-                                    <p className="text-gray-700">
-                                        Buy new car
-                                    </p>
-                                </div>
-                            </div>
-                            : <></>}
-                        {itemType.selectedType?.name == "House" ?
-                            <div className="flex gap-4" key={0}>
-                                <div
-                                    className={"eventButton w-60! panelButton duration-300! " + (itemSubType == "Buy " ? "bg-gray-400!" : "bg-gray-200!")}
-                                    onClick={() => {
-                                        setItemSubType("Buy ");
-                                        setBigTicketBaseValue(400000 * gameState.inflation);
-                                        setPurchaseDesc("You bought a house!");
-                                    }}>
-                                    <p className="text-gray-700">
-                                        Buy a house
-                                    </p>
-                                </div>
-                                <div
-                                    className={"eventButton w-60! panelButton duration-300! " + (itemSubType == "Build new" ? "bg-gray-400!" : "bg-gray-200!")}
-                                    onClick={() => {
-                                        setItemSubType("Build new");
-                                        setBigTicketBaseValue(420000 * gameState.inflation);
-                                        setPurchaseDesc("You built a new house!");
-                                    }}>
-                                    <p className="text-gray-700">
-                                        Build a house
-                                    </p>
-                                </div>
-                            </div>
-                            : <></>}
+                        <h3 className="text-gray-700 mt-2">Cost: {gameState.formatter.format(bigTicketBaseValue)}</h3>
+                        <SingleRangeSlider
+                            min={0}
+                            max={5}
+                            defaultValue={2}
+                            width={80}
+                            onChange={value => {
+                                setBigTicketCostValue(value);
+                            }}/>
                         {itemType.selectedType?.name == "Car" ?
                             <Select className="w-100"
                                     options={carReplaceOptions}
@@ -173,7 +139,7 @@ export function BigTicketItemsPage({gameState}: GameStateProps) {
                                         gameState.render();
                                     }}/>
                             : <></>}
-                        {itemType.selectedType?.name == "Car" && itemSubType != "" ? [
+                        {itemType.selectedType?.name.length ?? 0 > 0 ? [
                             <div className="flex gap-2" key={1}>
                                 <p className="text-gray-700">
                                     Years until the item is bought <input
@@ -183,13 +149,13 @@ export function BigTicketItemsPage({gameState}: GameStateProps) {
                                     value={duration}
                                     onChange={e => {
                                         if (!isNaN(e.target.valueAsNumber) && e.target.valueAsNumber >= 0) {
-                                            setDuration(e.target.valueAsNumber);
+                                            setDuration(Math.min(80, e.target.valueAsNumber));
+                                        } else if (isNaN(e.target.valueAsNumber)) {
+                                            setDuration(0);
                                         }
                                     }}
                                     type="number">
                                 </input></p></div>,
-                            <p className="text-gray-700"
-                               key={2}>Cost: {gameState.formatter.format(bigTicketBaseValue)}</p>,
                             (oldAsset && carReplace.selectedAsset ?
                                 <p className="text-gray-700" key={3}>Current car predicted trade in value
                                     : {gameState.formatter.format(sellValue)}</p> : <div key={3}></div>),
@@ -226,7 +192,7 @@ export function BigTicketItemsPage({gameState}: GameStateProps) {
                                             setAddBigTicketItem(false);
                                             const targetBalance = duration > 0 ? (bigTicketBaseValue - sellValue) * ((100 - pLoans) / 100) : 0;
                                             gameState.character.bigTicketItems.addBigTicketItem(
-                                                itemSubType + " " + itemType.selectedType!.name.toLowerCase(),
+                                                itemType.selectedType!.name.toLowerCase(),
                                                 purchaseDesc,
                                                 new Date(gameState.date.getFullYear() + duration,
                                                     random.int(0, 11),

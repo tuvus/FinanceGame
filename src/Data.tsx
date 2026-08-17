@@ -196,6 +196,10 @@ export class GameState {
         return this.pages[Math.min(this.page, this.pages.length - 1)];
     }
 
+    getFutureInflation(yearsInTheFuture: number) {
+        return Math.pow(1.021, yearsInTheFuture);
+    }
+
     nextPage = (): void => {
     };
     previousPage = (): void => {
