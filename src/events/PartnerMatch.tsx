@@ -44,7 +44,7 @@ export default function PartnerMatch({gameState}: GameStateProps) {
                 <ButtonNext style="w-50 text-xl h-10 p-1 font-bold mt-2" text="Awsome!" action={() => {
                     gameState.character.partnerFirstName = firstName;
                     gameState.character.partnerLastName = lastName;
-                    gameState.character.partnerAge = gameState.character.age + random.int(-3,3);
+                    gameState.character.partnerAge = gameState.character.age + random.int(-3, 3);
                     gameState.character.satisfaction += 5;
                     const partnerSalary = (gameState.character.education == "Bachelors" ? 78000 : (gameState.character.education == "Associates" ? 57000 : (gameState.character.education == "Trade School" ? 53000 : 48000))) * gameState.inflation * random.float(.9, 1.1);
                     const partnerLoans = (gameState.character.education == "Bachelors" ? 24000 : (gameState.character.education == "Associates" ? 8000 : (gameState.character.education == "Trade School" ? 9000 : 0))) * gameState.inflation * random.float(.9, 1.1);
@@ -123,39 +123,40 @@ export default function PartnerMatch({gameState}: GameStateProps) {
                                                     <p className="text-gray-700">{gameState.formatter.format(500 * gameState.inflation)}</p>
                                                     <p className="text-gray-700">Family and close friends</p>
                                                 </div>
-                                                <div
-                                                    className="eventButton panelButton"
-                                                    onClick={() => {
-                                                        gameState.character.satisfaction += 1;
-                                                        gameState.character.payMoney(28000 * gameState.inflation);
-                                                        gameState.lifeEventManager!.addEvent(new LifeEvent("Wedding day", gameState.getRandomDateFromGameYear(3),
-                                                            <div className="flex w-full justify-center">
-                                                                <div className="flex flex-col items-center w-3/4">
-                                                                    <p>
-                                                                        Wow, the wedding really flew by!
-                                                                    </p>
-                                                                    <p>
-                                                                        The wedding was a blast! Your family, friends
-                                                                        and distant relatives traveled to congratulate
-                                                                        you two on your marriage. You met some friends
-                                                                        that you hadn't seen since high school! Now you
-                                                                        have some gifts to open.
-                                                                    </p>
-                                                                    <ButtonNext
-                                                                        style="w-50 text-xl h-10 p-1 font-bold mt-2"
-                                                                        text="Awsome!" action={() => {
-                                                                        gameState.character.satisfaction += 1;
-                                                                        gameState.character.addMoney(1000 * random.float(.9, .11) * gameState.inflation);
-                                                                        gameState.lifeEventManager!.nextEvent();
-                                                                    }}/>
-                                                                </div>
-                                                            </div>, true));
-                                                        gameState.lifeEventManager!.nextEvent();
-                                                    }}>
-                                                    <h3 className="text-gray-700 font-bold">Sizable wedding</h3>
-                                                    <p className="text-gray-700">{gameState.formatter.format(28000 * gameState.inflation)}</p>
-                                                    <p className="text-gray-700">~100 people</p>
-                                                </div>
+                                                <ButtonNext style="eventButton panelButton" child={
+                                                    <div className="flex flex-col">
+                                                        <h3 className="text-gray-700 font-bold">Sizable wedding</h3>
+                                                        <p className="text-gray-700">{gameState.formatter.format(28000 * gameState.inflation)}</p>
+                                                        <p className="text-gray-700">~100 people</p>
+                                                    </div>
+                                                } action={() => {
+                                                    gameState.character.satisfaction += 1;
+                                                    gameState.character.payMoney(28000 * gameState.inflation);
+                                                    gameState.lifeEventManager!.addEvent(new LifeEvent("Wedding day", gameState.getRandomDateFromGameYear(3),
+                                                        <div className="flex w-full justify-center">
+                                                            <div className="flex flex-col items-center w-3/4">
+                                                                <p>
+                                                                    Wow, the wedding really flew by!
+                                                                </p>
+                                                                <p>
+                                                                    The wedding was a blast! Your family, friends
+                                                                    and distant relatives traveled to congratulate
+                                                                    you two on your marriage. You met some friends
+                                                                    that you hadn't seen since high school! Now you
+                                                                    have some gifts to open.
+                                                                </p>
+                                                                <ButtonNext
+                                                                    style="w-50 text-xl h-10 p-1 font-bold mt-2"
+                                                                    text="Awsome!" action={() => {
+                                                                    gameState.character.satisfaction += 1;
+                                                                    gameState.character.addMoney(1000 * random.float(.9, .11) * gameState.inflation);
+                                                                    gameState.lifeEventManager!.nextEvent();
+                                                                }}/>
+                                                            </div>
+                                                        </div>, true));
+                                                    gameState.lifeEventManager!.nextEvent();
+
+                                                }}/>
                                                 <div
                                                     className="eventButton panelButton"
                                                     onClick={() => {
@@ -192,8 +193,7 @@ export default function PartnerMatch({gameState}: GameStateProps) {
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                    , true));
+                                    </div>, true));
                             }}/>
                         </div>, true));
                 }}></ButtonNext>

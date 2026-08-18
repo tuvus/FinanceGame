@@ -1,5 +1,5 @@
 import {type GroupBase, type StylesConfig} from "react-select";
-import React, {useEffect, useState} from "react";
+import React, {type ReactNode, useEffect, useState} from "react";
 import {marriedTaxBrackets, singleTaxBrackets} from "./Constants.tsx";
 import {getTrackBackground, Range} from "react-range";
 
@@ -58,10 +58,10 @@ export function CopyDate(date: Date) {
 }
 
 export type ButtonNextProps = {
-    style: string; text: string; action: () => void;
+    style: string; text?: string | null; child?: ReactNode | null; action: () => void;
 }
 
-export function ButtonNext({style, text, action}: ButtonNextProps) {
+export function ButtonNext({style, text, child, action}: ButtonNextProps) {
     const keyPressed = ((e: KeyboardEvent) => {
         if (e.key == "n") {
             action();
@@ -78,6 +78,7 @@ export function ButtonNext({style, text, action}: ButtonNextProps) {
     return (
         <button className={style} onClick={action}>
             {text}
+            {child ? child : <></>}
         </button>
     );
 }

@@ -164,402 +164,403 @@ function GamePage({fname, lname, tutorial}: GameProps) {
 
 
     const [lifeEventManager] = useState(new LifeEventManager(gameState.s, nextYear, render, [
-        new LifeEvent("Education", gameState.s.date, <>
-            <h2>Choose your education path</h2>
-            <div className="flex justify-center gap-8 mt-6">
-                <div className="eventButton panelButton"
-                     onClick={() => {
-                         const previousExpenses = character.monthlyLivingExpenses;
-                         character.savingsAccount.balance = 30000 * random.float(.9, 1.1);
-                         endYear();
-                         character.salary = 42000 * random.float(.95, 1.1);
-                         character.monthlyLivingExpenses = previousExpenses;
-                         endYear();
-                         endYear();
-                         endYear();
-                         endYear();
-                         character.salary = 48000 * random.float(1, 1.1);
-                         character.satisfaction = 35 * random.float(.9, 1.3);
-                         character.pdiscretionary = 10;
-                         character.ptrips = 2;
-                         lifeEventManager.nextEvent();
-                     }}>
-                    <h3 className="text-gray-700 font-bold">High School</h3>
-                    <p className="text-gray-700">Graduates that go straight into the workforce start building their
-                        wealth earlier and don't have to spend money on education.</p>
-                </div>
-                <div className="eventButton panelButton"
-                     onClick={() => {
-                         const previousExpenses = character.monthlyLivingExpenses;
-                         character.monthlyLivingExpenses = new Map();
-                         character.savingsAccount.balance = 30000 * random.float(.9, 1.1);
-                         endYear();
-                         [
-                             {name: "Rent", amount: 500},
-                             {name: "Utilities", amount: 50},
-                             {name: "Groceries", amount: 150},
-                             {name: "Health Insurance", amount: 200},
-                         ].forEach(m => character.monthlyLivingExpenses.set(m.name, m.amount))
+            new LifeEvent("Education", gameState.s.date, <>
+                <h2>Choose your education path</h2>
+                <div className="flex justify-center gap-8 mt-6">
+                    <div className="eventButton panelButton"
+                         onClick={() => {
+                             const previousExpenses = character.monthlyLivingExpenses;
+                             character.savingsAccount.balance = 30000 * random.float(.9, 1.1);
+                             endYear();
+                             character.salary = 42000 * random.float(.95, 1.1);
+                             character.monthlyLivingExpenses = previousExpenses;
+                             endYear();
+                             endYear();
+                             endYear();
+                             endYear();
+                             character.salary = 48000 * random.float(1, 1.1);
+                             character.satisfaction = 35 * random.float(.9, 1.3);
+                             character.pdiscretionary = 10;
+                             character.ptrips = 2;
+                             lifeEventManager.nextEvent();
+                         }}>
+                        <h3 className="text-gray-700 font-bold">High School</h3>
+                        <p className="text-gray-700">Graduates that go straight into the workforce start building their
+                            wealth earlier and don't have to spend money on education.</p>
+                    </div>
+                    <div className="eventButton panelButton"
+                         onClick={() => {
+                             const previousExpenses = character.monthlyLivingExpenses;
+                             character.monthlyLivingExpenses = new Map();
+                             character.savingsAccount.balance = 30000 * random.float(.9, 1.1);
+                             endYear();
+                             [
+                                 {name: "Rent", amount: 500},
+                                 {name: "Utilities", amount: 50},
+                                 {name: "Groceries", amount: 150},
+                                 {name: "Health Insurance", amount: 200},
+                             ].forEach(m => character.monthlyLivingExpenses.set(m.name, m.amount))
 
-                         character.addLoan(new Loan("Trade School Debt", 10000 * random.float(.9, 1.1), character.savingsAccount, 1.067, true));
-                         character.savingsAccount.balance += 10000;
-                         character.loans[0].balance += 10000;
-                         endYear();
-                         character.loans[0].balance += 10000 * random.float(.9, 1.1);
-                         endYear();
-                         character.salary = 48000 * random.float(.9, 1.1);
-                         character.monthlyLivingExpenses = previousExpenses;
-                         endYear();
-                         endYear();
-                         character.salary = 53000 * random.float(1, 1.1);
-                         character.satisfaction = 37 * random.float(.9, 1.3);
-                         character.pdiscretionary = 10;
-                         character.ptrips = 2;
-                         character.education = "Trade School";
-                         lifeEventManager.nextEvent();
-                     }}>
-                    <h3 className="text-gray-700 font-bold">Trade School</h3>
-                    <p className="text-gray-700">Trade school is around a one year program that emphasizes going into
-                        the workforce early. The practical experience from a trade school certificate allows entry
-                        into more specialized work areas.</p>
-                </div>
-                <div className="eventButton panelButton"
-                     onClick={() => {
-                         lifeEventManager.replaceEvent(new LifeEvent("Choosing a College", gameState.s.date, <>
-                             <div className="flex justify-center gap-8">
-                                 <div className="eventButton panelButton"
-                                      onClick={() => {
-                                          const previousExpenses = character.monthlyLivingExpenses;
-                                          character.monthlyLivingExpenses = new Map();
-                                          character.savingsAccount.balance = 30000 * random.float(.9, 1.1);
-                                          endYear();
-                                          [
-                                              {name: "Rent", amount: 500},
-                                              {name: "Utilities", amount: 50},
-                                              {name: "Groceries", amount: 150},
-                                              {name: "Health Insurance", amount: 200},
-                                          ].forEach(m => character.monthlyLivingExpenses.set(m.name, m.amount))
+                             character.addLoan(new Loan("Trade School Debt", 10000 * random.float(.9, 1.1), character.savingsAccount, 1.067, true));
+                             character.savingsAccount.balance += 10000;
+                             character.loans[0].balance += 10000;
+                             endYear();
+                             character.loans[0].balance += 10000 * random.float(.9, 1.1);
+                             endYear();
+                             character.salary = 48000 * random.float(.9, 1.1);
+                             character.monthlyLivingExpenses = previousExpenses;
+                             endYear();
+                             endYear();
+                             character.salary = 53000 * random.float(1, 1.1);
+                             character.satisfaction = 37 * random.float(.9, 1.3);
+                             character.pdiscretionary = 10;
+                             character.ptrips = 2;
+                             character.education = "Trade School";
+                             lifeEventManager.nextEvent();
+                         }}>
+                        <h3 className="text-gray-700 font-bold">Trade School</h3>
+                        <p className="text-gray-700">Trade school is around a one year program that emphasizes going into
+                            the workforce early. The practical experience from a trade school certificate allows entry
+                            into more specialized work areas.</p>
+                    </div>
+                    <div className="eventButton panelButton"
+                         onClick={() => {
+                             lifeEventManager.replaceEvent(new LifeEvent("Choosing a College", gameState.s.date, <>
+                                 <div className="flex justify-center gap-8">
+                                     <div className="eventButton panelButton"
+                                          onClick={() => {
+                                              const previousExpenses = character.monthlyLivingExpenses;
+                                              character.monthlyLivingExpenses = new Map();
+                                              character.savingsAccount.balance = 30000 * random.float(.9, 1.1);
+                                              endYear();
+                                              [
+                                                  {name: "Rent", amount: 500},
+                                                  {name: "Utilities", amount: 50},
+                                                  {name: "Groceries", amount: 150},
+                                                  {name: "Health Insurance", amount: 200},
+                                              ].forEach(m => character.monthlyLivingExpenses.set(m.name, m.amount))
 
-                                          character.addLoan(new Loan("College Debt", 4000 * random.float(.9, 1.1), character.savingsAccount, 1.067, true));
-                                          character.savingsAccount.balance += 10000;
-                                          character.loans[0].balance += 10000;
-                                          endYear();
-                                          character.loans[0].balance += 4000 * random.float(.9, 1.1);
-                                          endYear();
-                                          character.monthlyLivingExpenses = previousExpenses;
-                                          character.salary = 52000 * random.float(.90, 1.1);
-                                          endYear();
-                                          endYear();
-                                          character.salary = 57000 * random.float(1, 1.1);
-                                          character.satisfaction = 38 * random.float(.9, 1.3);
-                                          character.pdiscretionary = 10;
-                                          character.ptrips = 2;
-                                          character.education = "Associates";
-                                          lifeEventManager.nextEvent();
-                                      }}>
-                                     <h3 className="text-gray-700 font-bold">Community College</h3>
-                                     <p className="text-gray-700">An associates degree is a two year program that
-                                         balances college education and going into the workforce early. It is less
-                                         expensive than other colleges, but won't be as specialized.</p>
+                                              character.addLoan(new Loan("College Debt", 4000 * random.float(.9, 1.1), character.savingsAccount, 1.067, true));
+                                              character.savingsAccount.balance += 10000;
+                                              character.loans[0].balance += 10000;
+                                              endYear();
+                                              character.loans[0].balance += 4000 * random.float(.9, 1.1);
+                                              endYear();
+                                              character.monthlyLivingExpenses = previousExpenses;
+                                              character.salary = 52000 * random.float(.90, 1.1);
+                                              endYear();
+                                              endYear();
+                                              character.salary = 57000 * random.float(1, 1.1);
+                                              character.satisfaction = 38 * random.float(.9, 1.3);
+                                              character.pdiscretionary = 10;
+                                              character.ptrips = 2;
+                                              character.education = "Associates";
+                                              lifeEventManager.nextEvent();
+                                          }}>
+                                         <h3 className="text-gray-700 font-bold">Community College</h3>
+                                         <p className="text-gray-700">An associates degree is a two year program that
+                                             balances college education and going into the workforce early. It is less
+                                             expensive than other colleges, but won't be as specialized.</p>
+                                     </div>
+                                     <div className="eventButton panelButton"
+                                          onClick={() => {
+                                              const previousExpenses = character.monthlyLivingExpenses;
+                                              character.monthlyLivingExpenses = new Map();
+                                              character.savingsAccount.balance = 30000 * random.float(.9, 1.1);
+                                              endYear();
+                                              [
+                                                  {name: "Rent", amount: 500},
+                                                  {name: "Utilities", amount: 50},
+                                                  {name: "Groceries", amount: 150},
+                                                  {name: "Health Insurance", amount: 200},
+                                              ].forEach(m => character.monthlyLivingExpenses.set(m.name, m.amount))
+
+                                              character.addLoan(new Loan("College Debt", 20000 * random.float(.9, 1.1), character.savingsAccount, 1.067, true));
+                                              character.savingsAccount.balance += 30000;
+                                              character.loans[0].balance += 30000;
+                                              endYear();
+                                              character.loans[0].balance += 20000 * random.float(.9, 1.1);
+                                              endYear();
+                                              character.loans[0].balance += 20000 * random.float(.9, 1.1);
+                                              character.savingsAccount.balance += 25000;
+                                              character.loans[0].balance += 25000;
+                                              endYear();
+                                              character.loans[0].balance += 20000 * random.float(.9, 1.1);
+                                              character.savingsAccount.balance += 20000;
+                                              character.loans[0].balance += 20000;
+                                              endYear();
+                                              character.monthlyLivingExpenses = previousExpenses;
+                                              character.salary = 80000 * random.float(1, 1.3);
+                                              character.satisfaction = 42 * random.float(.9, 1.3);
+                                              character.pdiscretionary = 10;
+                                              character.ptrips = 2;
+                                              character.education = "Bachelors";
+                                              lifeEventManager.nextEvent();
+                                          }}>
+                                         <h3 className="text-gray-700 font-bold">Public University</h3>
+                                         <p className="text-gray-700">A bachelors degree is a four year program that focuses
+                                             on a specific topic. Public universities provide more depth, but can be
+                                             expensive.</p>
+                                     </div>
+                                     <div className="eventButton panelButton"
+                                          onClick={() => {
+                                              const previousExpenses = character.monthlyLivingExpenses;
+                                              character.monthlyLivingExpenses = new Map();
+                                              character.savingsAccount.balance = 30000 * random.float(.9, 1.1);
+                                              endYear();
+                                              [
+                                                  {name: "Rent", amount: 500},
+                                                  {name: "Utilities", amount: 50},
+                                                  {name: "Groceries", amount: 150},
+                                                  {name: "Health Insurance", amount: 200},
+                                              ].forEach(m => character.monthlyLivingExpenses.set(m.name, m.amount))
+
+                                              character.addLoan(new Loan("College Debt", 50000 * random.float(.9, 1.1), character.savingsAccount, 1.067, true));
+                                              character.savingsAccount.balance += 20000;
+                                              character.loans[0].balance += 20000;
+                                              endYear();
+                                              character.loans[0].balance += 50000 * random.float(.9, 1.1);
+                                              character.savingsAccount.balance += 20000;
+                                              character.loans[0].balance += 20000;
+                                              endYear();
+                                              character.loans[0].balance += 50000 * random.float(.9, 1.1);
+                                              character.savingsAccount.balance += 30000;
+                                              character.loans[0].balance += 30000;
+                                              endYear();
+                                              character.loans[0].balance += 50000 * random.float(.9, 1.1);
+                                              character.savingsAccount.balance += 30000;
+                                              character.loans[0].balance += 30000;
+                                              endYear();
+                                              character.monthlyLivingExpenses = previousExpenses;
+                                              character.salary = 83000 * random.float(1, 1.3);
+                                              character.satisfaction = 44 * random.float(.9, 1.3);
+                                              character.pdiscretionary = 10;
+                                              character.ptrips = 2;
+                                              character.education = "Bachelors";
+                                              lifeEventManager.nextEvent();
+                                          }}>
+                                         <h3 className="text-gray-700 font-bold">Private University</h3>
+                                         <p className="text-gray-700">A bachelors degree is a four year program that focuses
+                                             on a specific topic. While private universities are expensive they
+                                             are often more prestigious.</p>
+                                     </div>
                                  </div>
-                                 <div className="eventButton panelButton"
-                                      onClick={() => {
-                                          const previousExpenses = character.monthlyLivingExpenses;
-                                          character.monthlyLivingExpenses = new Map();
-                                          character.savingsAccount.balance = 30000 * random.float(.9, 1.1);
-                                          endYear();
-                                          [
-                                              {name: "Rent", amount: 500},
-                                              {name: "Utilities", amount: 50},
-                                              {name: "Groceries", amount: 150},
-                                              {name: "Health Insurance", amount: 200},
-                                          ].forEach(m => character.monthlyLivingExpenses.set(m.name, m.amount))
-
-                                          character.addLoan(new Loan("College Debt", 20000 * random.float(.9, 1.1), character.savingsAccount, 1.067, true));
-                                          character.savingsAccount.balance += 30000;
-                                          character.loans[0].balance += 30000;
-                                          endYear();
-                                          character.loans[0].balance += 20000 * random.float(.9, 1.1);
-                                          endYear();
-                                          character.loans[0].balance += 20000 * random.float(.9, 1.1);
-                                          character.savingsAccount.balance += 25000;
-                                          character.loans[0].balance += 25000;
-                                          endYear();
-                                          character.loans[0].balance += 20000 * random.float(.9, 1.1);
-                                          character.savingsAccount.balance += 20000;
-                                          character.loans[0].balance += 20000;
-                                          endYear();
-                                          character.monthlyLivingExpenses = previousExpenses;
-                                          character.salary = 80000 * random.float(1, 1.3);
-                                          character.satisfaction = 42 * random.float(.9, 1.3);
-                                          character.pdiscretionary = 10;
-                                          character.ptrips = 2;
-                                          character.education = "Bachelors";
-                                          lifeEventManager.nextEvent();
-                                      }}>
-                                     <h3 className="text-gray-700 font-bold">Public University</h3>
-                                     <p className="text-gray-700">A bachelors degree is a four year program that focuses
-                                         on a specific topic. Public universities provide more depth, but can be
-                                         expensive.</p>
-                                 </div>
-                                 <div className="eventButton panelButton"
-                                      onClick={() => {
-                                          const previousExpenses = character.monthlyLivingExpenses;
-                                          character.monthlyLivingExpenses = new Map();
-                                          character.savingsAccount.balance = 30000 * random.float(.9, 1.1);
-                                          endYear();
-                                          [
-                                              {name: "Rent", amount: 500},
-                                              {name: "Utilities", amount: 50},
-                                              {name: "Groceries", amount: 150},
-                                              {name: "Health Insurance", amount: 200},
-                                          ].forEach(m => character.monthlyLivingExpenses.set(m.name, m.amount))
-
-                                          character.addLoan(new Loan("College Debt", 50000 * random.float(.9, 1.1), character.savingsAccount, 1.067, true));
-                                          character.savingsAccount.balance += 20000;
-                                          character.loans[0].balance += 20000;
-                                          endYear();
-                                          character.loans[0].balance += 50000 * random.float(.9, 1.1);
-                                          character.savingsAccount.balance += 20000;
-                                          character.loans[0].balance += 20000;
-                                          endYear();
-                                          character.loans[0].balance += 50000 * random.float(.9, 1.1);
-                                          character.savingsAccount.balance += 30000;
-                                          character.loans[0].balance += 30000;
-                                          endYear();
-                                          character.loans[0].balance += 50000 * random.float(.9, 1.1);
-                                          character.savingsAccount.balance += 30000;
-                                          character.loans[0].balance += 30000;
-                                          endYear();
-                                          character.monthlyLivingExpenses = previousExpenses;
-                                          character.salary = 83000 * random.float(1, 1.3);
-                                          character.satisfaction = 44 * random.float(.9, 1.3);
-                                          character.pdiscretionary = 10;
-                                          character.ptrips = 2;
-                                          character.education = "Bachelors";
-                                          lifeEventManager.nextEvent();
-                                      }}>
-                                     <h3 className="text-gray-700 font-bold">Private University</h3>
-                                     <p className="text-gray-700">A bachelors degree is a four year program that focuses
-                                         on a specific topic. While private universities are expensive they
-                                         are often more prestigious.</p>
-                                 </div>
-                             </div>
-                         </>, true));
-                     }}>
-                    <h3 className="text-gray-700 font-bold">College</h3>
-                    <p className="text-gray-700">Obtaining an associates or bachelors degree allows entry into
-                        specialized areas. College degrees can be expensive and may need to be paid through loans.</p>
-                </div>
-            </div>
-        </>, true),
-        new LifeEvent("Moving Out", gameState.s.date, <>
-            <h2>Its time to start your journey!</h2>
-        </>),
-        new LifeEvent("Financial Planning", gameState.s.date, <div className="flex flex-col w-full items-center">
-            <div className="flex flex-col items-center gap-2 w-3/4">
-                <h2>As an adult you need to plan your finances and how you handle your money.</h2>
-                <p>Now that you are on your own there are many things you would like to do: Buy a car, buy a house, go
-                    on vacations, and maybe even start a family. None of these come for free, you will need to
-                    efficiently allocate the money you make from your new job in order to achieve these goals. In
-                    January of each year you will sit down and plan your finances for the upcoming year. It's time to
-                    take what you have learned about money and plan your adventure! But be careful and keep some money
-                    in savings, life has it's twists and turns!</p>
-                <ButtonNext
-                    style="w-50 text-xl h-10 p-1 font-bold mt-2"
-                    text="Ready to start!" action={
-                    () => {
-                        character.addGoal(new Goal("Plan Finances", "Plan your finances for the year such that you will end with a positive yearly balance.", new Date(gameState.s.date.getFullYear() + 1, 0),
-                            (gameState, goal) => character.previousYearlyBalance > 0
-                                && gameState.date.getFullYear() >= goal.targetDate.getFullYear(),
-                            (gameState) => {
-                                gameState.character.satisfaction += 1;
-                                gameState.character.milesDriven = 1000;
-                                gameState.lifeEventManager!.addEvent(
-                                    new LifeEvent("First plan!", new Date(gameState.date.getFullYear(), 0, 21),
-                                        <div className="flex flex-col w-full items-center">
-                                            <p className="w-3/4">Congratulations on finishing your first year plan, it
-                                                wasn't so hard after all! With your plan you can now enjoy your year
-                                                without
-                                                having to worry about your financing. Now its time to stick to your
-                                                plan!</p>
-                                        </div>
-                                    ));
-                            }));
-                        gameState.s.lifeEventManager!.nextEvent();
-                    }}/>
-            </div>
-        </div>, true),
-        new LifeEvent("Buying a Car", gameState.s.getRandomDateFromGameYear(1),
-            (<div className="flex flex-col items-center gap-4">
-                <p className="w-200">Your car is nearing the end of it's lifespan, and it is about time to buy a new
-                    one. Luckily, your parents have offered to subsidise your purchase in celebration of your new job.
-                    It is time to decide to get a new or used car, and how decked-out it is.</p>
-                <ButtonNext style="w-60 text-xl h-10 font-bold" text="Choose a car" action={() => {
-                    lifeEventManager.replaceEvent(new LifeEvent("Choosing a car", gameState.s.date,
-                        <div className="flex flex-col items-center w-full">
-                            <div className="flex flex-col items-center gap-4 w-3/4">
-                                <p>Your parents gave you {formatter.format(30000 * gameState.s.inflation)} to
-                                    buy a car. Choose the type of car you want to buy, you may also buy a more
-                                    expensive car by using cash from your savings. You are allowed to keep the
-                                    money that you don't
-                                    spend on the car.</p>
-                                <CarShop gameState={gameState.s}
-                                         action={(gameState: GameState) => gameState.lifeEventManager!.nextEvent()}
-                                         allocatedMoney={30000 * gameState.s.inflation}
-                                         garage={0}
-                                />
-                            </div>
-                        </div>, true
-                    ));
-                }}/>
-            </div>), true),
-        new LifeEvent("Finding a partner", gameState.s.getRandomDateFromGameYear(1),
-            <div className="flex flex-col w-full items-center">
-                <div className="flex flex-col justify-center gap-2 w-3/4">
-                    <p>Now that you have settled in its time to focus on your life goals: finding a partner. You've had
-                        some experience search in the past but now that you are settled, its time to get real. Who are
-                        you searching for?</p>
-                    <div className="flex justify-center gap-8 mt-6">
-                        <div
-                            className="eventButton panelButton"
-                            onClick={() => {
-                                gameState.s.character.partnerAspiration = "Boyfriend";
-                                gameState.s.character.satisfaction += 1;
-                                gameState.s.character.partnerPronoun = "he";
-                                gameState.s.character.partnerPronoun2 = "him";
-                                lifeEventManager.replaceEvent(new LifeEvent("Searching for a boyfriend", gameState.s.date,
-                                    <div className="flex flex-col w-full items-center">
-                                        <div className="flex flex-col items-center gap-2 w-3/4">
-                                            <p>You double your efforts searching for the right match, partaking in more
-                                                social gatherings and go to local events. You might not have found him
-                                                yet, but at least you can enjoying your time searching.</p>
-                                        </div>
-                                    </div>, false))
-                                lifeEventManager.addEvent(new LifeEvent("Its a match!", gameState.s.getRandomDateFromGameYear(2),
-                                    <PartnerMatch gameState={gameState.s}/>, true));
-                            }}>
-                            <p className="text-gray-700">Boyfriend</p>
-                        </div>
-                        <div
-                            className="eventButton panelButton"
-                            onClick={() => {
-                                gameState.s.character.partnerAspiration = "Girlfriend";
-                                gameState.s.character.satisfaction += 1;
-                                gameState.s.character.partnerPronoun = "she";
-                                gameState.s.character.partnerPronoun2 = "her";
-                                lifeEventManager.replaceEvent(new LifeEvent("Searching for a girlfriend", gameState.s.date,
-                                    <div className="flex flex-col w-full items-center">
-                                        <div className="flex flex-col items-center gap-2 w-3/4">
-                                            <p>You double your efforts searching for the right match, partaking in more
-                                                social gatherings and go to local events. You might not have found her
-                                                yet, but at least you can enjoying your time searching.</p>
-                                        </div>
-                                    </div>, false))
-                                lifeEventManager.addEvent(new LifeEvent("Its a match!", gameState.s.getRandomDateFromGameYear(2),
-                                    <PartnerMatch gameState={gameState.s}/>, true));
-                            }}>
-                            <p className="text-gray-700">Girlfriend</p>
-                        </div>
-                        <div
-                            className="eventButton panelButton"
-                            onClick={() => {
-                                gameState.s.character.partnerAspiration = "Diverse";
-                                gameState.s.character.satisfaction += 1;
-                                gameState.s.character.partnerPronoun = "they";
-                                gameState.s.character.partnerPronoun2 = "them";
-                                lifeEventManager.replaceEvent(new LifeEvent("Searching for a partner", gameState.s.date,
-                                    <div className="flex flex-col w-full items-center">
-                                        <div className="flex flex-col items-center gap-2 w-3/4">
-                                            <p>You double your efforts searching for the right match, partaking in more
-                                                social gatherings and go to local events. You might not have found them
-                                                yet, but at least you can enjoying your time searching.</p>
-                                        </div>
-                                    </div>, false))
-                                lifeEventManager.addEvent(new LifeEvent("Its a match!", gameState.s.getRandomDateFromGameYear(2),
-                                    <PartnerMatch gameState={gameState.s}/>, true));
-                            }}>
-                            <p className="text-gray-700">Diverse</p>
-                        </div>
-                        <div
-                            className="eventButton panelButton"
-                            onClick={() => {
-                                gameState.s.character.partnerAspiration = "Pet";
-                                gameState.s.character.satisfaction += 3;
-                                gameState.s.character.payMoney(1000 * gameState.s.inflation);
-                                lifeEventManager.nextEvent();
-                            }}>
-                            <p className="text-gray-700">Pet</p>
-                        </div>
+                             </>, true));
+                         }}>
+                        <h3 className="text-gray-700 font-bold">College</h3>
+                        <p className="text-gray-700">Obtaining an associates or bachelors degree allows entry into
+                            specialized areas. College degrees can be expensive and may need to be paid through loans.</p>
                     </div>
                 </div>
-
+            </>, true),
+            new LifeEvent("Moving Out", gameState.s.date, <>
+                <h2>Its time to start your journey!</h2>
+            </>),
+            new LifeEvent("Financial Planning", gameState.s.date, <div className="flex flex-col w-full items-center">
+                <div className="flex flex-col items-center gap-2 w-3/4">
+                    <h2>As an adult you need to plan your finances and how you handle your money.</h2>
+                    <p>Now that you are on your own there are many things you would like to do: Buy a car, buy a house, go
+                        on vacations, and maybe even start a family. None of these come for free, you will need to
+                        efficiently allocate the money you make from your new job in order to achieve these goals. In
+                        January of each year you will sit down and plan your finances for the upcoming year. It's time to
+                        take what you have learned about money and plan your adventure! But be careful and keep some money
+                        in savings, life has it's twists and turns!</p>
+                    <ButtonNext
+                        style="w-50 text-xl h-10 p-1 font-bold mt-2"
+                        text="Ready to start!" action={
+                        () => {
+                            character.addGoal(new Goal("Plan Finances", "Plan your finances for the year such that you will end with a positive yearly balance.", new Date(gameState.s.date.getFullYear() + 1, 0),
+                                (gameState, goal) => character.previousYearlyBalance > 0
+                                    && gameState.date.getFullYear() >= goal.targetDate.getFullYear(),
+                                (gameState) => {
+                                    gameState.character.satisfaction += 1;
+                                    gameState.character.milesDriven = 1000;
+                                    gameState.lifeEventManager!.addEvent(
+                                        new LifeEvent("First plan!", new Date(gameState.date.getFullYear(), 0, 21),
+                                            <div className="flex flex-col w-full items-center">
+                                                <p className="w-3/4">Congratulations on finishing your first year plan, it
+                                                    wasn't so hard after all! With your plan you can now enjoy your year
+                                                    without
+                                                    having to worry about your financing. Now its time to stick to your
+                                                    plan!</p>
+                                            </div>
+                                        ));
+                                }));
+                            gameState.s.lifeEventManager!.nextEvent();
+                        }}/>
+                </div>
             </div>, true),
-        new LifeEvent("Finding a place to live", gameState.s.getRandomDateFromGameYear(5),
-            <div className="flex flex-col w-full items-center">
-                <div className="flex flex-col justify-center gap-2 w-3/4">
-                    {character.isMarried() ?
-                        <p>Now that you are married you and {character.partnerFirstName} would like to find a more
-                            comfortable place to live. </p>
-                        :
-                        <p>Now that you have settled down you would like to find a more comfortable place to live.</p>}
-                    <p>Unfortunately houses are very expensive, most people take out a
-                        20-40 year loan so that they don't have to wait until they are older. It may be wise,
-                        however, to consider a cheaper, temporary option to save up some cash for the house. Note that
-                        when buying a mobile home or condo you own the property and can sell it to pay for a future
-                        property.</p>
-                    <div className="flex justify-center gap-8 mt-6">
-                        <div
-                            className="eventButton panelButton"
-                            onClick={() => {
-                                character.monthlyLivingExpenses.set("Rent", 1800 * gameState.s.inflation);
-                                character.housing = "Apartment";
-                            }}>
-                            <p className="text-gray-700">Move to a bigger apartment</p>
+            new LifeEvent("Buying a Car", gameState.s.getRandomDateFromGameYear(1),
+                (<div className="flex flex-col items-center gap-4">
+                    <p className="w-200">Your car is nearing the end of it's lifespan, and it is about time to buy a new
+                        one. Luckily, your parents have offered to subsidise your purchase in celebration of your new job.
+                        It is time to decide to get a new or used car, and how decked-out it is.</p>
+                    <ButtonNext style="w-60 text-xl h-10 font-bold" text="Choose a car" action={() => {
+                        lifeEventManager.replaceEvent(new LifeEvent("Choosing a car", gameState.s.date,
+                            <div className="flex flex-col items-center w-full">
+                                <div className="flex flex-col items-center gap-4 w-3/4">
+                                    <p>Your parents gave you {formatter.format(30000 * gameState.s.inflation)} to
+                                        buy a car. Choose the type of car you want to buy, you may also buy a more
+                                        expensive car by using cash from your savings. You are allowed to keep the
+                                        money that you don't
+                                        spend on the car.</p>
+                                    <CarShop gameState={gameState.s}
+                                             action={(gameState: GameState) => gameState.lifeEventManager!.nextEvent()}
+                                             allocatedMoney={30000 * gameState.s.inflation}
+                                             garage={0}
+                                    />
+                                </div>
+                            </div>, true
+                        ));
+                    }}/>
+                </div>), true),
+            new LifeEvent("Finding a partner", gameState.s.getRandomDateFromGameYear(1),
+                <div className="flex flex-col w-full items-center">
+                    <div className="flex flex-col justify-center gap-2 w-3/4">
+                        <p>Now that you have settled in its time to focus on your life goals: finding a partner. You've had
+                            some experience search in the past but now that you are settled, its time to get real. Who are
+                            you searching for?</p>
+                        <div className="flex justify-center gap-8 mt-6">
+                            <div
+                                className="eventButton panelButton"
+                                onClick={() => {
+                                    gameState.s.character.partnerAspiration = "Boyfriend";
+                                    gameState.s.character.satisfaction += 1;
+                                    gameState.s.character.partnerPronoun = "he";
+                                    gameState.s.character.partnerPronoun2 = "him";
+                                    lifeEventManager.replaceEvent(new LifeEvent("Searching for a boyfriend", gameState.s.date,
+                                        <div className="flex flex-col w-full items-center">
+                                            <div className="flex flex-col items-center gap-2 w-3/4">
+                                                <p>You double your efforts searching for the right match, partaking in more
+                                                    social gatherings and go to local events. You might not have found him
+                                                    yet, but at least you can enjoying your time searching.</p>
+                                            </div>
+                                        </div>, false))
+                                    lifeEventManager.addEvent(new LifeEvent("Its a match!", gameState.s.getRandomDateFromGameYear(2),
+                                        <PartnerMatch gameState={gameState.s}/>, true));
+                                }}>
+                                <p className="text-gray-700">Boyfriend</p>
+                            </div>
+                            <div
+                                className="eventButton panelButton"
+                                onClick={() => {
+                                    gameState.s.character.partnerAspiration = "Girlfriend";
+                                    gameState.s.character.satisfaction += 1;
+                                    gameState.s.character.partnerPronoun = "she";
+                                    gameState.s.character.partnerPronoun2 = "her";
+                                    lifeEventManager.replaceEvent(new LifeEvent("Searching for a girlfriend", gameState.s.date,
+                                        <div className="flex flex-col w-full items-center">
+                                            <div className="flex flex-col items-center gap-2 w-3/4">
+                                                <p>You double your efforts searching for the right match, partaking in more
+                                                    social gatherings and go to local events. You might not have found her
+                                                    yet, but at least you can enjoying your time searching.</p>
+                                            </div>
+                                        </div>, false))
+                                    lifeEventManager.addEvent(new LifeEvent("Its a match!", gameState.s.getRandomDateFromGameYear(2),
+                                        <PartnerMatch gameState={gameState.s}/>, true));
+                                }}>
+                                <p className="text-gray-700">Girlfriend</p>
+                            </div>
+                            <ButtonNext
+                                style="eventButton panelButton"
+                                child={<p className="text-gray-700">Diverse</p>}
+                                action={() => {
+                                    gameState.s.character.partnerAspiration = "Diverse";
+                                    gameState.s.character.satisfaction += 1;
+                                    gameState.s.character.partnerPronoun = "they";
+                                    gameState.s.character.partnerPronoun2 = "them";
+                                    lifeEventManager.replaceEvent(new LifeEvent("Searching for a partner", gameState.s.date,
+                                        <div className="flex flex-col w-full items-center">
+                                            <div className="flex flex-col items-center gap-2 w-3/4">
+                                                <p>You double your efforts searching for the right match, partaking in more
+                                                    social gatherings and go to local events. You might not have found them
+                                                    yet, but at least you can enjoying your time searching.</p>
+                                            </div>
+                                        </div>, false))
+                                    lifeEventManager.addEvent(new LifeEvent("Its a match!", gameState.s.getRandomDateFromGameYear(2),
+                                        <PartnerMatch gameState={gameState.s}/>, true));
+                                }}/>
+                            <div
+                                className="eventButton panelButton"
+                                onClick={() => {
+                                    gameState.s.character.partnerAspiration = "Pet";
+                                    gameState.s.character.satisfaction += 3;
+                                    gameState.s.character.payMoney(1000 * gameState.s.inflation);
+                                    lifeEventManager.nextEvent();
+                                }}>
+                                <p className="text-gray-700">Pet</p>
+                            </div>
                         </div>
                     </div>
-                    <div className="flex justify-center gap-8 mt-6">
-                        <div
-                            className="eventButton panelButton"
-                            onClick={() => {
-                                gameState.s.lifeEventManager!.replaceEvent(new LifeEvent("Buying a mobile home", gameState.s.date,
-                                    <BuyHousing gameState={gameState.s} avgCost={65000 * gameState.s.inflation}
-                                                type="Mobile Home"/>, true))
-                            }}>
-                            <p className="text-gray-700">Buy a mobile home</p>
-                            <p className="text-gray-700">Average
-                                cost: {formatter.format(65000 * gameState.s.inflation)}</p>
+                </div>,
+                true
+            ),
+            new LifeEvent("Finding a place to live", gameState.s.getRandomDateFromGameYear(5),
+                <div className="flex flex-col w-full items-center">
+                    <div className="flex flex-col justify-center gap-2 w-3/4">
+                        {character.isMarried() ?
+                            <p>Now that you are married you and {character.partnerFirstName} would like to find a more
+                                comfortable place to live. </p>
+                            :
+                            <p>Now that you have settled down you would like to find a more comfortable place to live.</p>}
+                        <p>Unfortunately houses are very expensive, most people take out a
+                            20-40 year loan so that they don't have to wait until they are older. It may be wise,
+                            however, to consider a cheaper, temporary option to save up some cash for the house. Note that
+                            when buying a mobile home or condo you own the property and can sell it to pay for a future
+                            property.</p>
+                        <div className="flex justify-center gap-8 mt-6">
+                            <div
+                                className="eventButton panelButton"
+                                onClick={() => {
+                                    character.monthlyLivingExpenses.set("Rent", 1800 * gameState.s.inflation);
+                                    character.housing = "Apartment";
+                                }}>
+                                <p className="text-gray-700">Move to a bigger apartment</p>
+                            </div>
+                        </div>
+                        <div className="flex justify-center gap-8 mt-6">
+                            <div
+                                className="eventButton panelButton"
+                                onClick={() => {
+                                    gameState.s.lifeEventManager!.replaceEvent(new LifeEvent("Buying a mobile home", gameState.s.date,
+                                        <BuyHousing gameState={gameState.s} avgCost={65000 * gameState.s.inflation}
+                                                    type="Mobile Home"/>, true))
+                                }}>
+                                <p className="text-gray-700">Buy a mobile home</p>
+                                <p className="text-gray-700">Average
+                                    cost: {formatter.format(65000 * gameState.s.inflation)}</p>
+                            </div>
+                        </div>
+                        <div className="flex justify-center gap-8 mt-6">
+                            <div
+                                className="eventButton panelButton"
+                                onClick={() => {
+                                    gameState.s.lifeEventManager!.replaceEvent(new LifeEvent("Buying a condo", gameState.s.date,
+                                        <BuyHousing gameState={gameState.s} avgCost={200000 * gameState.s.inflation}
+                                                    type="Condo"/>, true))
+                                }}>
+                                <p className="text-gray-700">Buy a condo</p>
+                                <p className="text-gray-700">Average
+                                    cost: {formatter.format(200000 * gameState.s.inflation)}</p>
+                            </div>
+                        </div>
+                        <div className="flex justify-center gap-8 mt-6">
+                            <div
+                                className="eventButton panelButton"
+                                onClick={() => {
+                                    gameState.s.lifeEventManager!.replaceEvent(new LifeEvent("Buying a house", gameState.s.date,
+                                        <BuyHousing gameState={gameState.s} avgCost={390000 * gameState.s.inflation}
+                                                    type="House"/>, true))
+                                }}>
+                                <p className="text-gray-700">Buy a house</p>
+                                <p className="text-gray-700">Average
+                                    cost: {formatter.format(390000 * gameState.s.inflation)}</p>
+                            </div>
                         </div>
                     </div>
-                    <div className="flex justify-center gap-8 mt-6">
-                        <div
-                            className="eventButton panelButton"
-                            onClick={() => {
-                                gameState.s.lifeEventManager!.replaceEvent(new LifeEvent("Buying a condo", gameState.s.date,
-                                    <BuyHousing gameState={gameState.s} avgCost={200000 * gameState.s.inflation}
-                                                type="Condo"/>, true))
-                            }}>
-                            <p className="text-gray-700">Buy a condo</p>
-                            <p className="text-gray-700">Average
-                                cost: {formatter.format(200000 * gameState.s.inflation)}</p>
-                        </div>
-                    </div>
-                    <div className="flex justify-center gap-8 mt-6">
-                        <div
-                            className="eventButton panelButton"
-                            onClick={() => {
-                                gameState.s.lifeEventManager!.replaceEvent(new LifeEvent("Buying a house", gameState.s.date,
-                                    <BuyHousing gameState={gameState.s} avgCost={390000 * gameState.s.inflation}
-                                                type="House"/>, true))
-                            }}>
-                            <p className="text-gray-700">Buy a house</p>
-                            <p className="text-gray-700">Average
-                                cost: {formatter.format(390000 * gameState.s.inflation)}</p>
-                        </div>
-                    </div>
-                </div>
-            </div>, false),
-    ]));
+                </div>, false),
+        ]))
+    ;
     const activeEvent = lifeEventManager.getActiveEvent(gameState.s.date);
 
     const tutorialManager = useRef(new TutorialManager(gameState.s, [
@@ -1445,7 +1446,7 @@ function GamePage({fname, lname, tutorial}: GameProps) {
                                     <h3 className="text-gray-700">{c.model}</h3>
                                     <img src={c.image} className="w-50 m-auto"></img>
                                     <p className="text-gray-700">Value: {formatter.format(c.getBaseValue(gameState.s.date))}</p>
-                                    <p className={gameState.s.date.getFullYear() -  c.buyDate.getFullYear() >= 9 ? "text-red-800" : "text-gray-700"}>Year: {c.buyDate.getFullYear()}</p>
+                                    <p className={gameState.s.date.getFullYear() - c.buyDate.getFullYear() >= 9 ? "text-red-800" : "text-gray-700"}>Year: {c.buyDate.getFullYear()}</p>
                                     {character.bigTicketItems.bigTicketItems.some(bt => bt.asset == c) ?
                                         <button className="p-1 w-30" onClick={() => {
                                             character.bigTicketItems.removeBigTicketItem(
